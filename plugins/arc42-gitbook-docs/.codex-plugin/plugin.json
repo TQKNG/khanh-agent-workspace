@@ -1,0 +1,40 @@
+{
+  "interface": {
+    "displayName": "arc42 GitBook Docs",
+    "shortDescription": "GitBook site and ARC42 docs",
+    "longDescription": "Create a standard GitBook site and space structure, inspect a GitHub repository, generate evidence-based architecture documentation using arc42 and C4, and deliver changes through a reviewable GitBook workflow.",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Create a new GitBook documentation site.",
+      "Generate arc42 architecture documentation from this GitHub repository and create a GitBook change request.",
+      "Refresh the existing GitBook architecture documentation from the current repository state."
+    ],
+    "brandColor": "#2F6FED",
+    "developerName": "Khanh Nguyen"
+  },
+  "extensions": {
+    "com.openai": {
+      "onboardingSkill": "./skills/setup/SKILL.md"
+    }
+  },
+  "name": "arc42-gitbook-docs",
+  "version": "0.2.2",
+  "description": "Create structured GitBook documentation sites and generate evidence-based arc42 architecture documentation with C4 views from GitHub repositories.",
+  "author": {
+    "name": "Khanh Nguyen",
+    "email": "khanhnguyen.trq@gmail.com"
+  },
+  "keywords": [
+    "arc42",
+    "architecture",
+    "c4-model",
+    "documentation",
+    "gitbook",
+    "github"
+  ],
+  "skills": "./skills"
+}

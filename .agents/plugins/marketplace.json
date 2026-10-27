@@ -1,0 +1,20 @@
+{
+  "name": "khanh-plugins",
+  "interface": {
+    "displayName": "Khanh Plugins"
+  },
+  "plugins": [
+    {
+      "name": "arc42-gitbook-docs",
+      "source": {
+        "source": "local",
+        "path": "./plugins/arc42-gitbook-docs"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
