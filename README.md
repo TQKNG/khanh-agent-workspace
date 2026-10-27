@@ -1,8 +1,8 @@
-# arc42 Plugin Marketplace
+# Codex Plugin Marketplace
 
-This repository distributes the `arc42-gitbook-docs` plugin through a Git-backed Codex plugin marketplace.
+This repository distributes reusable Codex plugins through a Git-backed marketplace.
 
-The plugin creates a standard GitBook documentation structure and generates evidence-based arc42 architecture documentation with C4 views from GitHub repositories.
+The first included plugin creates a standard GitBook documentation structure and generates evidence-based arc42 architecture documentation with C4 views from GitHub repositories.
 
 ## Included plugin
 
@@ -20,7 +20,7 @@ The plugin creates a standard GitBook documentation structure and generates evid
 Add this Git-backed marketplace:
 
 ```powershell
-codex plugin marketplace add TQKNG/arc42-plugin-marketplace --ref v0.2.2
+codex plugin marketplace add TQKNG/codex-plugin-marketplace --ref main
 ```
 
 Verify the marketplace registration:
