@@ -1,0 +1,179 @@
+{
+  "answers": {},
+  "source": {},
+  "questions": [
+    {
+      "question": "What source and scope should this site document?",
+      "answer": null,
+      "state": "open"
+    }
+  ],
+  "confirmation": {
+    "reviewed": false,
+    "user_citation": null,
+    "fingerprint": null
+  },
+  "facts": {},
+  "pages": {
+    "overview.landing": {
+      "status": "blocked",
+      "facts": []
+    },
+    "overview.goals": {
+      "status": "blocked",
+      "facts": []
+    },
+    "overview.constraints": {
+      "status": "blocked",
+      "facts": []
+    },
+    "overview.context": {
+      "status": "blocked",
+      "facts": []
+    },
+    "overview.strategy": {
+      "status": "blocked",
+      "facts": []
+    },
+    "architecture.building-blocks": {
+      "status": "blocked",
+      "facts": []
+    },
+    "architecture.runtime": {
+      "status": "blocked",
+      "facts": []
+    },
+    "architecture.deployment": {
+      "status": "blocked",
+      "facts": []
+    },
+    "architecture.crosscutting": {
+      "status": "blocked",
+      "facts": []
+    },
+    "architecture.decisions": {
+      "status": "blocked",
+      "facts": []
+    },
+    "architecture.decision-detail": {
+      "status": "blocked",
+      "facts": []
+    },
+    "architecture.quality": {
+      "status": "blocked",
+      "facts": []
+    },
+    "architecture.risks": {
+      "status": "blocked",
+      "facts": []
+    },
+    "architecture.glossary": {
+      "status": "blocked",
+      "facts": []
+    },
+    "getting-started.start": {
+      "status": "blocked",
+      "facts": []
+    },
+    "getting-started.prerequisites": {
+      "status": "blocked",
+      "facts": []
+    },
+    "getting-started.local": {
+      "status": "blocked",
+      "facts": []
+    },
+    "getting-started.container": {
+      "status": "blocked",
+      "facts": []
+    },
+    "getting-started.verify": {
+      "status": "blocked",
+      "facts": []
+    },
+    "getting-started.deploy": {
+      "status": "blocked",
+      "facts": []
+    },
+    "getting-started.troubleshoot": {
+      "status": "blocked",
+      "facts": []
+    },
+    "api.api-welcome": {
+      "status": "blocked",
+      "facts": []
+    },
+    "api.servers": {
+      "status": "blocked",
+      "facts": []
+    },
+    "api.api-start": {
+      "status": "blocked",
+      "facts": []
+    },
+    "api.lifecycle": {
+      "status": "blocked",
+      "facts": []
+    },
+    "api.errors": {
+      "status": "blocked",
+      "facts": []
+    },
+    "api.operations": {
+      "status": "blocked",
+      "facts": []
+    },
+    "api.models": {
+      "status": "blocked",
+      "facts": []
+    },
+    "api.download": {
+      "status": "blocked",
+      "facts": []
+    },
+    "security.security-overview": {
+      "status": "blocked",
+      "facts": []
+    },
+    "security.access": {
+      "status": "blocked",
+      "facts": []
+    },
+    "security.privacy": {
+      "status": "blocked",
+      "facts": []
+    },
+    "security.controls": {
+      "status": "blocked",
+      "facts": []
+    },
+    "security.incident": {
+      "status": "blocked",
+      "facts": []
+    },
+    "releases.release-index": {
+      "status": "blocked",
+      "facts": []
+    },
+    "releases.unreleased": {
+      "status": "blocked",
+      "facts": []
+    },
+    "releases.release": {
+      "status": "blocked",
+      "facts": []
+    },
+    "releases.milestones": {
+      "status": "blocked",
+      "facts": []
+    },
+    "releases.issues": {
+      "status": "blocked",
+      "facts": []
+    },
+    "releases.upgrade": {
+      "status": "blocked",
+      "facts": []
+    }
+  }
+}

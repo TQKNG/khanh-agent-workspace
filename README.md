@@ -6,13 +6,13 @@ The first included plugin creates a standard GitBook documentation structure and
 
 ## Included plugin
 
-- `arc42-gitbook-docs` version `0.2.2`
+- `arc42-gitbook-docs` version `0.3.0`
 
 ## Requirements
 
 - Codex CLI or Codex in the ChatGPT desktop app.
 - Git access to this repository.
-- The GitHub plugin installed and connected.
+- The GitHub plugin installed and connected for repository inputs.
 - The GitBook plugin installed and connected.
 
 ## Install on another machine
@@ -73,3 +73,16 @@ plugins/arc42-gitbook-docs/skills/
 The marketplace catalog resolves the plugin path relative to this repository root.
 
 Do not commit GitHub credentials, GitBook credentials, access tokens, or local connection settings.
+
+## Version 0.3 workflow
+
+Input may be a GitHub repository, plan or idea.
+The plugin always asks questions and receives answers before constructing documentation.
+Missing required details block writes until resolved or explicitly omitted by the user.
+The final output is a six-space GitBook site with reviewable changes and a verification report.
+
+See [site analysis](docs/site-analysis.md), [page contracts](plugins/arc42-gitbook-docs/references/site-blueprint.json), and [test report](docs/test-report.md).
+
+Run the local checks with `python3 -m unittest discover -s tests -v`.
+The readiness validator is invoked with `python3 plugins/arc42-gitbook-docs/scripts/validate_session.py session.json --phase write`.
+Merge additionally requires approval of the exact reviewed revision.

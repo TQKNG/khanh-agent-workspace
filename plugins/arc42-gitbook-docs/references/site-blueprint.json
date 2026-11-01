@@ -1,0 +1,583 @@
+{
+  "version": "1.0.0",
+  "reference_site": "Documentation - ReportGeneratorTool",
+  "spaces": [
+    {
+      "key": "overview",
+      "title": "1. Overview",
+      "pages": [
+        {
+          "key": "landing",
+          "title": "1.1 {product_name}",
+          "content": [
+            "Purpose and audience",
+            "Source and approved scope",
+            "Six-row task-based navigation table linking the six spaces",
+            "Four local overview shortcuts"
+          ],
+          "blocks": [
+            "paragraph",
+            "hint",
+            "table"
+          ]
+        },
+        {
+          "key": "goals",
+          "title": "1.2 Introduction and Goals",
+          "content": [
+            "Business requirements",
+            "Stakeholders and expectations",
+            "Three to five prioritized measurable quality goals"
+          ],
+          "blocks": [
+            "paragraph",
+            "table"
+          ]
+        },
+        {
+          "key": "constraints",
+          "title": "1.3 Constraints",
+          "content": [
+            "Technical organizational and regulatory constraints",
+            "Distinguish mandated constraints from chosen technologies"
+          ],
+          "blocks": [
+            "paragraph",
+            "table"
+          ]
+        },
+        {
+          "key": "context",
+          "title": "1.4 Context and Scope",
+          "content": [
+            "System boundary",
+            "Users and external systems",
+            "Interface directions and exchanged data"
+          ],
+          "blocks": [
+            "paragraph",
+            "mermaid-context",
+            "table"
+          ]
+        },
+        {
+          "key": "strategy",
+          "title": "1.5 Solution Strategy",
+          "content": [
+            "Strategy linked to goals and constraints",
+            "Fundamental choices and tradeoffs",
+            "Link canonical decisions"
+          ],
+          "blocks": [
+            "paragraph",
+            "table"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "architecture",
+      "title": "2. Solution Architecture and Design",
+      "pages": [
+        {
+          "key": "building-blocks",
+          "title": "2.1 Building Block View",
+          "content": [
+            "Containers and responsibilities",
+            "Technologies and owned data",
+            "Optional component view with justified scope"
+          ],
+          "blocks": [
+            "paragraph",
+            "mermaid-container",
+            "table"
+          ]
+        },
+        {
+          "key": "runtime",
+          "title": "2.2 Runtime View",
+          "content": [
+            "Primary workflow",
+            "Failure and recovery scenarios",
+            "Async state transitions when applicable"
+          ],
+          "blocks": [
+            "paragraph",
+            "mermaid-sequence"
+          ]
+        },
+        {
+          "key": "deployment",
+          "title": "2.3 Deployment View",
+          "content": [
+            "Confirmed environments and topology",
+            "Runtime and infrastructure mapping",
+            "Differences between local staging and production"
+          ],
+          "blocks": [
+            "paragraph",
+            "mermaid-deployment",
+            "table"
+          ]
+        },
+        {
+          "key": "crosscutting",
+          "title": "2.4 Crosscutting Concepts",
+          "content": [
+            "Validation errors configuration observability resilience",
+            "Links to canonical security and API content"
+          ],
+          "blocks": [
+            "paragraph",
+            "table"
+          ]
+        },
+        {
+          "key": "decisions",
+          "title": "2.5 Architecture Decisions",
+          "content": [
+            "Decision index with status and evidence",
+            "One child page per material decision"
+          ],
+          "blocks": [
+            "paragraph",
+            "table"
+          ]
+        },
+        {
+          "key": "decision-detail",
+          "title": "AD-{number} {decision}",
+          "content": [
+            "Context",
+            "Decision and status",
+            "Alternatives",
+            "Consequences",
+            "Date and evidence"
+          ],
+          "blocks": [
+            "paragraph",
+            "table"
+          ],
+          "parent": "decisions",
+          "condition": "One per evidenced or explicitly user-confirmed decision; no invented dates or rationale"
+        },
+        {
+          "key": "quality",
+          "title": "2.6 Quality Requirements",
+          "content": [
+            "Stimulus context artifact response and measurable acceptance",
+            "Evidence and verification method"
+          ],
+          "blocks": [
+            "paragraph",
+            "table"
+          ]
+        },
+        {
+          "key": "risks",
+          "title": "2.7 Risks and Technical Debt",
+          "content": [
+            "Prioritized impact and likelihood when known",
+            "Evidence",
+            "Mitigation owner and status"
+          ],
+          "blocks": [
+            "paragraph",
+            "table"
+          ]
+        },
+        {
+          "key": "glossary",
+          "title": "2.8 Glossary",
+          "content": [
+            "Domain terms acronyms and architecture names",
+            "One canonical definition per term"
+          ],
+          "blocks": [
+            "table"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "getting-started",
+      "title": "3. Getting Started",
+      "pages": [
+        {
+          "key": "start",
+          "title": "Getting Started",
+          "content": [
+            "Prerequisites summary",
+            "Choose supported setup path",
+            "Navigation to setup and verification"
+          ],
+          "blocks": [
+            "paragraph",
+            "table"
+          ]
+        },
+        {
+          "key": "prerequisites",
+          "title": "3.1 Prerequisites and Configuration",
+          "content": [
+            "Supported runtimes and tools",
+            "Non-secret configuration names purpose and requiredness",
+            "Credential provisioning instructions"
+          ],
+          "blocks": [
+            "paragraph",
+            "table"
+          ],
+          "parent": "start"
+        },
+        {
+          "key": "local",
+          "title": "3.2 Run Locally",
+          "content": [
+            "User-confirmed OS and supported native setup",
+            "Commands expected output and cleanup"
+          ],
+          "blocks": [
+            "stepper",
+            "code"
+          ],
+          "parent": "start"
+        },
+        {
+          "key": "container",
+          "title": "3.3 Run with Containers",
+          "content": [
+            "Build and run commands",
+            "Mounts ports browser dependencies and cleanup"
+          ],
+          "blocks": [
+            "stepper",
+            "code"
+          ],
+          "parent": "start",
+          "condition": "Container support established or user confirms design"
+        },
+        {
+          "key": "verify",
+          "title": "3.4 Verify the First Result",
+          "content": [
+            "Safe sample input",
+            "Expected observable output",
+            "Failure checks and test-data cleanup"
+          ],
+          "blocks": [
+            "stepper",
+            "code"
+          ],
+          "parent": "start"
+        },
+        {
+          "key": "deploy",
+          "title": "3.5 Deploy",
+          "content": [
+            "Confirmed hosting target",
+            "Configuration and secrets",
+            "Deployment verification and rollback links"
+          ],
+          "blocks": [
+            "stepper",
+            "code"
+          ],
+          "parent": "start",
+          "condition": "Hosting target resolved by evidence or answer"
+        },
+        {
+          "key": "troubleshoot",
+          "title": "3.6 Troubleshoot Setup",
+          "content": [
+            "Symptom cause diagnostic and resolution",
+            "Redacted diagnostic examples"
+          ],
+          "blocks": [
+            "table",
+            "code"
+          ],
+          "parent": "start"
+        }
+      ]
+    },
+    {
+      "key": "api",
+      "title": "4. API Reference",
+      "pages": [
+        {
+          "key": "api-welcome",
+          "title": "Welcome to the {product_name} API",
+          "content": [
+            "API purpose and scope",
+            "Link canonical operations"
+          ],
+          "blocks": [
+            "paragraph"
+          ]
+        },
+        {
+          "key": "servers",
+          "title": "Servers and Authentication",
+          "content": [
+            "Confirmed deployment URLs or explicitly approved example hosts",
+            "Authentication schemes and scopes"
+          ],
+          "blocks": [
+            "tabs",
+            "code"
+          ],
+          "parent": "api-welcome"
+        },
+        {
+          "key": "api-start",
+          "title": "Getting Started",
+          "content": [
+            "First API request",
+            "Expected response",
+            "Follow-up workflow"
+          ],
+          "blocks": [
+            "stepper",
+            "code"
+          ],
+          "parent": "api-welcome"
+        },
+        {
+          "key": "lifecycle",
+          "title": "Requests and Lifecycle",
+          "content": [
+            "Validation pagination idempotency job states limits and retention when applicable"
+          ],
+          "blocks": [
+            "paragraph",
+            "table"
+          ],
+          "parent": "api-welcome"
+        },
+        {
+          "key": "errors",
+          "title": "Error Responses",
+          "content": [
+            "Canonical error envelope",
+            "Status code mapping",
+            "Retry guidance"
+          ],
+          "blocks": [
+            "code",
+            "table"
+          ],
+          "parent": "api-welcome"
+        },
+        {
+          "key": "operations",
+          "title": "{domain} / {resource}",
+          "content": [
+            "Domain and resource groups from OpenAPI tags",
+            "Operation parameters bodies responses examples and permissions",
+            "cURL JavaScript and Python samples where useful"
+          ],
+          "blocks": [
+            "openapi-operations"
+          ]
+        },
+        {
+          "key": "models",
+          "title": "Models",
+          "content": [
+            "Reusable request response and error schemas"
+          ],
+          "blocks": [
+            "openapi-models"
+          ]
+        },
+        {
+          "key": "download",
+          "title": "Download OpenAPI spec",
+          "content": [
+            "Link generated by GitBook spec renderer"
+          ],
+          "blocks": [
+            "download-link"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "security",
+      "title": "5. Security and Privacy",
+      "pages": [
+        {
+          "key": "security-overview",
+          "title": "5.1 Security and Privacy Overview",
+          "content": [
+            "Protected assets",
+            "Trust boundaries",
+            "Responsibilities",
+            "Control scope and evidence"
+          ],
+          "blocks": [
+            "paragraph",
+            "table"
+          ]
+        },
+        {
+          "key": "access",
+          "title": "5.2 Credentials and Access Control",
+          "content": [
+            "Caller identity permissions and tenancy",
+            "Secret lifecycle",
+            "Runtime deployment and portal identities"
+          ],
+          "blocks": [
+            "paragraph",
+            "table"
+          ]
+        },
+        {
+          "key": "privacy",
+          "title": "5.3 Data Handling and Privacy",
+          "content": [
+            "Inventory purpose destinations retention and deletion",
+            "Temporary data",
+            "Storage transport email and external providers"
+          ],
+          "blocks": [
+            "paragraph",
+            "table"
+          ]
+        },
+        {
+          "key": "controls",
+          "title": "5.4 Security Risks and Required Actions",
+          "content": [
+            "Control IDs findings impact owner and closure evidence",
+            "Browser and network controls where relevant",
+            "Release acceptance checks"
+          ],
+          "blocks": [
+            "paragraph",
+            "table",
+            "checklist"
+          ]
+        },
+        {
+          "key": "incident",
+          "title": "5.5 Incident Response",
+          "content": [
+            "Private reporting route",
+            "Severity and ownership",
+            "Containment recovery communication and closure"
+          ],
+          "blocks": [
+            "paragraph",
+            "table",
+            "numbered-list"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "releases",
+      "title": "6. Release Notes",
+      "pages": [
+        {
+          "key": "release-index",
+          "title": "6.1 Release Notes",
+          "content": [
+            "Release index with version date status and links",
+            "Distinguish package version from published release",
+            "Source baseline"
+          ],
+          "blocks": [
+            "paragraph",
+            "table"
+          ]
+        },
+        {
+          "key": "unreleased",
+          "title": "6.2 Unreleased",
+          "content": [
+            "Unshipped implementation scope",
+            "Added Changed Fixed Security Deprecated Removed as relevant",
+            "Compatibility and completion criteria"
+          ],
+          "blocks": [
+            "paragraph",
+            "list"
+          ]
+        },
+        {
+          "key": "release",
+          "title": "6.3 {version} - {release_title}",
+          "content": [
+            "Actual publication date and source",
+            "User impact",
+            "Changes migration and evidence"
+          ],
+          "blocks": [
+            "paragraph",
+            "table"
+          ],
+          "condition": "One page per verified published release; otherwise ask or explicitly omit"
+        },
+        {
+          "key": "milestones",
+          "title": "6.4 Repository Milestones",
+          "content": [
+            "Development evidence after published releases",
+            "No fictional release history"
+          ],
+          "blocks": [
+            "paragraph",
+            "list"
+          ],
+          "condition": "Repository history exists"
+        },
+        {
+          "key": "issues",
+          "title": "6.5 Known Issues",
+          "content": [
+            "Issue ID behavior impact and resolution criterion",
+            "Safe reporting instructions"
+          ],
+          "blocks": [
+            "paragraph",
+            "table"
+          ]
+        },
+        {
+          "key": "upgrade",
+          "title": "6.6 Upgrade and Rollback",
+          "content": [
+            "Prerequisites staging validation promotion and rollback",
+            "In-flight work compatibility",
+            "Secret revocation and data deletion boundaries"
+          ],
+          "blocks": [
+            "stepper",
+            "checklist"
+          ]
+        }
+      ]
+    }
+  ],
+  "blocks": {
+    "paragraph": "One short purpose statement, semantic H1/H2/H3, each full sentence on its own line.",
+    "table": "Compact comparison or register, meaningful columns, descriptive links, no giant prose cells.",
+    "hint": "One short source/scope/decision notice; do not repeat it on every page.",
+    "stepper": "Native GitBook ordered procedure, prerequisites and observable result; numbered-list fallback if unsupported.",
+    "code": "Language-tagged code, safe placeholders, validated against approved contract; never secrets.",
+    "mermaid-context": "C4 System Context semantics in supported flowchart syntax, labeled boundaries and arrows.",
+    "mermaid-container": "C4 Container semantics; components only inside a named container.",
+    "mermaid-sequence": "Supported sequenceDiagram syntax; split happy and failure paths.",
+    "mermaid-deployment": "Environment-specific deployment nodes, never infer production from local config.",
+    "openapi-operations": "Organization OpenAPI spec rendered by builtin:openapi computed page; preserve template props.",
+    "openapi-models": "Schemas generated from the same canonical OpenAPI specification.",
+    "download-link": "Computed OpenAPI downloadLink property, no manually fabricated URL.",
+    "checklist": "Verification with observable acceptance evidence.",
+    "numbered-list": "Ordered actionable steps.",
+    "list": "Parallel concise change items.",
+    "tabs": "Alternative environments or languages, never hide required sequential steps."
+  }
+}

@@ -6,6 +6,10 @@ It is based on the official arc42 and C4 documentation listed at the end of this
 
 Research was refreshed on 2026-10-27.
 
+The shared intake gate takes precedence over any evidence-placeholder wording below.
+Unknowns and inferences must trigger questions before content construction; do not silently fill them with TBD.
+Use the site blueprint for placement and user answers for applicability.
+
 ## Operating principles
 
 Use arc42 as the documentation structure and C4 as the visual model inside relevant arc42 sections.
@@ -223,14 +227,15 @@ When the standard six-space site exists, use this default placement unless the u
 | --- | --- |
 | Overview | Architecture landing page, arc42 sections 1 through 4, System Context view, quality summary, and glossary links. |
 | Getting Started | Evidence-based prerequisites, local setup, first successful run, and verification steps. |
-| Solution Architecture and Design | arc42 sections 5 through 9 and 11, Container and optional Component views, runtime scenarios, and deployment views. |
+| Solution Architecture and Design | arc42 sections 5 through 12, Container and optional Component views, runtime scenarios, and deployment views. |
 | API Reference | Implemented operations generated or documented from a reviewed OpenAPI contract. |
 | Security and Privacy | Security and privacy portions of crosscutting concepts, quality requirements, risks, and data handling. |
 | Release Notes | Confirmed releases, tags, migrations, breaking changes, and upgrade notes. |
 
 Cross-link related pages instead of duplicating authoritative content.
 
-Use `TBD` when the repository does not establish content for a required space.
+Ask the user when evidence does not establish required content.
+Do not construct the affected page until the user resolves it or explicitly omits it.
 
 ## Completion checklist
 
