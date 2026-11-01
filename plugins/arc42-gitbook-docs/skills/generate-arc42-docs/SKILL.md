@@ -26,7 +26,7 @@ Never copy reference-site product names, endpoints, vendors or security claims i
 
 Create a session record from ../../references/session.example.json.
 Record user answers, source evidence, selected page decisions, unresolved questions and the reviewed fingerprint.
-Run ../../scripts/validate_session.py SESSION --phase write.
+Run `python3 ../../scripts/validate_session.py SESSION --phase write`.
 If validation fails, ask for the missing values and do not mutate GitBook.
 Use the approved blueprint to plan stable page keys and canonical links.
 For a new destination, route through create-gitbook-site after readiness passes.

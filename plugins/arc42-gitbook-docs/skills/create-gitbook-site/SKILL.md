@@ -7,7 +7,7 @@ description: Create the approved six-space GitBook site after mandatory user que
 
 Read ../../references/intake-and-evidence.md, ../../references/site-blueprint.json and ../../references/block-and-delivery-standard.md.
 Always ask and receive an answer before construction; a user request to skip questions does not supply missing product information.
-Complete the source, destination and page readiness record and run ../../scripts/validate_session.py SESSION --phase write.
+Complete the source, destination and page readiness record and run `python3 ../../scripts/validate_session.py SESSION --phase write`.
 Do not create even an empty site until readiness passes.
 Ask the site name, organization, new/existing choice and direct/template/Git Sync onboarding path.
 Use exactly Documentation - <confirmed product name>, avoiding a duplicated prefix.
