@@ -12,7 +12,7 @@ This package adds Khanh's personal cockpit layout to Herdr.
 
 Ask the Herdr agent:
 
-> Read `~/.config/herdr-app/AGENTS.md`, then add this layout: `https://github.com/TQKNG/codex-plugin-marketplace/tree/main/herdr-layouts/khanh-personal`
+> Read `~/.config/herdr-app/AGENTS.md`, then add this layout: `https://github.com/TQKNG/khanh-agent-workspace/tree/main/herdr-layouts/khanh-personal`
 
 The layout is selected with `Ctrl+Shift+L` or `herdr-app do layout.switch '{"name":"personal"}'`.
 

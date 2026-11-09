@@ -2,7 +2,7 @@
 
 Date: 2026-11-01.
 Plugin: arc42-gitbook-docs 0.3.0.
-Baseline: TQKNG/codex-plugin-marketplace at e1eb414fe3d07ae2b8d589bac965703448ee6d8d.
+Baseline: TQKNG/khanh-agent-workspace at e1eb414fe3d07ae2b8d589bac965703448ee6d8d.
 Scope: source update and automated validation; existing GitBook site content was read without mutation.
 
 ## Result

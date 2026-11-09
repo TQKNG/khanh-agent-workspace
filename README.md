@@ -20,7 +20,7 @@ The first included plugin creates a standard GitBook documentation structure and
 Add this Git-backed marketplace:
 
 ```powershell
-codex plugin marketplace add TQKNG/codex-plugin-marketplace --ref main
+codex plugin marketplace add TQKNG/khanh-agent-workspace --ref main
 ```
 
 Verify the marketplace registration:
@@ -83,7 +83,7 @@ The Herdr package is intentionally outside `plugins/` and is not listed in the C
 Share or install it from the layout folder:
 
 ```text
-https://github.com/TQKNG/codex-plugin-marketplace/tree/main/herdr-layouts/khanh-personal
+https://github.com/TQKNG/khanh-agent-workspace/tree/main/herdr-layouts/khanh-personal
 ```
 
 The package includes the layout, its custom mod, a recipe, and a preview image.
