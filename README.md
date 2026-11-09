@@ -68,9 +68,27 @@ Restart the ChatGPT desktop app and verify the installed plugin version.
 plugins/arc42-gitbook-docs/plugin.json
 plugins/arc42-gitbook-docs/.codex-plugin/plugin.json
 plugins/arc42-gitbook-docs/skills/
+herdr-layouts/khanh-personal/layouts/personal.json
+herdr-layouts/khanh-personal/mods/personal/
 ```
 
 The marketplace catalog resolves the plugin path relative to this repository root.
+
+## Herdr layout
+
+This repository also contains Khanh's personal Herdr layout.
+
+The Herdr package is intentionally outside `plugins/` and is not listed in the Codex marketplace manifest.
+
+Share or install it from the layout folder:
+
+```text
+https://github.com/TQKNG/codex-plugin-marketplace/tree/main/herdr-layouts/khanh-personal
+```
+
+The package includes the layout, its custom mod, a recipe, and a preview image.
+
+It excludes Herdr runtime state such as `shared.json`, `view.json`, `data/`, `window.json`, and `windows.json`.
 
 Do not commit GitHub credentials, GitBook credentials, access tokens, or local connection settings.
 
