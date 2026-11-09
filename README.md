@@ -1,8 +1,10 @@
 # Khanh Agent Workspace
 
-This repository contains reusable Codex plugins and Herdr workspace layouts.
+This repository contains reusable agent skills, instructions, prompts, Codex plugins, and Herdr workspace layouts.
 
-The Codex marketplace distributes the `arc42-gitbook-docs` plugin.
+The Codex marketplace distributes the `arc42-gitbook-docs` plugin and its bundled skills and references.
+
+The repository is also a source for reusable agent guidance that can be included in future plugins or used as shared project resources.
 
 The Herdr package distributes Khanh's personal cockpit layout and its custom mod.
 
@@ -12,6 +14,8 @@ Repository: <https://github.com/TQKNG/khanh-agent-workspace>
 
 - Codex plugin marketplace: `.agents/plugins/marketplace.json`
 - Codex plugin: `plugins/arc42-gitbook-docs/`
+- Agent skills and instructions: `plugins/*/skills/` and `plugins/*/references/`
+- Agent prompts: `plugins/*/prompts/` when a plugin provides reusable prompts
 - Herdr layout package: `herdr-layouts/khanh-personal/`
 
 ## Included plugin
@@ -46,6 +50,10 @@ Open the Plugins directory, select `Khanh Plugins`, and install `arc42 GitBook D
 In Codex CLI, run `/plugins`, select the `Khanh Plugins` source, and install the plugin.
 
 Start a new chat after installation.
+
+Installing the Codex plugin also makes its bundled skills, instructions, references, and prompts available to Codex according to the plugin manifest.
+
+Standalone resources that are not part of a plugin should be documented with their intended installation path and scope before they are added to this repository.
 
 ## Install the Herdr layout
 
@@ -91,6 +99,8 @@ Restart the ChatGPT desktop app and verify the installed plugin version.
 plugins/arc42-gitbook-docs/plugin.json
 plugins/arc42-gitbook-docs/.codex-plugin/plugin.json
 plugins/arc42-gitbook-docs/skills/
+plugins/arc42-gitbook-docs/references/
+plugins/arc42-gitbook-docs/prompts/
 herdr-layouts/khanh-personal/layouts/personal.json
 herdr-layouts/khanh-personal/mods/personal/
 ```
@@ -102,6 +112,10 @@ The Herdr package is intentionally outside `plugins/` and is not listed in the C
 It excludes Herdr runtime state such as `shared.json`, `view.json`, `data/`, `window.json`, and `windows.json`.
 
 Do not commit GitHub credentials, GitBook credentials, access tokens, or local connection settings.
+
+Review all skills, instructions, and prompts before distribution.
+
+Document any required connectors, permissions, filesystem access, network access, commands, or external services.
 
 ## Version 0.3 workflow
 
