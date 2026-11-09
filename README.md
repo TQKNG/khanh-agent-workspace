@@ -1,8 +1,18 @@
-# Codex Plugin Marketplace
+# Khanh Agent Workspace
 
-This repository distributes reusable Codex plugins through a Git-backed marketplace.
+This repository contains reusable Codex plugins and Herdr workspace layouts.
 
-The first included plugin creates a standard GitBook documentation structure and generates evidence-based arc42 architecture documentation with C4 views from GitHub repositories.
+The Codex marketplace distributes the `arc42-gitbook-docs` plugin.
+
+The Herdr package distributes Khanh's personal cockpit layout and its custom mod.
+
+Repository: <https://github.com/TQKNG/khanh-agent-workspace>
+
+## Contents
+
+- Codex plugin marketplace: `.agents/plugins/marketplace.json`
+- Codex plugin: `plugins/arc42-gitbook-docs/`
+- Herdr layout package: `herdr-layouts/khanh-personal/`
 
 ## Included plugin
 
@@ -15,7 +25,7 @@ The first included plugin creates a standard GitBook documentation structure and
 - The GitHub plugin installed and connected for repository inputs.
 - The GitBook plugin installed and connected.
 
-## Install on another machine
+## Install the Codex plugin
 
 Add this Git-backed marketplace:
 
@@ -36,6 +46,19 @@ Open the Plugins directory, select `Khanh Plugins`, and install `arc42 GitBook D
 In Codex CLI, run `/plugins`, select the `Khanh Plugins` source, and install the plugin.
 
 Start a new chat after installation.
+
+## Install the Herdr layout
+
+Ask the Herdr agent:
+
+```text
+Read ~/.config/herdr-app/AGENTS.md, then add this layout:
+https://github.com/TQKNG/khanh-agent-workspace/tree/main/herdr-layouts/khanh-personal
+```
+
+The package includes `layouts/personal.json`, `layouts/personal.svg`, the `personal` mod, `RECIPE.md`, and `preview.png`.
+
+It does not include Herdr runtime state, project files, credentials, or connection settings.
 
 ## Test
 
@@ -74,19 +97,7 @@ herdr-layouts/khanh-personal/mods/personal/
 
 The marketplace catalog resolves the plugin path relative to this repository root.
 
-## Herdr layout
-
-This repository also contains Khanh's personal Herdr layout.
-
 The Herdr package is intentionally outside `plugins/` and is not listed in the Codex marketplace manifest.
-
-Share or install it from the layout folder:
-
-```text
-https://github.com/TQKNG/khanh-agent-workspace/tree/main/herdr-layouts/khanh-personal
-```
-
-The package includes the layout, its custom mod, a recipe, and a preview image.
 
 It excludes Herdr runtime state such as `shared.json`, `view.json`, `data/`, `window.json`, and `windows.json`.
 
