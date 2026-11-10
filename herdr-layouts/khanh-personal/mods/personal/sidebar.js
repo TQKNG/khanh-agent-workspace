@@ -626,6 +626,7 @@ export default class Sidebar {
     const withLines = ordered.filter((r) => hasTerms(r.s));
     const allFolded = withLines.length > 0 && withLines.every((r) => folded.has(r.s.id));
     const head = SectionHeader("Spaces", {
+      count: sp.length,
       action: h_flex()
         .gap(2)
         .when(withLines.length > 0, (e) =>
