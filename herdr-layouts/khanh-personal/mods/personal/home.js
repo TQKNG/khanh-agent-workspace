@@ -1039,7 +1039,7 @@ export default class Home {
           .child(div().flex_1().min_w(0).truncate().font_family("JetBrains Mono").text_size(TEXT.xs).text_color(k.dim).child(a?.branch ?? pr?.branch ?? a?.space_name ?? ""))
           .child(Mono(timer, { color: card.stage === "needs" ? tone : card.stage === "ready" ? k.success : k.mutedFg })),
       )
-      .child(div().w_full().truncate().text_size(13.5).font_medium().text_color(k.foreground).child(title))
+      .child(div().w_full().truncate().text_size(15).font_medium().text_color(k.foreground).child(title))
       .when(card.stage === "needs" && isAgentCard, (e) =>
         e.child(
           v_flex()
@@ -1050,12 +1050,12 @@ export default class Home {
             .rounded(RADIUS.md)
             .bg(alpha(tone, 0.1))
             .child(div().text_size(10.5).font_semibold().text_color(tone).child(a.status === "blocked" ? "ASKS YOU" : "TO FIX"))
-            .child(div().w_full().whitespace_normal().text_size(TEXT.sm).text_color(k.foreground).child(a.question?.text || (a.status === "blocked" ? "It stopped and waits for you." : a.ci === "FAILURE" ? "Its PR's checks fail: tell it to fix them." : "Changes were asked on its PR.")))
+            .child(div().w_full().whitespace_normal().text_size(TEXT.base).text_color(k.foreground).child(a.question?.text || (a.status === "blocked" ? "It stopped and waits for you." : a.ci === "FAILURE" ? "Its PR's checks fail: tell it to fix them." : "Changes were asked on its PR.")))
             .when(Boolean(a.question?.choices?.length), (e) => e.child(this.choiceRow(a, card.key, 4))),
         ),
       )
       .when(replying, (e) => e.child(h_flex().gap(6).child(TextField(this.reply)).child(Button(`${card.key}-send`, { icon: "send", size: "icon-sm", onClick: (_e, cx) => this.sendReply(cx) }))))
-      .when(Boolean(recap), (e) => e.child(div().w_full().truncate().text_size(TEXT.sm).text_color(k.mutedFg).child(recap ?? "")))
+      .when(Boolean(recap), (e) => e.child(div().w_full().truncate().text_size(TEXT.base).text_color(k.mutedFg).child(recap ?? "")))
       .when(facts.length > 0, (e) => e.child(h_flex().w_full().flex_wrap().gap(6).items_center().children(facts)))
       .when(actions.length > 0, (e) => e.child(h_flex().w_full().flex_wrap().gap(6).items_center().children(actions)));
 

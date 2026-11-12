@@ -199,7 +199,7 @@ export default class Sidebar {
         .when(rail, (e) => e.justify_center())
         .rounded(RADIUS.md)
         .cursor_pointer()
-        .text_size(TEXT.base)
+        .text_size(14)
         .font_medium()
         .text_color(on ? k.foreground : k.mutedFg)
         .when(on, (e) => e.bg(k.selected))
@@ -268,7 +268,7 @@ export default class Sidebar {
             .hover((s) => s.border_color(k.ring))
             .on_click(() => openPalette())
             .child(Icon("search", { size: 14, color: k.mutedFg }))
-            .child(div().flex_1().text_size(TEXT.sm).text_color(k.mutedFg).child("Search or run…"))
+          .child(div().flex_1().text_size(13).text_color(k.mutedFg).child("Search or run…"))
             .child(Kbd("⌘⇧P")),
         ),
       )
@@ -472,7 +472,7 @@ export default class Sidebar {
           .flex_1()
           .min_w(0)
           .gap(1)
-          .child(h_flex().min_w(0).gap(6).items_center().child(agentIcon(k, r)).child(div().flex_none().text_size(TEXT.xs).font_semibold().text_color(k.mutedFg).child(critter)).child(div().flex_1().min_w(0).truncate().text_size(TEXT.base).text_color(r.stage === "idle" || r.stage === "merged" ? k.mutedFg : k.foreground).child(title)))
+          .child(h_flex().min_w(0).gap(6).items_center().child(agentIcon(k, r)).child(div().flex_none().text_size(TEXT.xs).font_semibold().text_color(k.mutedFg).child(critter)).child(div().flex_1().min_w(0).truncate().text_size(14).text_color(r.stage === "idle" || r.stage === "merged" ? k.mutedFg : k.foreground).child(title)))
           .child(h_flex().min_w(0).gap(6).text_size(TEXT.xs).text_color(k.dim).child(div().flex_none().truncate().child(`${place} · ${stage} ${duration}`)).children(parts)),
       )
       .child(h_flex().w(14).flex_none().justify_center().pt(4).tooltip(`${stage} for ${duration}`).child(StageMark(`${id}-status`, r.stage, { size: 9 })))
@@ -580,7 +580,7 @@ export default class Sidebar {
         .items_center()
         .rounded(RADIUS.md)
         .cursor_pointer()
-        .text_size(TEXT.base)
+        .text_size(14)
         .text_color(on ? k.foreground : k.mutedFg)
         .when(on, (e) => e.bg(k.selected))
         .when(!on, (e) => e.hover((st) => st.bg(k.accent).text_color(k.foreground)))
@@ -626,7 +626,6 @@ export default class Sidebar {
     const withLines = ordered.filter((r) => hasTerms(r.s));
     const allFolded = withLines.length > 0 && withLines.every((r) => folded.has(r.s.id));
     const head = SectionHeader("Spaces", {
-      count: sp.length,
       action: h_flex()
         .gap(2)
         .when(withLines.length > 0, (e) =>
@@ -728,7 +727,7 @@ export default class Sidebar {
           show("work");
         })
         .child(h_flex().w(12).flex_none().justify_center().child(stage ? StageMark(`term-${p.terminal}`, stage, { size: 6 }) : Icon("terminal", { size: 11, color: k.dim })))
-        .child(div().flex_none().text_size(TEXT.sm).text_color(stage === "needs_you" ? k.blocked : k.mutedFg).child(name))
+        .child(div().flex_none().text_size(12.5).text_color(stage === "needs_you" ? k.blocked : k.mutedFg).child(name))
         .when(Boolean(title) && title !== name && title !== p.terminal, (e) => e.child(div().flex_1().min_w(0).truncate().text_size(TEXT.xs).text_color(k.dim).child(title)));
     };
     const out = shown.map(line);
