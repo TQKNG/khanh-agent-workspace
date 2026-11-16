@@ -10,26 +10,30 @@ MARKETPLACE = json.loads((ROOT / '.agents/plugins/marketplace.json').read_text(e
 
 
 class ReusablePluginTests(unittest.TestCase):
-    def test_marketplace_packages_and_skills_are_discoverable(self):
-        expected = {
-            'agent-workflows': {'repo-scaffold', 'ticket', 'graphify', 'technical-blog-writing'},
-            'session-token-audit': {'session-token-audit'},
-        }
+    def test_standalone_skills_have_complete_entrypoints(self):
+        for name in ('repo-scaffold', 'graphify', 'technical-blog-writing'):
+            with self.subTest(skill=name):
+                source = (ROOT / 'skills' / name / 'SKILL.md').read_text(encoding='utf-8')
+                self.assertTrue(source.startswith('---\n'))
+                self.assertIn(f'name: {name}\n', source.split('---', 2)[1])
+
+    def test_ticket_keeps_claude_and_herdr_contract(self):
+        source = (ROOT / '.claude/skills/ticket/SKILL.md').read_text(encoding='utf-8')
+        self.assertIn('argument-hint: <github issue number or URL>', source)
+        self.assertIn('HERDR_ENV=1', source)
+
+    def test_session_plugin_is_the_only_new_marketplace_package(self):
         entries = {entry['name']: entry for entry in MARKETPLACE['plugins']}
-        for name, skills in expected.items():
-            with self.subTest(plugin=name):
-                plugin = ROOT / entries[name]['source']['path']
-                manifest = json.loads((plugin / 'plugin.json').read_text(encoding='utf-8'))
-                compatibility = json.loads((plugin / '.codex-plugin/plugin.json').read_text(encoding='utf-8'))
-                self.assertEqual(manifest['name'], name)
-                self.assertEqual(compatibility['name'], name)
-                self.assertEqual(compatibility['version'], manifest['version'])
-                self.assertLessEqual(len(manifest['extensions']['com.openai']['interface']['shortDescription']), 30)
-                self.assertEqual({path.parent.name for path in (plugin / 'skills').glob('*/SKILL.md')}, skills)
-                for skill in skills:
-                    source = (plugin / 'skills' / skill / 'SKILL.md').read_text(encoding='utf-8')
-                    self.assertTrue(source.startswith('---\n'))
-                    self.assertIn(f'name: {skill}\n', source.split('---', 2)[1])
+        self.assertNotIn('agent-workflows', entries)
+        name = 'session-token-audit'
+        plugin = ROOT / entries[name]['source']['path']
+        manifest = json.loads((plugin / 'plugin.json').read_text(encoding='utf-8'))
+        compatibility = json.loads((plugin / '.codex-plugin/plugin.json').read_text(encoding='utf-8'))
+        self.assertEqual(manifest['name'], name)
+        self.assertEqual(compatibility['name'], name)
+        self.assertEqual(compatibility['version'], manifest['version'])
+        self.assertLessEqual(len(manifest['extensions']['com.openai']['interface']['shortDescription']), 30)
+        self.assertTrue((plugin / 'skills' / name / 'SKILL.md').is_file())
 
     def test_token_audit_discovers_children_without_double_counting(self):
         script = ROOT / 'plugins/session-token-audit/skills/session-token-audit/scripts/audit_sessions.py'
