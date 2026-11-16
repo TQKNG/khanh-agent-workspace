@@ -1,0 +1,31 @@
+# Contributing to Khanh Agent Workspace
+
+Check existing issues and pull requests before proposing a change.
+Keep changes to the Codex plugin, standalone agent resources, and Herdr layout package clearly scoped.
+Explain which resource is affected and how a user installs or updates it.
+
+## Work on the plugin
+
+Read [README.md](README.md) for marketplace installation and upgrade instructions.
+Run the repository test suite from the root:
+
+```sh
+python -m unittest discover -s tests -v
+```
+
+When changing a skill, plugin manifest, prompt, or reference, check its paths and describe the behavior you verified.
+Do not publish credentials, access tokens, private connection settings, or customer data.
+
+## Work on the Herdr layout
+
+Read [the layout recipe](herdr-layouts/khanh-personal/RECIPE.md) and the Herdr app instructions before changing a packaged layout or mod.
+Keep machine-specific runtime state and credentials out of the share package.
+For mod changes, run `herdr-app check` on the affected mod and inspect the layout in the app when available.
+State any visual or runtime checks that could not be performed.
+
+## Submit a pull request
+
+Describe the problem, the affected package, and any related issue.
+List automated and manual checks with results.
+Include a preview or screenshots for visible Herdr layout changes.
+Call out connector, permission, installation, or compatibility changes for reviewers.
