@@ -8,6 +8,8 @@ The repository is also a source for reusable agent guidance that can be included
 
 The Herdr package distributes Khanh's personal cockpit layout and its custom mod.
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution and pull request guidance.
+
 Repository: <https://github.com/TQKNG/khanh-agent-workspace>
 
 ## Contents
@@ -129,3 +131,9 @@ See [site analysis](docs/site-analysis.md), [page contracts](plugins/arc42-gitbo
 Run the local checks with `python3 -m unittest discover -s tests -v`.
 The readiness validator is invoked with `python3 plugins/arc42-gitbook-docs/scripts/validate_session.py session.json --phase write`.
 Merge additionally requires approval of the exact reviewed revision.
+
+## License
+
+Original material authored by Khanh Nguyen is available under the [MIT License](LICENSE).
+Bundled third-party materials retain their own terms, including the font licenses under `herdr-layouts/khanh-personal/mods/herdr-critters/fonts/`.
+The `herdr-critters` upstream repository does not identify a license, so this MIT grant does not cover that imported mod.
