@@ -2,7 +2,7 @@
 
 This repository contains reusable agent skills, instructions, prompts, Codex plugins, and Herdr workspace layouts.
 
-The Codex marketplace distributes the `arc42-gitbook-docs` plugin and its bundled skills and references.
+The Codex marketplace distributes `arc42-gitbook-docs`, `agent-workflows`, and `session-token-audit`.
 
 The repository is also a source for reusable agent guidance that can be included in future plugins or used as shared project resources.
 
@@ -16,6 +16,8 @@ Repository: <https://github.com/TQKNG/khanh-agent-workspace>
 
 - Codex plugin marketplace: `.agents/plugins/marketplace.json`
 - Codex plugin: `plugins/arc42-gitbook-docs/`
+- Reusable workflow skills: `plugins/agent-workflows/skills/`
+- Session audit plugin: `plugins/session-token-audit/`
 - Agent skills and instructions: `plugins/*/skills/` and `plugins/*/references/`
 - Agent prompts: `plugins/*/prompts/` when a plugin provides reusable prompts
 - Herdr layout package: `herdr-layouts/khanh-personal/`
@@ -23,6 +25,8 @@ Repository: <https://github.com/TQKNG/khanh-agent-workspace>
 ## Included plugin
 
 - `arc42-gitbook-docs` version `0.3.0`
+- `agent-workflows` version `0.1.0`, containing `repo-scaffold`, `ticket`, `graphify`, and `technical-blog-writing`
+- `session-token-audit` version `0.1.0`
 
 ## Requirements
 
@@ -47,13 +51,25 @@ codex plugin marketplace list
 
 Restart the ChatGPT desktop app.
 
-Open the Plugins directory, select `Khanh Plugins`, and install `arc42 GitBook Docs`.
+Open the Plugins directory, select `Khanh Plugins`, and install the plugins you need.
 
 In Codex CLI, run `/plugins`, select the `Khanh Plugins` source, and install the plugin.
 
 Start a new chat after installation.
 
 Installing the Codex plugin also makes its bundled skills, instructions, references, and prompts available to Codex according to the plugin manifest.
+
+The `ticket` skill requires a Herdr-managed agent session and a GitHub issue number or URL.
+The `graphify` skill requires the Graphify CLI; semantic extraction can use an available host agent when no model key is configured.
+The `session-token-audit` plugin reads local Codex session logs and needs access to the configured Notion workspace before it can record results.
+Its pricing reference is an estimate that must be refreshed against official rates before use.
+
+For Claude Code, copy a selected skill directory from `plugins/agent-workflows/skills/` into `~/.claude/skills/` or the target repository's `.claude/skills/` directory.
+The `ticket` skill is sourced from Khanh's existing Claude skill and retains Claude's `$ARGUMENTS` support.
+Other agents can use these folders as source packages, but availability depends on their skill discovery and tool support.
+
+These packages are reviewable distribution snapshots of local sources: `~/.codex/skills/repo-scaffold`, `~/.codex/skills/graphify`, `~/.codex/skills/technical-blog-writing`, `~/.claude/skills/ticket`, and `~/plugins/session-token-audit`.
+Refresh the repository copies through a pull request when a local source changes.
 
 Standalone resources that are not part of a plugin should be documented with their intended installation path and scope before they are added to this repository.
 
@@ -103,6 +119,8 @@ plugins/arc42-gitbook-docs/.codex-plugin/plugin.json
 plugins/arc42-gitbook-docs/skills/
 plugins/arc42-gitbook-docs/references/
 plugins/arc42-gitbook-docs/prompts/
+plugins/agent-workflows/skills/
+plugins/session-token-audit/skills/
 herdr-layouts/khanh-personal/layouts/personal.json
 herdr-layouts/khanh-personal/mods/personal/
 ```

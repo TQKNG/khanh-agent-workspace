@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  repository-baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check repository baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in README.md LICENSE CONTRIBUTING.md AGENTS.md CLAUDE.md .github/copilot-instructions.md .github/pull_request_template.md .github/ISSUE_TEMPLATE/bug_report.md .github/ISSUE_TEMPLATE/feature_request.md; do
+            test -s "$file" || { echo "Missing or empty: $file"; exit 1; }
+          done
+          if grep -R -n '{{[A-Z_]*}}' README.md LICENSE CONTRIBUTING.md .github/ISSUE_TEMPLATE .github/pull_request_template.md; then
+            echo 'Unresolved scaffold placeholders found.'
+            exit 1
+          fi

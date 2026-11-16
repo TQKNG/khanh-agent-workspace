@@ -1,0 +1,20 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "agent-workflows",
+  "version": "0.1.0",
+  "description": "Reusable repository scaffolding, Herdr issue delivery, knowledge graph, and technical writing skills.",
+  "author": { "name": "Khanh Nguyen" },
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Agent Workflows",
+        "shortDescription": "Reusable agent skills",
+        "longDescription": "Use Khanh's reusable skills for repository scaffolding, Herdr issue work, graph-based codebase exploration, and technical blog writing.",
+        "developerName": "Khanh Nguyen",
+        "category": "Productivity",
+        "capabilities": ["Read", "Write"],
+        "defaultPrompt": "Help me use one of my agent workflow skills."
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "session-token-audit",
+  "version": "0.1.0",
+  "description": "Audit local Codex session token usage and estimate cost for a selected Notion research result.",
+  "author": { "name": "Khanh Nguyen" },
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Session Token Audit",
+        "shortDescription": "Audit session token usage",
+        "longDescription": "Parse local Codex session logs, discover child sessions, estimate API cost, and record the result in Khanh's Notion tracker.",
+        "developerName": "Khanh Nguyen",
+        "category": "Productivity",
+        "capabilities": ["Read", "Write"],
+        "defaultPrompt": "Use $session-token-audit to audit a selected Research Results session."
+      }
+    }
+  }
+}
