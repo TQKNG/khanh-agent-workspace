@@ -1,0 +1,4 @@
+interface:
+  display_name: "Technical Blog Writing"
+  short_description: "Write grounded, reflective technical blog posts"
+  default_prompt: "Use $technical-blog-writing to write or revise a technical blog post in my preferred voice and style."

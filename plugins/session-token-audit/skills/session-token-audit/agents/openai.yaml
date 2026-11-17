@@ -1,0 +1,4 @@
+interface:
+  display_name: "Session Token Audit"
+  short_description: "Audit Codex session tokens and API cost"
+  default_prompt: "Use $session-token-audit to audit a selected Research Results session and record its token and cost breakdown in Notion."
