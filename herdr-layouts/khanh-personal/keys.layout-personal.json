@@ -1,0 +1,9 @@
+{
+  "layout:personal": {
+    "cmd-alt-0": "personal.go:dashboard",
+    "cmd-alt-1": "personal.go:workqueue",
+    "cmd-alt-2": "personal.go:calendar",
+    "cmd-alt-3": "personal.go:work",
+    "cmd-r": "personal.refresh"
+  }
+}

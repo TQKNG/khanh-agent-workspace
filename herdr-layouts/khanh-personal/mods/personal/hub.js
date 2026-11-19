@@ -2,7 +2,6 @@
 // connection, and subscriptions that come back by themselves when the hub restarts.
 
 import net from "net";
-import { Buffer } from "buffer";
 import { exec, appHome, readTextFile, window as win } from "herdr";
 
 /** Waits `ms` on the context's timer (mods have no setTimeout). */
@@ -69,6 +68,27 @@ async function address(fresh) {
   return startHub();
 }
 
+/** UTF-8 bytes to a string. `Buffer#toString` returns "" in the Windows build of the Herdr app, so decode by hand. */
+function utf8(bytes) {
+  const out = [];
+  let units = [];
+  const flush = () => {
+    out.push(String.fromCodePoint(...units));
+    units = [];
+  };
+  for (let i = 0; i < bytes.length; ) {
+    const b = bytes[i++];
+    let cp = b;
+    if (b >= 0xf0) cp = ((b & 0x07) << 18) | ((bytes[i++] & 0x3f) << 12) | ((bytes[i++] & 0x3f) << 6) | (bytes[i++] & 0x3f);
+    else if (b >= 0xe0) cp = ((b & 0x0f) << 12) | ((bytes[i++] & 0x3f) << 6) | (bytes[i++] & 0x3f);
+    else if (b >= 0xc0) cp = ((b & 0x1f) << 6) | (bytes[i++] & 0x3f);
+    units.push(cp);
+    if (units.length >= 4096) flush();
+  }
+  if (units.length) flush();
+  return out.join("");
+}
+
 /** Splits a socket's bytes into lines, decoding each whole line (a UTF-8 character may span two reads). */
 class Lines {
   constructor(socket) {
@@ -80,7 +100,7 @@ class Lines {
     for (;;) {
       const at = this.pending.indexOf(10);
       if (at >= 0) {
-        const line = Buffer.from(this.pending.slice(0, at)).toString("utf8");
+        const line = utf8(this.pending.slice(0, at));
         this.pending = this.pending.slice(at + 1);
         return line;
       }
@@ -112,6 +132,8 @@ async function connect() {
 /** Runs the cockpit binary on the install's HOME, driving this Herdr window: { code, stdout, stderr }. */
 export async function cockpit(args) {
   const { bin, home, env = {} } = await install();
+  // Windows has no `env` program: run the launcher directly (the hub keeps its own state under its folder).
+  if (win()?.platform === "windows") return exec(bin, args);
   const vars = Object.entries(env).map(([k, v]) => `${k}=${v}`);
   return exec("env", [`HOME=${home}`, `HERDR_APP_HOME=${appHome()}`, "COCKPIT_FRONTEND=app", ...vars, bin, ...args]);
 }

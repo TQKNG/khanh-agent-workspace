@@ -30,7 +30,7 @@ const AGENT_ICONS = [
   { match: "claude", image: "icons/claude.svg" },
   { match: "copilot", image: "icons/copilot.svg" },
 ];
-const CRITTER_ART = "mods/herdr-critters/themes/retro/art";
+const CRITTER_ART = "mods/personal/critters/art";
 const CRITTER_NAMES = [
   "pixel", "byte", "nova", "rook", "ziggy", "mochi", "bolt", "echo", "juno", "kiwi",
   "luma", "miso", "nimbus", "onyx", "pepper", "quill", "rusty", "sprout", "tango", "umbra",
@@ -47,14 +47,15 @@ function critterStatus(stage) {
 function agentIcon(k, r) {
   const program = `${r.program?.key ?? ""} ${r.program?.name ?? ""}`.toLowerCase();
   const found = AGENT_ICONS.find((entry) => program.includes(entry.match));
-  return h_flex().size(20).flex_none().items_center().justify_center().rounded(RADIUS.md).bg(alpha(k.muted, 0.16))
+  return h_flex().size(20).flex_none().items_center().justify_center().rounded(RADIUS.sm).bg(alpha(k.muted, 0.16))
     .child(found?.image ? image(found.image).size(14) : Icon("bot", { size: 13, color: k.mutedFg }));
 }
 
 function agentAvatar(k, r) {
   const critter = r.critter ?? "pixel";
-  return h_flex().size(40).flex_none().items_center().justify_center().rounded(RADIUS.lg).border_1().border_color(k.border)
-    .child(image(`${CRITTER_ART}/sprite-${critter}-${critterStatus(r.stage)}.svg`).size(34));
+  const tone = stageColor(r.stage);
+  return h_flex().size(44).flex_none().items_center().justify_center().rounded(RADIUS.lg).border_1().border_color(alpha(tone, 0.35)).bg(alpha(tone, 0.1))
+    .child(image(`${CRITTER_ART}/sprite-${critter}-${critterStatus(r.stage)}.svg`).size(38));
 }
 
 /** An app's bubble from its view: what waits on you there, {count, tone} or null. */
@@ -199,7 +200,7 @@ export default class Sidebar {
         .when(rail, (e) => e.justify_center())
         .rounded(RADIUS.md)
         .cursor_pointer()
-        .text_size(14)
+        .text_size(15)
         .font_medium()
         .text_color(on ? k.foreground : k.mutedFg)
         .when(on, (e) => e.bg(k.selected))
@@ -250,7 +251,7 @@ export default class Sidebar {
       })
       .px(rail ? 6 : 10)
       .py(6)
-      .gap(1)
+      .gap(2)
       .when(!rail, (e) =>
         e.child(
           h_flex()
@@ -268,7 +269,7 @@ export default class Sidebar {
             .hover((s) => s.border_color(k.ring))
             .on_click(() => openPalette())
             .child(Icon("search", { size: 14, color: k.mutedFg }))
-          .child(div().flex_1().text_size(13).text_color(k.mutedFg).child("Search or run…"))
+          .child(div().flex_1().text_size(14).text_color(k.mutedFg).child("Search or run…"))
             .child(Kbd("⌘⇧P")),
         ),
       )
@@ -294,7 +295,7 @@ export default class Sidebar {
           .id("sidebar-scroll")
           .flex_1()
           .min_h(0)
-          .gap(2)
+          .gap(4)
           .overflow_y_scrollbar()
           .when(rail, (e) => e.children(this.railRows(k, rows)))
           .when(!rail, (e) => e.children([...this.bandRows(k, band), ...this.agentRows(k, rows, band, cx), ...this.spaceRows(k, cx)])),
@@ -439,6 +440,7 @@ export default class Sidebar {
     const title = r.title || r.tab?.name || r.address;
     const place = r.space?.name || "Unknown space";
     const stage = STAGES[r.stage]?.label || r.stage || "idle";
+    const tone = stageColor(r.stage);
     const duration = dur(now - (r.since ?? now));
     const critter = this.critterName(r);
     const parts = [];
@@ -448,48 +450,65 @@ export default class Sidebar {
     if (r.changes?.files) parts.push(h_flex().gap(3).child(div().text_color(k.success).child(`+${r.changes.add}`)).child(div().text_color(k.destructive).child(`−${r.changes.del}`)));
     if (!parts.length && r.said) parts.push(div().min_w(0).truncate().italic().child(r.said));
     const flash = this.flashes.of(r.terminal);
-    const row = h_flex()
+    const row = v_flex()
       .id(id)
       .relative()
-      .min_h(parts.length ? 72 : 64)
-      .py(8)
-      .pl(8 + indent)
-      .pr(8)
-      .gap(10)
-      .items_start()
-      .rounded(RADIUS.md)
+      .min_h(parts.length ? 88 : 76)
+      .p(10)
+      .gap(6)
+      .rounded(RADIUS.lg)
+      .border_1()
+      .border_color(focusedNow ? alpha(tone, 0.55) : alpha(k.border, 0.7))
+      .bg(focusedNow ? alpha(tone, 0.08) : k.background)
       .cursor_pointer()
-      .when(focusedNow, (e) => e.bg(k.selected))
-      .when(!focusedNow, (e) => e.hover((s) => s.bg(k.accent)))
+      .hover((s) => s.bg(alpha(tone, 0.06)).border_color(alpha(tone, 0.45)))
       .when(Boolean(flash), (e) =>
-        e.child(div().id(`${id}-flash`).absolute().inset_0().rounded(RADIUS.md).bg(alpha(flash.color ?? k.ring, 0.28)).opacity(flash.on ? 1 : 0).transition("opacity", { duration: 1600, easing: "ease-out" })),
+        e.child(div().id(`${id}-flash`).absolute().inset_0().rounded(RADIUS.lg).bg(alpha(flash.color ?? k.ring, 0.28)).opacity(flash.on ? 1 : 0).transition("opacity", { duration: 1600, easing: "ease-out" })),
       )
       .on_click((_e, cx) => this.agents.go(cx, r))
       .on_mouse_down("right", () => this.agents.menu(r))
-      .child(agentAvatar(k, { ...r, critter }))
       .child(
         v_flex()
-          .flex_1()
-          .min_w(0)
-          .gap(1)
-          .child(h_flex().min_w(0).gap(6).items_center().child(agentIcon(k, r)).child(div().flex_none().text_size(TEXT.xs).font_semibold().text_color(k.mutedFg).child(critter)).child(div().flex_1().min_w(0).truncate().text_size(14).text_color(r.stage === "idle" || r.stage === "merged" ? k.mutedFg : k.foreground).child(title)))
-          .child(h_flex().min_w(0).gap(6).text_size(TEXT.xs).text_color(k.dim).child(div().flex_none().truncate().child(`${place} · ${stage} ${duration}`)).children(parts)),
+          .w_full()
+          .gap(8)
+          .child(
+            h_flex()
+              .w_full()
+              .gap(8)
+              .items_start()
+              .child(
+                v_flex()
+                  .flex_1()
+                  .min_w(0)
+                  .gap(4)
+                  .child(
+                    h_flex()
+                      .w_full()
+                      .gap(6)
+                      .items_center()
+                      .child(agentIcon(k, r))
+                      .child(div().text_size(TEXT.xs).font_semibold().text_color(tone).child(stage.toUpperCase()))
+                      .child(div().flex_1())
+                      .child(div().text_size(TEXT.xs).font_family("JetBrains Mono").text_color(k.dim).child(duration)),
+                  )
+                  .child(div().w_full().truncate().text_size(15).font_semibold().text_color(r.stage === "idle" || r.stage === "merged" ? k.mutedFg : k.foreground).child(title))
+                  .child(div().w_full().truncate().text_size(TEXT.xs).text_color(k.mutedFg).child(place)),
+              )
+              .child(agentAvatar(k, { ...r, critter })),
+          )
+          .when(parts.length > 0, (e) => e.child(h_flex().w_full().gap(6).flex_wrap().pt(4).border_t_1().border_color(alpha(k.border, 0.6)).text_size(TEXT.xs).text_color(k.dim).children(parts))),
       )
-      .child(h_flex().w(14).flex_none().justify_center().pt(4).tooltip(`${stage} for ${duration}`).child(StageMark(`${id}-status`, r.stage, { size: 9 })))
       .when(hovered, (e) =>
         e.child(
           h_flex()
             .gap(2)
+            .justify_end()
             .flex_none()
             .child(Button(`${id}-pin`, { icon: pinned ? "pin-off" : "pin", variant: "ghost", size: "icon-sm", tooltip: pinned ? "Unpin" : "Pin to the top", onClick: (_e, cx) => (cx.stop_propagation(), this.agents.togglePin(r.terminal), cx.notify()) }))
             .child(Button(`${id}-more`, { icon: "more", variant: "ghost", size: "icon-sm", tooltip: "Snooze, recap, fork…", onClick: (_e, cx) => (cx.stop_propagation(), this.agents.menu(r)) })),
         ),
       )
-      .when(!hovered, (e) =>
-        e
-          .when(Boolean(r.unread), (el) => el.child(div().size(6).flex_none().rounded(3).bg(stageColor(r.stage))))
-          .child(div().flex_none().text_size(TEXT.xs).text_color(r.stage === "snoozed" ? k.info : k.dim).child(r.stage === "snoozed" ? r.snoozed?.label?.replace("until ", "") ?? "" : dur(now - (r.since ?? now)))),
-      );
+      .when(!hovered && Boolean(r.unread), (e) => e.child(div().absolute().top(10).right(10).size(6).rounded(3).bg(tone)));
     const tracked = this.hover.track(row, id);
     const recap = r.recap?.text;
     const card = v_flex()
@@ -527,6 +546,7 @@ export default class Sidebar {
     const now = Date.now();
     const rest = rows.filter((r) => !band.includes(r));
     const head = SectionHeader("Agents", {
+      highlight: true,
       count: rows.length || undefined,
       action: h_flex()
         .gap(2)
@@ -580,7 +600,7 @@ export default class Sidebar {
         .items_center()
         .rounded(RADIUS.md)
         .cursor_pointer()
-        .text_size(14)
+        .text_size(15)
         .text_color(on ? k.foreground : k.mutedFg)
         .when(on, (e) => e.bg(k.selected))
         .when(!on, (e) => e.hover((st) => st.bg(k.accent).text_color(k.foreground)))
@@ -626,6 +646,8 @@ export default class Sidebar {
     const withLines = ordered.filter((r) => hasTerms(r.s));
     const allFolded = withLines.length > 0 && withLines.every((r) => folded.has(r.s.id));
     const head = SectionHeader("Spaces", {
+      highlight: true,
+      count: sp.length,
       action: h_flex()
         .gap(2)
         .when(withLines.length > 0, (e) =>
@@ -727,7 +749,7 @@ export default class Sidebar {
           show("work");
         })
         .child(h_flex().w(12).flex_none().justify_center().child(stage ? StageMark(`term-${p.terminal}`, stage, { size: 6 }) : Icon("terminal", { size: 11, color: k.dim })))
-        .child(div().flex_none().text_size(12.5).text_color(stage === "needs_you" ? k.blocked : k.mutedFg).child(name))
+        .child(div().flex_none().text_size(13.5).text_color(stage === "needs_you" ? k.blocked : k.mutedFg).child(name))
         .when(Boolean(title) && title !== name && title !== p.terminal, (e) => e.child(div().flex_1().min_w(0).truncate().text_size(TEXT.xs).text_color(k.dim).child(title)));
     };
     const out = shown.map(line);

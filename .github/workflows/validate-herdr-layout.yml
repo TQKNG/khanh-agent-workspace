@@ -1,0 +1,26 @@
+name: Validate Herdr layout
+on:
+  pull_request:
+    paths:
+      - 'herdr-layouts/**'
+      - '.github/workflows/validate-herdr-layout.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'herdr-layouts/**'
+      - '.github/workflows/validate-herdr-layout.yml'
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m unittest discover -s herdr-layouts/khanh-personal/tests -v
+      - run: node --test herdr-layouts/khanh-personal/tests/*.test.mjs

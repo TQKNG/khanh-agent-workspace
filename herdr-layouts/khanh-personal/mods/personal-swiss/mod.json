@@ -1,9 +1,0 @@
-{
-  "place": "none",
-  "title": "Cockpit",
-  "focusable": true,
-  "cloned_from": {
-    "name": "personal",
-    "version": "0.1.14"
-  }
-}
