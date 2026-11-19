@@ -189,9 +189,10 @@ export class AgentsModel {
     this.sub?.stop();
   }
 
-  /** The hub's rows; while it doesn't answer, Herdr's own agents (status, title, place), so none vanishes. */
+  /** The hub's rows; while it doesn't answer, or answers without an agent list (the bundled hub only serves
+   *  the inbox and meetings), Herdr's own agents (status, title, place), so none vanishes. */
   get rows() {
-    if (!this.down) return this.value?.agents ?? [];
+    if (!this.down && Array.isArray(this.value?.agents)) return this.value.agents;
     const stage = { blocked: "needs_you", working: "working", done: "done", idle: "idle" };
     return agents().map((a) => ({
       terminal: `app:${a.address}`,

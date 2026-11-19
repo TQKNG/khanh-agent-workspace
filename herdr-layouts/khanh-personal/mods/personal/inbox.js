@@ -8,34 +8,13 @@ import { div } from "gpui-kit";
 import { h_flex, v_flex, InputState } from "gpui-base";
 import { settings } from "herdr";
 import * as hub from "./hub.js";
+import { byKind, byRepo } from "./inbox-groups.js";
+import { openPrReview } from "./prreview.js";
 import {
   tokens, TEXT, RADIUS, Icon, Spinner, Badge, Button, Kbd, PageHeader, SearchField, TextField, KeyHints, Empty, ErrorState,
   Skeleton, Command, Toaster, Flashes, Scroller, Hover, HoverCard, openMenu, alpha, Chip, Mono, ToneButton, Pills,
   SegBar, Avatar, personColor, Separator, CountPill, Overline,
 } from "./ui.js";
-
-/** The inbox by kind of thing rather than the TUI's tree: alerts, reviews, your PRs, tickets, then what is left. */
-function bySort(model) {
-  if (!model?.sections) return model;
-  const flat = [];
-  const walk = (row) => {
-    flat.push(row);
-    for (const kid of row.children ?? []) walk(kid);
-  };
-  model.sections.forEach(walk);
-  const section = (key, title, icon, children, extra = "") => ({ key, path: `s:${key}`, kind: "plain", name: title, title, icon, extra, expand: true, children, acts: [], text: [] });
-  const keep = (key) => model.sections.find((s) => s.key === key);
-  const prs = flat.filter((r) => r.kind === "pr");
-  const tickets = flat.filter((r) => r.kind === "ticket").map((t) => ({ ...t, children: (t.children ?? []).filter((c) => c.kind !== "pr" && c.kind !== "ticket") }));
-  const trees = flat.filter((r) => r.kind === "worktree");
-  const review = keep("review");
-  const out = [keep("today"), keep("alerts")].filter(Boolean);
-  if (review) out.push({ ...review, title: "Reviews", name: "Reviews" });
-  if (prs.length) out.push(section("prs", "Your PRs", "git-pull-request", prs));
-  if (tickets.length) out.push(section("tickets", "Tickets", "ticket", tickets));
-  if (trees.length) out.push(section("cleanup", "To clean up", "folder-git", trees));
-  return { ...model, sections: out };
-}
 
 const H = { heading: 52, pr: 34, ticket: 34, group: 30, line: 26, text: 32 };
 const KIND_NAME = { pr: ["PR", "PRs"], review: ["review request", "review requests"], ticket: ["ticket", "tickets"], alert: ["alert", "alerts"], brief: ["brief line", "brief lines"], muted: ["muted repo", "muted repos"], worktree: ["worktree", "worktrees"] };
@@ -45,8 +24,8 @@ const words = (q) => q.toLowerCase().split(/\s+/).filter(Boolean);
 const spansText = (spans) => (spans ?? []).map((s) => s.text ?? "").join(" ");
 
 function haystack(row) {
-  if (row.cells) return `${row.cells.ref} ${row.cells.title} ${row.cells.notes}`;
-  return spansText(row.text) || row.name;
+  const own = row.cells ? `${row.cells.ref} ${row.cells.title} ${row.cells.notes}` : spansText(row.text) || row.name;
+  return row.repo ? `${own} ${row.repo}` : own; // a repository's name finds everything in it
 }
 
 function kindCount(kind, n) {
@@ -59,7 +38,7 @@ function signature(row) {
   const it = row.item ?? {};
   if (row.kind === "pr" || row.kind === "review") return `${it.ci}|${it.review}|${it.isDraft}|${it.updatedAt}`;
   if (row.kind === "ticket") return row.cells?.ref ?? "";
-  if (row.kind === "alert" || row.kind === "worktree") return spansText(row.text);
+  if (row.kind === "alert" || row.kind === "worktree" || row.kind === "run") return spansText(row.text);
   return null;
 }
 
@@ -75,7 +54,8 @@ export default class Inbox {
     this.model = null;
     this.agents = null;
     this.status = "connecting";
-    this.group = "feature";
+    this.group = "repo"; // "repo" or "kind": how the rows are arranged
+    this.raw = null;
     this.sel = null;
     this.folds = new Map();
     this.unfolded = new Set();
@@ -127,7 +107,7 @@ export default class Inbox {
     this.sub?.stop();
     this.sub = hub.subscribe(
       cx,
-      { views: [{ name: "inbox", args: { group: this.group } }, { name: "agents", args: {} }] },
+      { views: [{ name: "inbox", args: { group: "feature" } }, { name: "agents", args: {} }] },
       (m, cx) => {
         if (m.view === "inbox") this.take(m.value, cx);
         if (m.view === "agents") this.agents = m.value;
@@ -150,7 +130,8 @@ export default class Inbox {
 
   take(model, cx) {
     const before = this.model;
-    model = bySort(model);
+    this.raw = model;
+    model = this.group === "repo" ? byRepo(model) : byKind(model);
     this.model = model;
     const k = tokens();
     const was = new Map();
@@ -367,6 +348,7 @@ export default class Inbox {
   run(cx, row, act) {
     if (!act) return;
     if (act.call?.fn === "start") return this.openStart(cx, row, act);
+    if (act.call?.fn === "review_pr") return openPrReview(row.item);
     if (act.label === "merge" && (row.kind === "pr" || row.kind === "review")) return this.openMerge(cx, row);
     if (act.choices?.length) {
       this.dialog = { kind: "pick", title: `${act.label[0].toUpperCase()}${act.label.slice(1)}`, description: row.name, choices: act.choices.map((c) => ({ label: c.label, run: (cx) => this.call(cx, c.call, { row }) })) };
@@ -404,7 +386,7 @@ export default class Inbox {
 
   shared(rows) {
     if (!rows.length) return [];
-    return rows[0].acts.filter((a) => rows.every((r) => r.acts.some((b) => b.label === a.label && b.key === a.key)));
+    return rows[0].acts.filter((a) => a.call?.fn !== "review_pr" && rows.every((r) => r.acts.some((b) => b.label === a.label && b.key === a.key)));
   }
 
   describe(rows) {
@@ -435,9 +417,10 @@ export default class Inbox {
     if (row.children?.length) this.toggleFold(row);
   }
 
+  /** Switches between the rows by repository and by kind. */
   regroup(cx) {
-    this.group = this.group === "feature" ? "status" : "feature";
-    this.subscribe(cx);
+    this.group = this.group === "repo" ? "kind" : "repo";
+    this.take(this.raw, cx);
     cx.notify();
   }
 
@@ -556,7 +539,7 @@ export default class Inbox {
     const hit = (text) => q.every((w) => text.toLowerCase().includes(w));
     const own = [
       { id: "p-refresh", label: "Refresh the inbox", shortcut: "R", icon: "refresh-cw", run: () => this.refresh(cx) },
-      { id: "p-group", label: `Group work by ${this.group === "feature" ? "status" : "feature"}`, shortcut: "w", icon: "layers", run: () => this.regroup(cx) },
+      { id: "p-group", label: `Group by ${this.group === "repo" ? "kind" : "repo"}`, shortcut: "w", icon: "layers", run: () => this.regroup(cx) },
       { id: "p-filter", label: "Filter rows", shortcut: "/", icon: "search", run: () => this.startFilter(cx) },
       { id: "p-file", label: "File an issue", shortcut: "I", icon: "file-plus", run: () => this.openFile(cx) },
     ];
@@ -932,6 +915,7 @@ export default class Inbox {
 
   body(v, k, cx) {
     const { row, depth } = v;
+    if (depth === 0 && row.repo) return this.repoBody(row, k);
     if (depth === 0) {
       const count = row.children?.length ?? 0;
       return h_flex()
@@ -953,6 +937,24 @@ export default class Inbox {
     return this.spans(row.text, k, { grow: true });
   }
 
+  /** A repository's heading: its name, a summary of what is in it (what is wrong in red, what waits on you in amber), a count. */
+  repoBody(row, k) {
+    const count = row.children?.length ?? 0;
+    return h_flex().flex_1().min_w(0).gap(8).items_center()
+      .child(Icon(row.icon, { size: 15, color: row.rank[0] === 0 ? k.destructive : k.foreground }))
+      .child(h_flex().flex_none().items_center().text_size(TEXT.base)
+        .child(div().text_color(k.mutedFg).child(`${row.owner}/`))
+        .child(div().font_semibold().child(row.title)))
+      .child(h_flex().flex_1().min_w(0).gap(10).items_center().overflow_hidden().whitespace_nowrap().text_size(TEXT.xs)
+        .children(row.parts.map((part) => div().flex_none().text_color(this.tone(part.tone, k) ?? k.mutedFg).child(part.text))))
+      .child(CountPill(count, { on: row.rank[0] === 0 || row.rank[1] === 0 }));
+  }
+
+  /** A PR's or ticket's reference: inside a repository's group the repository is already the heading, so just `#12`. */
+  refText(ref) {
+    return this.group === "repo" ? ref.replace(/^[^#]*#/, "#") : ref;
+  }
+
   prBody(row, k) {
     const c = row.cells;
     const it = row.item ?? {};
@@ -967,7 +969,7 @@ export default class Inbox {
       .gap(10)
       .items_center()
       .child(lead)
-      .child(this.refLink(row, c.ref, k))
+      .child(this.refLink(row, this.refText(c.ref), k))
       .child(div().flex_1().min_w(0).truncate().text_color(c.title_tone === "dim" ? k.mutedFg : k.foreground).child(c.title))
       .when(row.kind === "review" && Boolean(it.isDirect), (e) => e.child(div().id(`you-${row.path}`).flex_none().tooltip("Asked of you").child(Icon("user", { size: 13, color: k.warning }))))
       .when(Boolean(trail), (e) => e.child(trail))
@@ -1005,7 +1007,7 @@ export default class Inbox {
       .gap(10)
       .items_center()
       .child(Icon(lead?.icon ?? "circle", { size: 15, color: this.tone(lead?.tone, k) ?? k.mutedFg }))
-      .child(this.refLink(row, id, k, { color: k.foreground }))
+      .child(this.refLink(row, this.refText(id), k, { color: k.foreground }))
       .child(div().flex_1().min_w(0).truncate().child(c.title))
       .when(Boolean(statusText), (e) => e.child(Badge(statusText, lead?.tone === "warn" ? "warning" : "outline")))
       .when(Boolean(this.timeChip(row.key, k)), (e) => e.child(this.timeChip(row.key, k)))

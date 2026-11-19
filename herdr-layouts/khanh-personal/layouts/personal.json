@@ -30,7 +30,7 @@
       "resizable": false,
       "children": [
         { "id": "brand", "type": "block", "size": { "px": 46 }, "window_drag": true, "content": { "mod": "workspace-chrome-swiss" } },
-        { "id": "cockpit-sidebar", "type": "block", "size": { "weight": 1 }, "min": 120, "content": { "mod": "personal-swiss", "props": { "app": "sidebar" } } },
+        { "id": "cockpit-sidebar", "type": "block", "size": { "weight": 1 }, "min": 120, "content": { "mod": "personal", "props": { "app": "sidebar" } } },
         { "id": "sidebar-footer", "type": "block", "size": { "px": 69 }, "content": { "mod": "workspace-chrome-swiss", "props": { "footer": true } } }
       ]
     },

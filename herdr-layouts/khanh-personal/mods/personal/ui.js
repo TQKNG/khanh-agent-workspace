@@ -350,10 +350,15 @@ export function ErrorState({ title = "Something went wrong", message, onRetry } 
   }).text_color(k.foreground);
 }
 
-/** A section label above a group: small, medium weight, muted; a count and an action at the right. */
-export function SectionHeader(text, { count, action, id } = {}) {
+/** A section label above a group: small, semibold, muted; `highlight` makes it larger and foreground-colored. A count and an action sit at the right. */
+export function SectionHeader(text, { count, action, id, highlight = false } = {}) {
   const k = tokens();
-  let el = h_flex().h(28).px(8).gap(6).items_center().text_size(TEXT.sm).font_medium().text_color(k.mutedFg).child(text);
+  let el = h_flex().h(highlight ? 34 : 28).px(8).gap(6).items_center().rounded(RADIUS.md)
+    .text_size(highlight ? 14 : TEXT.sm)
+    .font_semibold()
+    .text_color(highlight ? k.foreground : k.mutedFg)
+    .when(highlight, (e) => e.pl(10))
+    .child(text);
   if (count !== undefined) el = el.child(div().text_color(k.dim).child(String(count)));
   if (action) el = el.child(div().flex_1()).child(action);
   return id ? el.id(id) : el;
