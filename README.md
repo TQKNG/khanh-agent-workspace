@@ -6,7 +6,7 @@ The Codex marketplace distributes `arc42-gitbook-docs` and `session-token-audit`
 
 The repository is also a source for reusable agent guidance that can be included in future plugins or used as shared project resources.
 
-The Herdr package distributes Khanh's personal cockpit layout and its custom mod.
+The Herdr package distributes Khanh's personal cockpit layout, its custom mods and a local hub that connects its Inbox to GitHub and its Meetings page to Google Calendar.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution and pull request guidance.
 
@@ -21,7 +21,7 @@ Repository: <https://github.com/TQKNG/khanh-agent-workspace>
 - Session audit plugin: `plugins/session-token-audit/`
 - Agent skills and instructions: `plugins/*/skills/` and `plugins/*/references/`
 - Agent prompts: `plugins/*/prompts/` when a plugin provides reusable prompts
-- Herdr layout package: `herdr-layouts/khanh-personal/`
+- Herdr layout package: `herdr-layouts/khanh-personal/` (layout, mods, local hub, installer)
 
 ## Included plugin
 
@@ -83,11 +83,26 @@ Standalone resources that are not part of a plugin should be documented with the
 Ask the Herdr agent:
 
 ```text
-Read ~/.config/herdr-app/AGENTS.md, then add this layout:
+Read ~/.config/herdr-app/AGENTS.md, then set up this layout by following the agent steps in its README:
 https://github.com/TQKNG/khanh-agent-workspace/tree/main/herdr-layouts/khanh-personal
 ```
 
-The package includes `layouts/personal.json`, `layouts/personal.svg`, the `personal` mod, `RECIPE.md`, and `preview.png`.
+Or run the installer yourself:
+
+```sh
+git clone https://github.com/TQKNG/khanh-agent-workspace
+cd khanh-agent-workspace/herdr-layouts/khanh-personal
+python install.py --activate
+```
+
+The package includes `layouts/personal.json` and `layouts/personal.svg`, the `personal` mod (the pages, the PR review window and the sidebar) and the `workspace-chrome-swiss` mod, the local hub in `hub/`, `install.py`, `RECIPE.md`, `ARCHITECTURE.md` and tests.
+
+The Inbox shows your GitHub PRs, review requests, issues and workflow runs grouped by repository, and a PR can be reviewed, approved, merged and have its failed checks inspected and re-run from a review window.
+It needs Python 3.9 or newer and the GitHub CLI signed in with `gh auth login`.
+Google Calendar is optional and needs your own OAuth credentials.
+
+Set your own workspace name and logo with `python install.py --only-brand --brand-name "<name>" --brand-logo <file>`.
+If you installed the previous version of this package, follow "Upgrading from the previous package" in its README.
 
 It does not include Herdr runtime state, project files, credentials, or connection settings.
 
@@ -131,6 +146,9 @@ skills/technical-blog-writing/
 plugins/session-token-audit/skills/
 herdr-layouts/khanh-personal/layouts/personal.json
 herdr-layouts/khanh-personal/mods/personal/
+herdr-layouts/khanh-personal/mods/workspace-chrome-swiss/
+herdr-layouts/khanh-personal/hub/
+herdr-layouts/khanh-personal/install.py
 ```
 
 The marketplace catalog resolves the plugin path relative to this repository root.
@@ -138,6 +156,8 @@ The marketplace catalog resolves the plugin path relative to this repository roo
 The Herdr package is intentionally outside `plugins/` and is not listed in the Codex marketplace manifest.
 
 It excludes Herdr runtime state such as `shared.json`, `view.json`, `data/`, `window.json`, and `windows.json`.
+
+The layout package has its own tests: `python -m unittest discover -s herdr-layouts/khanh-personal/tests -v` and `node --test herdr-layouts/khanh-personal/tests/`.
 
 Do not commit GitHub credentials, GitBook credentials, access tokens, or local connection settings.
 
@@ -161,5 +181,7 @@ Merge additionally requires approval of the exact reviewed revision.
 ## License
 
 Original material authored by Khanh Nguyen is available under the [MIT License](LICENSE).
-Bundled third-party materials retain their own terms, including the font licenses under `herdr-layouts/khanh-personal/mods/herdr-critters/fonts/`.
-The `herdr-critters` upstream repository does not identify a license, so this MIT grant does not cover that imported mod.
+Bundled third-party materials retain their own terms.
+The critter pictures under `herdr-layouts/khanh-personal/mods/personal/critters/art/` come from the `herdr-critters` mod.
+Its upstream repository does not identify a license, so this MIT grant does not cover them.
+The font files and font licenses that shipped with that imported mod are no longer part of this repository.

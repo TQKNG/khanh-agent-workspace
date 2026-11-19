@@ -21,6 +21,15 @@ Do not publish credentials, access tokens, private connection settings, or custo
 Read [the layout recipe](herdr-layouts/khanh-personal/RECIPE.md) and the Herdr app instructions before changing a packaged layout or mod.
 Keep machine-specific runtime state and credentials out of the share package.
 For mod changes, run `herdr-app check` on the affected mod and inspect the layout in the app when available.
+Run the layout's tests from the root:
+
+```sh
+python -m unittest discover -s herdr-layouts/khanh-personal/tests -v
+node --test herdr-layouts/khanh-personal/tests/
+```
+
+Do not test write actions (reviews, merges, re-runs) against a pull request you care about.
+Use a throwaway pull request, or the fake `gh` the tests use.
 State any visual or runtime checks that could not be performed.
 
 ## Submit a pull request
