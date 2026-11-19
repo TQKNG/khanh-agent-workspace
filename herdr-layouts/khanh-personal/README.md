@@ -188,7 +188,7 @@ Press `M` in the review window, or `M` on a row in the Inbox, then pick a method
   The hub refuses it when the branch moved, and GitHub is sent the commit as well (`sha`), so a push right after the check is refused too.
 - Admin overrides of branch rules, auto-merge and the merge queue are not offered.
   On a repository that requires a review, someone other than the author has to approve first, because you cannot approve your own PR.
-The write path is covered by unit tests with a fake `gh` (`python -m unittest discover -s tests`), and the inbox's grouping by `node --test tests/`.
+The write path is covered by unit tests with a fake `gh` (`python -m unittest discover -s tests`), and the inbox's grouping by `node --test tests/*.test.mjs`.
 
 ## Your own name and logo
 
@@ -232,7 +232,7 @@ mods/personal/critters/art            the sidebar's critter pictures
 mods/workspace-chrome-swiss           the header, shortcuts button and footer (reads your brand)
 hub/                                  the local hub (Python) and its launchers
 tests/                                unit tests: the hub's GitHub code (Python) and the inbox grouping (Node)
-package.json                          marks the JavaScript as ES modules, so `node --test tests/` runs
+package.json                          marks the JavaScript as ES modules, so `node --test tests/*.test.mjs` runs
 keys.layout-personal.json             the layout's shortcuts
 install.py                            the installer
 RECIPE.md                             the brief to rebuild this layout from scratch

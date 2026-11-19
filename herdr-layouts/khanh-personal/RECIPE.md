@@ -74,7 +74,7 @@ A status bar at the bottom counts agents by state.
 - Running `python install.py` twice changes nothing the second time.
 - Running `python install.py --only-brand --brand-name X` changes the header text within about ten seconds, with no restart.
 - The sidebar shows critter pictures, not blank squares.
-- `python -m unittest discover -s tests` and `node --test tests/` pass.
+- `python -m unittest discover -s tests` and `node --test tests/*.test.mjs` pass.
 - The Inbox shows one heading per repository, failing ones first, and `w` switches to the view by kind.
 - `r` on a PR row shows its diff, `x` and `M` ask before sending, and nothing is sent until the dialog is confirmed.
 - A draft PR, or one with failing checks, offers no merge method and says why.

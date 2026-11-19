@@ -23,4 +23,4 @@ jobs:
         with:
           node-version: '22'
       - run: python -m unittest discover -s herdr-layouts/khanh-personal/tests -v
-      - run: node --test herdr-layouts/khanh-personal/tests/
+      - run: node --test herdr-layouts/khanh-personal/tests/*.test.mjs

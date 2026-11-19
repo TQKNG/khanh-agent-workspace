@@ -1,4 +1,4 @@
-// Tests for mods/personal/inbox-groups.js: node --test tests/
+// Tests for mods/personal/inbox-groups.js: node --test tests/*.test.mjs
 
 import assert from "node:assert/strict";
 import test from "node:test";

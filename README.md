@@ -157,7 +157,7 @@ The Herdr package is intentionally outside `plugins/` and is not listed in the C
 
 It excludes Herdr runtime state such as `shared.json`, `view.json`, `data/`, `window.json`, and `windows.json`.
 
-The layout package has its own tests: `python -m unittest discover -s herdr-layouts/khanh-personal/tests -v` and `node --test herdr-layouts/khanh-personal/tests/`.
+The layout package has its own tests: `python -m unittest discover -s herdr-layouts/khanh-personal/tests -v` and `node --test herdr-layouts/khanh-personal/tests/*.test.mjs`.
 
 Do not commit GitHub credentials, GitBook credentials, access tokens, or local connection settings.
 

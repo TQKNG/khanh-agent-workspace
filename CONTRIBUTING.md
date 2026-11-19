@@ -25,7 +25,7 @@ Run the layout's tests from the root:
 
 ```sh
 python -m unittest discover -s herdr-layouts/khanh-personal/tests -v
-node --test herdr-layouts/khanh-personal/tests/
+node --test herdr-layouts/khanh-personal/tests/*.test.mjs
 ```
 
 Do not test write actions (reviews, merges, re-runs) against a pull request you care about.
