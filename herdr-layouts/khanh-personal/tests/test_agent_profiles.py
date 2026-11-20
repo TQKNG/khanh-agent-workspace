@@ -312,6 +312,84 @@ class TestCodexPluginList(Home):
         self.assertEqual(profiles.lifetime(), ap.CACHE_SECONDS)
 
 
+def codex_event(stamp: str, limits) -> str:
+    """One line of a Codex session log: a token_count event, with its `rate_limits` (null on most events)."""
+    return json.dumps({"timestamp": stamp, "type": "event_msg", "payload": {"type": "token_count", "rate_limits": limits}})
+
+
+def codex_limits(five_used, five_resets, week_used, week_resets) -> dict:
+    return {
+        "primary": {"used_percent": five_used, "window_minutes": 300, "resets_at": five_resets},
+        "secondary": {"used_percent": week_used, "window_minutes": 10080, "resets_at": week_resets},
+        "plan_type": "plus",
+    }
+
+
+class TestUsage(Home):
+    """The usage figures each agent exposes: Codex's limit windows from its session logs, the rest said as not exposed."""
+
+    NOW = 1795000000.0
+
+    def sessions(self, name: str, *lines: str) -> Path:
+        return write(self.home / ".codex" / "sessions" / "2026" / "11" / "18" / name, "\n".join(lines) + "\n")
+
+    def test_the_newest_reading_is_used_past_events_without_one(self):
+        self.sessions(
+            "rollout-2026-11-18T10-00-00-a.jsonl",
+            codex_event("2026-11-18T10:00:00.000Z", codex_limits(5.0, 1795010000, 20.0, 1795200000)),
+        )
+        self.sessions(
+            "rollout-2026-11-18T12-00-00-b.jsonl",
+            codex_event("2026-11-18T12:00:00.000Z", codex_limits(40.0, 1795020000, 30.0, 1795200000)),
+            codex_event("2026-11-18T12:05:00.000Z", None),
+            "not json at all",
+        )
+        got = ap.codex_usage(now=self.NOW)
+        self.assertEqual(got["state"], "read")
+        self.assertEqual(got["observed_at"], ap.iso_epoch("2026-11-18T12:00:00.000Z"))
+        self.assertEqual(got["windows"], [
+            {"name": "5h", "used_percent": 40.0, "resets_at": 1795020000.0},
+            {"name": "7d", "used_percent": 30.0, "resets_at": 1795200000.0},
+        ])
+
+    def test_a_window_past_its_reset_is_unknown_not_full(self):
+        self.sessions("rollout-2026-11-18T10-00-00-a.jsonl", codex_event("2026-11-18T10:00:00.000Z", codex_limits(60.0, 1794990000, 25.0, 1795200000)))
+        windows = ap.codex_usage(now=self.NOW)["windows"]
+        self.assertEqual(windows[0], {"name": "5h", "used_percent": None, "resets_at": None}, "the reading is from before that reset")
+        self.assertEqual(windows[1]["used_percent"], 25.0)
+
+    def test_no_reading_is_unreadable_with_a_reason(self):
+        self.assertEqual(ap.codex_usage(now=self.NOW)["state"], "unreadable")
+        self.sessions("rollout-2026-11-18T10-00-00-a.jsonl", codex_event("2026-11-18T10:00:00.000Z", None))
+        got = ap.codex_usage(now=self.NOW)
+        self.assertEqual(got["state"], "unreadable")
+        self.assertIn("reason", got)
+
+    def test_a_profile_carries_its_agents_usage(self):
+        self.sessions("rollout-2026-11-18T10-00-00-a.jsonl", codex_event("2026-11-18T10:00:00.000Z", codex_limits(15.0, 1795100000, 96.0, 1795235821)))
+        got = self.profiles()
+        self.assertEqual(got["codex"]["usage"]["state"], "read")
+        self.assertEqual(got["claude"]["usage"]["state"], "not_exposed")
+        self.assertIn("Claude", got["claude"]["usage"]["reason"])
+        self.assertEqual(got["copilot"]["usage"]["state"], "not_exposed")
+
+    def test_a_missing_agent_has_no_usage(self):
+        with mock.patch.object(ap.shutil, "which", side_effect=lambda c: None if c == "copilot" else f"/bin/{c}"):
+            self.assertIsNone(self.profiles()["copilot"]["usage"])
+
+    def test_a_failing_reader_is_unreadable_and_not_an_error(self):
+        def boom():
+            raise OSError("sessions folder is locked")
+
+        agent = {"id": "codex", "label": "Codex", "command": "codex", "maker": "OpenAI", "read": lambda: {"skills": [], "plugins": [], "mcp": [], "errors": []}, "usage": boom}
+        got = ap.profile(agent)
+        self.assertEqual(got["usage"], {"state": "unreadable", "reason": "sessions folder is locked"})
+        self.assertEqual(got["errors"], [], "a usage figure does not mark the set-up as failed")
+
+    def test_window_names(self):
+        self.assertEqual((ap.window_name(300), ap.window_name(10080), ap.window_name(60)), ("5h", "7d", "1h"))
+
+
 class TestMark(unittest.TestCase):
     def test_sharp_copy_without_a_white_backdrop(self):
         with tempfile.TemporaryDirectory() as tmp:

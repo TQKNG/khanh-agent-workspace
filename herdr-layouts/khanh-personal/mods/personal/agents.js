@@ -9,6 +9,7 @@ import { h_flex, v_flex, Editor, EditorState } from "gpui-base";
 import { settings, shared, setShared, theme, readTextFile, writeTextFile } from "herdr";
 import * as hub from "./hub.js";
 import { tokens, alpha, TEXT, RADIUS, Icon, Button, Badge, Chip, Tabs, PageHeader, ErrorState, Skeleton, Mono, KeyHints, Callout, Toggle, Toaster, Spinner, agentMark } from "./ui.js";
+import { usageView } from "./usage.js";
 
 // Each agent's colours (the card's frame and the deep end of its artwork), its line of flavour text, and its number.
 const LOOK = {
@@ -378,16 +379,13 @@ export default class Agents {
           .child(move("server", "MCP servers", `${enabledOf(agent.mcp)}${signIn ? ` · ${signIn} sign-in` : ""}`, agent.mcp.length, look, k, on)),
       )
       .child(div().mx(14).h(1).bg(k.border))
-      // Weakness, resistance and retreat, as this card has them: what needs a look, its maker, its command.
+      // The card's HP: how much of the agent's usage is left, and when it refreshes. Its command sits under it.
       .child(
-        h_flex()
+        v_flex()
           .px(14)
-          .gap(10)
-          .text_size(TEXT.xs)
-          .text_color(k.mutedFg)
-          .child(v_flex().flex_1().child(div().font_semibold().child("weakness")).child(div().text_color(signIn ? k.warning : k.mutedFg).child(signIn ? `${signIn} sign-in` : "none")))
-          .child(v_flex().flex_1().child(div().font_semibold().child("errors")).child(div().text_color(agent.errors.length ? k.destructive : k.mutedFg).child(String(agent.errors.length || "none"))))
-          .child(v_flex().flex_1().child(div().font_semibold().child("command")).child(Mono(agent.command))),
+          .gap(6)
+          .child(this.hp(agent, k))
+          .child(h_flex().gap(6).items_center().text_size(TEXT.xs).text_color(k.mutedFg).child(div().font_semibold().child("command")).child(Mono(agent.command))),
       )
       .child(div().px(14).text_size(TEXT.xs).italic().text_color(k.mutedFg).child(look.flavor))
       .child(h_flex().px(14).text_size(10).text_color(k.dim).child(div().flex_1().child(agent.maker)).child(Mono(`№ ${String(look.no).padStart(3, "0")}/${String(Object.keys(LOOK).length).padStart(3, "0")}`, { size: 10, color: k.dim })));
@@ -409,6 +407,62 @@ export default class Agents {
         cx.notify();
       })
       .child(inner);
+  }
+
+  /**
+   * The card's health bar, as an HP bar: the share of the agent's usage still left in its tightest window, the colour
+   * going amber and then red as it runs low, and under it the window and the time until it resets. An agent that keeps no
+   * figure, or whose figure cannot be read, says so in place of a bar.
+   */
+  hp(agent, k) {
+    const view = usageView(agent.usage);
+    const label = (color) => div().w(22).flex_none().text_size(TEXT.xs).font_bold().text_color(color).child("HP");
+    if (view.state !== "read") {
+      const note = { not_exposed: "usage not exposed", unreadable: "usage not readable", not_installed: "not installed" }[view.state];
+      return h_flex()
+        .id(`agent-hp-${agent.id}`)
+        .h(22)
+        .gap(8)
+        .items_center()
+        .when(Boolean(view.reason), (e) => e.tooltip(view.reason))
+        .child(label(k.mutedFg))
+        .child(h_flex().flex_1().h(22).px(8).items_center().rounded(RADIUS.md).border_1().border_color(k.border).text_size(TEXT.xs).text_color(k.mutedFg).child(note));
+    }
+    const tone = k[view.tone];
+    const tip = view.windows.map((w) => `${w.name}: ${w.left === null ? "not known" : `${Math.round(w.left)}% left`}${w.resetsIn ? `, resets in ${w.resetsIn}` : ""}`).join(" · ");
+    return v_flex()
+      .id(`agent-hp-${agent.id}`)
+      .gap(3)
+      .tooltip(tip)
+      .child(
+        h_flex()
+          .gap(8)
+          .items_center()
+          .child(label(tone))
+          .child(
+            div()
+              .relative()
+              .flex_1()
+              .h(12)
+              .rounded(6)
+              .border_1()
+              .border_color(alpha(tone, 0.5))
+              .bg(k.muted)
+              .overflow_hidden()
+              .child(div().absolute().left(0).top(0).h_full().bg(tone).w(`${view.fill}%`).transition("width", { duration: 400, easing: "ease-out" })),
+          )
+          .child(Mono(`${view.left}%`, { size: TEXT.xs, color: tone })),
+      )
+      .child(
+        h_flex()
+          .pl(30)
+          .gap(6)
+          .text_size(TEXT.xs)
+          .text_color(k.mutedFg)
+          .child(`${view.window} window`)
+          .child(div().child(view.resetsIn ? `· resets in ${view.resetsIn}` : "· window reset"))
+          .when(Boolean(view.readAgo), (e) => e.child(div().text_color(k.warning).child(`· read ${view.readAgo} ago`))),
+      );
   }
 
   cardSkeleton(i, k) {

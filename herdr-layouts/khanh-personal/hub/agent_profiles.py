@@ -23,6 +23,7 @@ import threading
 import time
 from copy import deepcopy
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -44,6 +45,7 @@ CLI_TIMEOUT = 45
 PLUGIN_LIST_TIMEOUT = 150
 ERROR_CACHE_SECONDS = 20  # a read with errors (a slow CLI, a missing login) is tried again soon, not kept for CACHE_SECONDS
 MAX_INSTRUCTIONS = 20_000  # characters of an instructions file the page shows
+USAGE_SESSION_FILES = 3  # Codex's newest session logs searched for a limit reading
 CREATE_NO_WINDOW = 0x08000000 if os.name == "nt" else 0
 
 
@@ -221,6 +223,69 @@ def claude_mcp(text: str) -> list[dict]:
     return out
 
 
+def not_exposed(reason: str):
+    """The usage reader of an agent that keeps no usage figure where this page can read it."""
+    return lambda: {"state": "not_exposed", "reason": reason}
+
+
+def iso_epoch(text) -> float | None:
+    try:
+        return datetime.fromisoformat(str(text).replace("Z", "+00:00")).timestamp()
+    except ValueError:
+        return None
+
+
+def window_name(minutes: float) -> str:
+    """A limit window's length as the page names it: 5h, 7d."""
+    minutes = int(minutes)
+    return f"{minutes // 1440}d" if minutes % 1440 == 0 else f"{minutes // 60}h"
+
+
+def last_rate_limits(path: Path) -> tuple[dict, float | None] | None:
+    """The newest `rate_limits` a Codex session log holds, with the time it was written; most events carry none (null)."""
+    try:
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
+        return None
+    for line in reversed(lines):
+        if '"rate_limits"' not in line:
+            continue
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        payload = event.get("payload") if isinstance(event, dict) else None
+        limits = payload.get("rate_limits") if isinstance(payload, dict) else None
+        if isinstance(limits, dict) and (limits.get("primary") or limits.get("secondary")):
+            return limits, iso_epoch(event.get("timestamp"))
+    return None
+
+
+def usage_window(window: dict, now: float) -> dict | None:
+    """One limit window. Once its reset time has passed the reading is from before it, so the share used is unknown."""
+    minutes, used, resets = window.get("window_minutes"), window.get("used_percent"), window.get("resets_at")
+    if not isinstance(minutes, (int, float)) or not isinstance(used, (int, float)):
+        return None
+    resets_at = float(resets) if isinstance(resets, (int, float)) else None
+    stale = resets_at is not None and resets_at <= now
+    return {"name": window_name(minutes), "used_percent": None if stale else float(used), "resets_at": None if stale else resets_at}
+
+
+def codex_usage(now: float | None = None) -> dict:
+    """Codex's own limits (a 5-hour and a weekly window), from the newest session log that holds a reading."""
+    now = time.time() if now is None else now
+    files = sorted((home() / ".codex" / "sessions").rglob("rollout-*.jsonl"), reverse=True)[:USAGE_SESSION_FILES]
+    for path in files:
+        found = last_rate_limits(path)
+        if not found:
+            continue
+        limits, observed = found
+        windows = [w for w in (usage_window(limits.get(k) or {}, now) for k in ("primary", "secondary")) if w]
+        if windows:
+            return {"state": "read", "observed_at": observed, "windows": windows}
+    return {"state": "unreadable", "reason": "Codex's session logs hold no limit reading yet"}
+
+
 def codex() -> dict:
     root = home() / ".codex"
     errors = [] if tomllib else [NO_TOML]
@@ -306,9 +371,9 @@ def copilot() -> dict:
 
 # The agents the page shows, in its order: their command, their maker, and how to read their set-up.
 AGENTS = [
-    {"id": "claude", "label": "Claude", "command": "claude", "maker": "Anthropic", "read": claude},
-    {"id": "codex", "label": "Codex", "command": "codex", "maker": "OpenAI", "read": codex},
-    {"id": "copilot", "label": "Copilot", "command": "copilot", "maker": "GitHub", "read": copilot},
+    {"id": "claude", "label": "Claude", "command": "claude", "maker": "Anthropic", "read": claude, "usage": not_exposed("Claude does not keep its usage limits on disk, so this page cannot read them")},
+    {"id": "codex", "label": "Codex", "command": "codex", "maker": "OpenAI", "read": codex, "usage": codex_usage},
+    {"id": "copilot", "label": "Copilot", "command": "copilot", "maker": "GitHub", "read": copilot, "usage": not_exposed("Copilot does not show its usage limits on disk, so this page cannot read them")},
 ]
 
 
@@ -351,12 +416,16 @@ def version(command: str) -> str | None:
 def profile(agent: dict) -> dict:
     base = {**{key: agent[key] for key in ("id", "label", "command", "maker")}, "mark": mark(agent["id"])}
     if not shutil.which(agent["command"]):
-        return {**base, "installed": False, "version": None, "instructions": instructions(Path("/nonexistent")), "skills": [], "plugins": [], "mcp": [], "errors": []}
+        return {**base, "installed": False, "version": None, "usage": None, "instructions": instructions(Path("/nonexistent")), "skills": [], "plugins": [], "mcp": [], "errors": []}
     try:
         found = agent["read"]()
     except Exception as exc:  # One agent's broken set-up must not hide the others.
         found = {"instructions": instructions(Path("/nonexistent")), "skills": [], "plugins": [], "mcp": [], "errors": [str(exc)]}
-    return {**base, "installed": True, "version": version(agent["command"]), **found}
+    try:
+        usage = agent["usage"]()
+    except Exception as exc:  # A usage figure that cannot be read is shown as such, and is not an error of the set-up.
+        usage = {"state": "unreadable", "reason": str(exc)}
+    return {**base, "installed": True, "version": version(agent["command"]), "usage": usage, **found}
 
 
 class Profiles:
