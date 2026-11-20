@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.0](https://github.com/TQKNG/khanh-agent-workspace/compare/v0.3.1...v0.4.0) (2026-11-20)
+
+
+### Features
+
+* **herdr-layout:** clone a repository when starting an issue ([#16](https://github.com/TQKNG/khanh-agent-workspace/issues/16)) ([e2a0692](https://github.com/TQKNG/khanh-agent-workspace/commit/e2a06929446a7f42c1c7b0516edeceb77d060b08))
+* **herdr-layout:** draft issues from an idea in the File issue dialog ([#18](https://github.com/TQKNG/khanh-agent-workspace/issues/18)) ([09a4070](https://github.com/TQKNG/khanh-agent-workspace/commit/09a407032900a3fa72ee6f870ef3b2a3e2d704a7))
+
 ## [0.3.1](https://github.com/TQKNG/khanh-agent-workspace/compare/v0.3.0...v0.3.1) (2026-11-20)
 
 
