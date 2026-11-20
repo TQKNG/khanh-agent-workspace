@@ -1,27 +1,24 @@
 # Khanh Agent Workspace
 
-This repository contains reusable agent skills, instructions, prompts, Codex plugins, and Herdr workspace layouts.
+Khanh Agent Workspace is a collection of reusable agent skills, instructions, prompts, Codex plugins and Herdr workspace layouts.
+They help with writing GitBook and arc42 documentation, auditing Codex session token use, scaffolding and releasing GitHub repositories, writing technical blog posts, taking GitHub issues through to pull requests, and running a Herdr cockpit with a GitHub inbox and an agents page.
 
-The Codex marketplace distributes `arc42-gitbook-docs` and `session-token-audit`.
+## What is in each folder
 
-The repository is also a source for reusable agent guidance that can be included in future plugins or used as shared project resources.
+- `.agents/`: the Codex plugin marketplace file, `.agents/plugins/marketplace.json`.
+- `.claude/skills/`: the `ticket` skill, which takes a GitHub issue through an isolated implementation and pull request in its own Herdr tab.
+- `.github/`: issue and pull request templates, Copilot instructions and the CI workflows.
+- `docs/`: the reference site analysis and the verification report for the `arc42-gitbook-docs` plugin.
+- `herdr-layouts/`: the Herdr layout package `khanh-personal`, with its layout, mods, local hub and installer.
+- `plugins/`: the Codex plugins `arc42-gitbook-docs` (GitBook and arc42 documentation) and `session-token-audit` (Codex session token audit).
+- `skills/`: the standalone skills `graphify`, `repo-scaffold` and `technical-blog-writing`.
+- `tests/`: the repository's Python tests, run with `python -m unittest discover -s tests -v`.
 
-The Herdr package distributes Khanh's personal cockpit layout, its custom mods and a local hub that connects its Inbox to GitHub and its Agents page to the coding agents on the machine.
+The install steps for the plugins, standalone skills and Herdr layout follow below.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution and pull request guidance.
 
 Repository: <https://github.com/TQKNG/khanh-agent-workspace>
-
-## Contents
-
-- Codex plugin marketplace: `.agents/plugins/marketplace.json`
-- Codex plugin: `plugins/arc42-gitbook-docs/`
-- Standalone skills: `skills/repo-scaffold/`, `skills/graphify/`, and `skills/technical-blog-writing/`
-- Claude and Herdr issue skill: `.claude/skills/ticket/`
-- Session audit plugin: `plugins/session-token-audit/`
-- Agent skills and instructions: `plugins/*/skills/` and `plugins/*/references/`
-- Agent prompts: `plugins/*/prompts/` when a plugin provides reusable prompts
-- Herdr layout package: `herdr-layouts/khanh-personal/` (layout, mods, local hub, installer)
 
 ## Included plugin
 
