@@ -30,7 +30,8 @@ A status bar at the bottom counts agents by state.
   The Checks tab lists check runs and statuses, shows a failed Actions job's failing step, and re-runs the failed jobs after a confirmation.
   Each verdict and merge asks first, listing failing checks, unresolved threads and drafts, and is pinned to the commit that was read.
   Merge is offered only when GitHub says the pull request is ready, in the methods the repository allows.
-- The Agents page draws a trading card per coding agent (Claude, Codex, Copilot): a frame in the agent's colour, a gradient artwork window with a diagonal foil and the agent's mark from Herdr's `icons/`, the skill count as its "HP", four "moves" (instructions, skills, plugins, MCP servers) and a footer with what needs a look.
+- The Agents page draws a trading card per coding agent (Claude, Codex, Copilot): a frame in the agent's colour, a gradient artwork window with a diagonal foil and the agent's mark from Herdr's `icons/`, the skill count in its header, four "moves" (instructions, skills, plugins, MCP servers) and a health bar: the share of its tightest usage limit still left, the colour turning amber and then red as it runs low, with the time until that window resets.
+  Codex's limits come from the newest `rate_limits` in its session logs; Claude and Copilot keep no figure on disk, so their card says so instead of drawing a bar.
   Under the picked card, tabs list its instructions, skills, plugins and MCP servers, from the hub's `agent_profiles`.
 - Shortcuts in the layout: `cmd-alt-0` Home, `cmd-alt-1` Inbox, `cmd-alt-2` Agents, `cmd-alt-3` the terminals, `cmd-alt-5` to `cmd-alt-7` Monitor, Routines and Mail, and `cmd-r` refreshes.
 
