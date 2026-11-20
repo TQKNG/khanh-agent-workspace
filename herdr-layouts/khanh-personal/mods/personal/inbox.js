@@ -100,9 +100,11 @@ export default class Inbox {
       cx.notify();
     });
     this.query.on("submit", (_e, cx) => this.runPalette(cx));
+    this.issueIdea = InputState.new({ placeholder: "Idea: what the issue should say, in a line or two" });
     this.issueTitle = InputState.new({ placeholder: "Title" });
     this.issueBody = InputState.new({ placeholder: "What and why, in a line or two" });
-    this.issueTeam = InputState.new({ placeholder: "Team key (default: the first configured)" });
+    this.issueTeam = InputState.new({ placeholder: "Repository (owner/name)" });
+    this.issueIdea.on("submit", (_e, cx) => this.draftIssue(cx));
     this.issueTitle.on("submit", (_e, cx) => this.fileIssue(cx));
     this.issueBody.on("submit", (_e, cx) => this.fileIssue(cx));
     this.subscribe(cx);
@@ -303,12 +305,14 @@ export default class Inbox {
   // -------------------------------------------------------------------------------------------------------------------
   // Actions
 
-  async call(cx, call, { armed = null, row = null, quiet = false } = {}) {
+  /** `inline`: an error is returned for the caller to show (in its dialog), not toasted. */
+  async call(cx, call, { armed = null, row = null, quiet = false, inline = false } = {}) {
     if (!call) return;
     try {
       const r = await hub.request("act", { app: "inbox", action: call.fn, args: call.args ?? [], armed });
-      if (r.error) this.toasts.push(cx, r.error, { kind: "error", ms: 6000 });
-      else if (r.note && !quiet) {
+      if (r.error) {
+        if (!inline) this.toasts.push(cx, r.error, { kind: "error", ms: 6000 });
+      } else if (r.note && !quiet) {
         const url = r.note.match(/https?:\/\/\S+/)?.[0];
         this.toasts.push(cx, r.note.replace(/\s*https?:\/\/\S+/, ""), {
           kind: "success",
@@ -319,6 +323,7 @@ export default class Inbox {
       for (const [key, job] of Object.entries(r.pending ?? {})) this.pending.set(key, job);
       return r;
     } catch (e) {
+      if (inline) return { error: String(e?.message ?? e) };
       this.toasts.push(cx, "The hub did not answer", { kind: "error", description: String(e?.message ?? e) });
     } finally {
       cx.notify();
@@ -498,25 +503,128 @@ export default class Inbox {
   }
 
   openFile(cx) {
-    this.dialog = { kind: "file" };
+    this.dialog = { kind: "file", draft: null, busy: false, error: null, type: null, labels: [], types: [], similar: [] };
+    this.issueIdea.set_value("");
     this.issueTitle.set_value("");
     this.issueBody.set_value("");
-    this.issueTitle.focus();
+    this.issueIdea.focus();
     cx.notify();
   }
 
+  /** Asks the hub for a draft of the idea, in the repository typed. The draft fills the fields; nothing is posted yet. */
+  draftIssue(cx) {
+    const d = this.dialog;
+    if (d?.kind !== "file" || d.busy) return;
+    const idea = this.issueIdea.value().trim();
+    const repo = this.issueTeam.value().trim();
+    if (!idea || !repo) {
+      d.draft = { error: "Type an idea and a repository (owner/name) first." };
+      cx.notify();
+      return;
+    }
+    d.busy = true;
+    d.draft = { loading: true };
+    cx.spawn(async (cx) => {
+      try {
+        const got = await hub.fetchDetails("issue_draft", { idea, repo });
+        if (got.error) throw new Error(got.error);
+        if (this.dialog !== d) return;
+        this.issueTitle.set_value(got.title);
+        this.issueBody.set_value(got.body);
+        Object.assign(d, { type: got.type ?? null, labels: got.labels ?? [], types: got.types ?? [], similar: got.similar ?? [] });
+        d.draft = { source: got.source, agent: got.agent };
+      } catch (e) {
+        if (this.dialog === d) d.draft = { error: String(e?.message ?? e) };
+      } finally {
+        if (this.dialog === d) d.busy = false;
+        cx.notify();
+      }
+    });
+    cx.notify();
+  }
+
+  /** Files the dialog's issue. The dialog stays open until GitHub has answered, so an error is shown in it. */
   fileIssue(cx) {
+    const d = this.dialog;
+    if (d?.kind !== "file" || d.busy) return;
     const title = this.issueTitle.value().trim();
     if (!title) return;
-    const spec = { title, description: this.issueBody.value().trim(), team: this.issueTeam.value().trim() };
-    this.closeDialog(cx);
-    cx.spawn(async (cx) => this.call(cx, { fn: "file_issue", args: [spec] }));
+    const spec = { title, description: this.issueBody.value().trim(), team: this.issueTeam.value().trim(), type: d.type, labels: d.labels };
+    d.busy = true;
+    d.error = null;
+    cx.notify();
+    cx.spawn(async (cx) => {
+      const r = await this.call(cx, { fn: "file_issue", args: [spec] }, { inline: true });
+      if (this.dialog !== d) return;
+      if (!r || r.error) {
+        d.busy = false;
+        d.error = r?.error ?? "The issue was not filed.";
+        cx.notify();
+        return;
+      }
+      this.closeDialog(cx);
+    });
   }
 
   closeDialog(cx) {
     this.dialog = null;
     this.handle.focus();
     cx.notify();
+  }
+
+  /** The File dialog's body: the idea and the repository, the draft they produce to check, and the fields that file it. */
+  fileBody(d, k) {
+    const draft = d.draft ?? {};
+    const agent = draft.agent ?? "An agent";
+    let status = div().text_size(TEXT.sm).text_color(k.mutedFg).child("Type an idea and a repository, then draft it. Or write the title and description yourself.");
+    if (draft.loading) status = h_flex().gap(8).items_center().child(Spinner({ size: 12 })).child(div().text_size(TEXT.sm).text_color(k.mutedFg).child("An agent is drafting the issue…"));
+    else if (draft.error) status = div().text_size(TEXT.sm).text_color(k.destructive).child(draft.error);
+    else if (draft.source === "github-issues skill") status = div().text_size(TEXT.sm).text_color(k.mutedFg).child(`${agent} drafted it with the github-issues skill. Check it before filing.`);
+    else if (draft.source) status = div().text_size(TEXT.sm).text_color(k.mutedFg).child(`The github-issues skill is not installed, so ${agent} followed GitHub's issue best practice. Check it before filing.`);
+    const similar = d.similar.map((s) =>
+      h_flex()
+        .id(`dlg-similar-${s.number}`)
+        .gap(8)
+        .items_center()
+        .cursor_pointer()
+        .hover((st) => st.bg(k.accent))
+        .on_click((_e, cx) => cx.spawn(async (cx) => this.call(cx, { fn: "open_url", args: [s.url] }, { quiet: true })))
+        .child(Badge(`#${s.number}`, s.state === "open" ? "success" : "secondary"))
+        .child(div().flex_1().min_w(0).text_size(TEXT.sm).child(s.title)),
+    );
+    return v_flex()
+      .gap(10)
+      .child(TextField(this.issueIdea))
+      .child(TextField(this.issueTeam))
+      .child(h_flex().gap(10).items_center().child(div().flex_1().min_w(0).child(status)).child(Button("dlg-draft", { label: "Draft with an agent", icon: "bot", variant: "outline", size: "sm", disabled: d.busy, onClick: (_e, cx) => this.draftIssue(cx) })))
+      .when(Boolean(draft.source), (e) =>
+        e
+          .child(Separator())
+          .child(div().text_size(TEXT.xs).text_color(k.mutedFg).child(similar.length ? "Similar issues, open or closed" : "No similar issues found"))
+          .children(similar)
+          .when(d.types.length > 0, (e) =>
+            e.child(
+              h_flex()
+                .gap(6)
+                .items_center()
+                .child(div().flex_none().text_size(TEXT.sm).text_color(k.mutedFg).child("Type"))
+                .children([...d.types, null].map((t) => Button(`dlg-type-${t ?? "none"}`, { label: t ?? "None", variant: d.type === t ? "default" : "outline", size: "sm", onClick: (_e, cx) => ((d.type = t), cx.notify()) }))),
+            ),
+          )
+          .when(d.types.length === 0 && d.labels.length > 0, (e) =>
+            e.child(
+              h_flex()
+                .gap(6)
+                .items_center()
+                .child(div().flex_none().text_size(TEXT.sm).text_color(k.mutedFg).child("Labels"))
+                .children(d.labels.map((name) => Button(`dlg-label-${name}`, { label: name, variant: "secondary", size: "sm", onClick: (_e, cx) => ((d.labels = d.labels.filter((x) => x !== name)), cx.notify()) }))),
+            ),
+          ),
+      )
+      .child(Separator())
+      .child(TextField(this.issueTitle))
+      .child(TextField(this.issueBody))
+      .when(Boolean(d.error), (e) => e.child(div().text_size(TEXT.sm).text_color(k.destructive).child(`Not filed: ${d.error}`)));
   }
 
   statusMenu(row) {
@@ -1376,8 +1484,8 @@ export default class Inbox {
     } else if (d.kind === "file") {
       title = "File an issue";
       description = "A new issue, assigned to you";
-      body = v_flex().gap(8).child(TextField(this.issueTitle)).child(TextField(this.issueBody)).child(TextField(this.issueTeam));
-      actions.push(Button("dlg-file", { label: "File it", icon: "file-plus", kbd: "⏎", onClick: (_e, cx) => this.fileIssue(cx) }));
+      body = this.fileBody(d, k);
+      actions.push(Button("dlg-file", { label: "File it", icon: "file-plus", kbd: "⏎", disabled: d.busy, onClick: (_e, cx) => this.fileIssue(cx) }));
     }
     return div()
       .id("inbox-dialog")

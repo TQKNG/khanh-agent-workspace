@@ -41,7 +41,7 @@ A status bar at the bottom counts agents by state.
 - Herdr's shipped mods: `tabs`, `files`, `changes`, `menu`, `prompt` and `help`.
 - A local hub, started by the mods with `<cockpit.json bin> hub start`, which prints `{port, token}` as JSON and keeps running.
   The mods talk to it over TCP on `127.0.0.1` with one JSON message per line.
-- The hub serves the view `inbox`, answers `fetch` for `pr_merge`, `review_threads`, `ticket_card`, `pr_diff`, `pr_checks`, `check_log`, `start_plan` and `agent_profiles`, and handles the actions `request_refresh`, `file_issue`, `submit_review`, `merge`, `rerun_failed`, `start` and `open_url`.
+- The hub serves the view `inbox`, answers `fetch` for `pr_merge`, `review_threads`, `ticket_card`, `pr_diff`, `pr_checks`, `check_log`, `start_plan`, `issue_draft` and `agent_profiles`, and handles the actions `request_refresh`, `file_issue`, `submit_review`, `merge`, `rerun_failed`, `start` and `open_url`.
   The inbox reads GitHub through `gh api graphql`.
 
 ## Watch out
