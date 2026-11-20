@@ -289,6 +289,29 @@ class TestToggle(Home):
         self.assertEqual(self.config.read_text(), before)
 
 
+class TestCodexPluginList(Home):
+    def test_plugin_list_gets_the_longer_timeout(self):
+        calls = []
+        real = self.fake_run
+
+        def recording(argv, timeout=ap.CLI_TIMEOUT):
+            calls.append((argv[:3], timeout))
+            return real(argv, timeout)
+
+        with mock.patch.object(ap, "run", side_effect=recording):
+            self.profiles()
+        plugin_calls = [t for argv, t in calls if argv == ["codex", "plugin", "list"]]
+        self.assertEqual(plugin_calls, [ap.PLUGIN_LIST_TIMEOUT])
+        self.assertGreater(ap.PLUGIN_LIST_TIMEOUT, ap.CLI_TIMEOUT)
+
+    def test_a_read_with_errors_expires_quickly(self):
+        profiles = ap.Profiles()
+        profiles.value = {"agents": [{"errors": ["plugins: did not answer"]}]}
+        self.assertEqual(profiles.lifetime(), ap.ERROR_CACHE_SECONDS)
+        profiles.value = {"agents": [{"errors": []}]}
+        self.assertEqual(profiles.lifetime(), ap.CACHE_SECONDS)
+
+
 class TestMark(unittest.TestCase):
     def test_sharp_copy_without_a_white_backdrop(self):
         with tempfile.TemporaryDirectory() as tmp:
