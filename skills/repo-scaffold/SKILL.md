@@ -1,12 +1,13 @@
 ---
 name: repo-scaffold
-description: Scaffold a new GitHub repository with core project documents, contribution templates, and basic CI, or review and safely add missing repository hygiene artifacts to an existing repository.
+description: Scaffold a new GitHub repository with core project documents, contribution templates, basic CI, and a release process with versioning, generated changelogs, tags, and GitHub Releases, or review and safely add missing repository hygiene and release artifacts to an existing repository.
 ---
 
 # Repository scaffold
 
 Use this skill when asked to create a consistent GitHub repository starter or add its baseline artifacts to an existing repository.
 DecisionLane is the reference for the artifact set: README, license, contribution guide, issue and pull request templates, and CI.
+Release setup is part of the same review and is described in [Release setup](#release-setup).
 Adapt the content to the target repository rather than copying DecisionLane's product details or stack checks.
 Use `~/.codex/AGENTS.md` as Khanh's single authoring source for shared agent rules.
 Read it fresh on every invocation; do not rely on the skill's installation-time contents.
@@ -18,6 +19,7 @@ Resolve the target directory and inspect Git status, tracked files, root documen
 Classify the target as a new empty repository or an existing repository with meaningful content or history.
 Treat an existing repository as existing even when some baseline artifacts are absent.
 Check for case-insensitive filename collisions and generated files.
+Inspect the release state described in [Release setup](#release-setup) before proposing any change.
 
 ## New repository
 
@@ -33,6 +35,7 @@ If the project has no implementation yet, use a CI check that validates the base
 If code already exists, use the project's real install, lint, and test commands, and avoid claiming checks that do not run.
 Keep permissions minimal and use the repository's actual default branch, or branch agnostic push and pull request triggers when it is unknown.
 Include a practical `.gitignore` only when its entries match the selected stack.
+Recommend the release starter from [assets/release](assets/release) and add it when the user accepts it, as described in [Release setup](#release-setup).
 Run the local equivalent of the CI check and inspect the final files for placeholders and broken relative links.
 
 ## Existing repository
@@ -40,11 +43,44 @@ Run the local equivalent of the CI check and inspect the final files for placeho
 Prepare a concrete inventory before writing: present artifacts, missing artifacts, proposed paths and contents, conflicting conventions, and likely effects on existing workflows or contributors.
 Include `AGENTS.md`, `CLAUDE.md`, and `.github/copilot-instructions.md` in this review when cross-agent consistency is requested.
 Compare any existing root `AGENTS.md` with `~/.codex/AGENTS.md` and show differences before proposing a replacement or merge.
+Include the release inventory from [Release setup](#release-setup): current versions, tags, releases, changelogs, release and deployment workflows, and the proposed release additions.
 Show the user this inventory and explicitly ask whether to add the proposed artifacts.
 Wait for their answer before editing the repository.
 After approval, add only the agreed missing artifacts, preserve existing files and workflows, and integrate CI checks with the actual project commands.
 Do not overwrite a license, contributor guide, templates, or CI workflow without separate, specific approval for that replacement.
 Verify the resulting files and run the applicable local checks.
+
+## Release setup
+
+Inspect the current release state before recommending anything:
+
+- Versions: version fields in manifests such as `package.json`, `pyproject.toml`, `Cargo.toml`, `*.csproj`, `go.mod` module paths, or `VERSION` files, and whether they agree.
+- Tags: `git tag --sort=-v:refname` and the tag format in use, such as `v1.2.3` or `name-v1.2.3`.
+- Releases: `gh release list` when the GitHub CLI is available, and whether release notes are generated or hand written.
+- Changelogs: `CHANGELOG.md`, `HISTORY.md`, or `NEWS` files, their format, and whether a tool generates them.
+- Release tooling: existing workflows or configuration for release-please, semantic-release, Changesets, GoReleaser, `cargo-release`, or tag-triggered publishing.
+- Deployment: workflows triggered by `release`, tag `push`, `workflow_run`, or `workflow_dispatch`, and any publish targets such as npm, PyPI, container registries, or hosting.
+- Conventions: recent commit messages and pull request titles, merge strategy, and whether they follow Conventional Commits.
+
+Prefer the release tooling the repository already uses and only fill its gaps.
+When there is none, recommend the starter in [assets/release](assets/release), which uses release-please through a release pull request.
+Set `release-type` in `release-please-config.json` to match the stack, such as `node`, `python`, `rust`, `go`, or `simple` for repositories without a supported manifest.
+Set `.release-please-manifest.json` to the latest released version from tags or manifests, or to `0.0.0` when nothing has been released so the first release is `0.1.0`.
+Keep the existing tag format; the starter produces `v1.2.3` tags and must be adjusted when the repository uses another format.
+Adapt `RELEASING.md`, describe real deployment steps or state that there is no deployment, and link it from `README.md` and `CONTRIBUTING.md`.
+Add a Conventional Commits note to `CONTRIBUTING.md`, because the changelog and version bumps are generated from commit messages.
+Never hand write or edit `CHANGELOG.md`; the release tool generates it.
+release-please adds new entries above an existing changelog, so report how existing history will be kept and ask before moving or renaming it.
+
+For a new repository, include the release starter in the baseline when the user accepts the recommendation.
+For an existing repository, list the release additions in the inventory with their paths and contents, and follow the same approval rules as other artifacts.
+Do not modify, replace, or remove an existing release or deployment workflow unless the user specifically approves that replacement.
+When a deployment listens for `release` or tag events, explain that releases created with `GITHUB_TOKEN` do not trigger other workflows, and propose a GitHub App or fine-grained token or a direct call from the release workflow instead of silently breaking deployment.
+
+Generated release workflows set `permissions: {}` at the top level and grant only `contents: write` and `pull-requests: write` to the release job.
+Add publishing permissions, such as `id-token: write` for trusted publishing, only to a separate job that needs them.
+Trigger the release workflow on pushes to the repository's actual default branch only.
+Tell the user to enable "Allow GitHub Actions to create and approve pull requests" in the repository settings, because the release pull request cannot be opened otherwise.
 
 ## Content standard
 
@@ -54,6 +90,7 @@ Issue templates: reproducible bug reports and outcome focused feature requests.
 Pull request template: summary, linked issue, verification, review notes, and sensitive data reminder.
 License: complete chosen license text with correct holder and year.
 CI: least privilege read access and a check that actually runs for the repository's current state.
+Release guide: how versions are chosen, how maintainers review and publish a release, where the changelog comes from, and how deployment follows a release.
 Agent instructions: inspect the repository before generation or PR creation, follow the contribution and PR templates, run applicable checks, and report results honestly.
 For stronger enforcement, recommend required CI status checks and branch protection after the workflow has run successfully; instructions alone do not guarantee agent compliance.
 Keep each full sentence on its own physical line in long Markdown files.
