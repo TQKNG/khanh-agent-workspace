@@ -25,9 +25,11 @@ const SECTIONS = [
   { value: "mcp", label: "MCP servers", icon: "server", key: "m" },
 ];
 const CARD = { w: 288, h: 516, art: 150 };
-// The artwork's two halves: the logo's share (the larger), and the usage radar's square and its labels.
-const LOGO_W = 146;
-const RADAR = { box: 104, label: 32, lineH: 12, gap: 10 };
+// The artwork's two halves: the logo's share, and the usage radar's panel. The panel is the card's own surface, so its
+// labels read on every frame colour, and it is wide enough for the labels outside the radar's rim (a 44px label at
+// 10px out from the rim) to stay inside it. The radar's square is 80px, so its rim is 24px from the centre.
+const LOGO_W = 128;
+const RADAR = { box: 80, label: 44, lineH: 12, gap: 10 };
 const PICK_KEY = "cockpit.agents.pick";
 const SECTION_KEY = "cockpit.agents.section";
 
@@ -102,7 +104,7 @@ function art(agent, look, k) {
                 .child(mark ? image(mark).size(58) : Icon("bot", { size: 44, color: k.mutedFg })),
             ),
         )
-        .child(h_flex().flex_1().h_full().items_center().justify_center().child(radar(agent, k))),
+        .child(h_flex().flex_1().h_full().py(8).pr(8).child(radar(agent, k))),
     )
     .when(!on, (e) => e.child(h_flex().absolute().top(8).right(8).child(Badge("Not installed", "secondary"))));
 }
@@ -120,11 +122,12 @@ function radar(agent, k) {
     const note = { not_installed: "", unreadable: "Usage not readable", not_enough: "Not enough usage data" }[view.state] ?? "";
     return v_flex()
       .id(id)
-      .w(RADAR.box)
-      .h(RADAR.box)
-      .flex_none()
+      .w_full()
+      .h_full()
       .items_center()
       .justify_center()
+      .rounded(RADIUS.lg)
+      .bg(k.card)
       .px(8)
       .text_center()
       .text_size(TEXT.xs)
@@ -145,8 +148,8 @@ function radar(agent, k) {
     .relative()
     .size(RADAR.box)
     .flex_none()
-    .child(full(grid, alpha(k.border, 0.9)))
-    .child(full(spokes, alpha(k.border, 0.8)))
+    .child(full(grid, alpha(k.mutedFg, 0.45)))
+    .child(full(spokes, alpha(k.mutedFg, 0.6)))
     .child(full(PathBuilder.fill().add_polygon(shape, true), Background.solid(k.ring).opacity(0.22)))
     .child(full(PathBuilder.stroke(1.5 * z).add_polygon(shape, true), k.ring));
   view.axes.forEach((a, i) => {
@@ -167,16 +170,20 @@ function radar(agent, k) {
         .text_center()
         .text_size(TEXT.xs)
         .font_medium()
-        .text_color(k.mutedFg)
+        .text_color(k.foreground)
         .whitespace_nowrap()
         .child(a.label),
     );
   });
   return v_flex()
     .id(id)
-    .flex_none()
+    .w_full()
+    .h_full()
     .items_center()
+    .justify_center()
     .gap(4)
+    .rounded(RADIUS.lg)
+    .bg(k.card)
     .tooltip(`${radarTip(view)} · last ${view.days} days`)
     .child(chart)
     .child(div().text_size(TEXT.xs).text_color(k.mutedFg).child(`last ${view.days} days`));
@@ -437,8 +444,8 @@ export default class Agents {
           .child(div().text_size(TEXT.xl).font_bold().child(agent.label))
           .child(Mono(agent.version ? `v${agent.version}` : "", { color: k.mutedFg }))
           .child(div().flex_1())
-          .child(div().text_size(TEXT.xs).font_bold().text_color(on ? look.color : k.mutedFg).pb(3).child("SKILLS"))
-          .child(div().text_size(22).font_bold().text_color(on ? look.color : k.mutedFg).child(String(skillsOn))),
+          .child(div().text_size(TEXT.xs).font_bold().text_color(on ? look.deep : k.mutedFg).pb(3).child("SKILLS"))
+          .child(div().text_size(22).font_bold().text_color(on ? look.deep : k.mutedFg).child(String(skillsOn))),
       )
       .child(art(agent, look, k))
       // The type strip under the artwork.
@@ -475,7 +482,7 @@ export default class Agents {
           .child(h_flex().gap(6).items_center().text_size(TEXT.xs).text_color(k.mutedFg).child(div().font_semibold().child("command")).child(Mono(agent.command))),
       )
       .child(div().px(14).text_size(TEXT.xs).italic().text_color(k.mutedFg).child(look.flavor))
-      .child(h_flex().px(14).text_size(10).text_color(k.dim).child(div().flex_1().child(agent.maker)).child(Mono(`№ ${String(look.no).padStart(3, "0")}/${String(Object.keys(LOOK).length).padStart(3, "0")}`, { size: 10, color: k.dim })));
+      .child(h_flex().px(14).text_size(10).text_color(k.mutedFg).child(div().flex_1().child(agent.maker)).child(Mono(`№ ${String(look.no).padStart(3, "0")}/${String(Object.keys(LOOK).length).padStart(3, "0")}`, { size: 10, color: k.mutedFg })));
     return v_flex()
       .id(`agent-card-${agent.id}`)
       .w(CARD.w)
@@ -544,6 +551,7 @@ export default class Agents {
         h_flex()
           .pl(30)
           .gap(6)
+          .flex_wrap()
           .text_size(TEXT.xs)
           .text_color(k.mutedFg)
           .child(`${view.window} window`)
