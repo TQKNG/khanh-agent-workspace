@@ -10,6 +10,7 @@ import { settings, shared, setShared, theme, readTextFile, writeTextFile } from 
 import * as hub from "./hub.js";
 import { tokens, alpha, TEXT, RADIUS, Icon, Button, Badge, Chip, Tabs, PageHeader, ErrorState, Skeleton, Mono, KeyHints, Callout, Toggle, Toaster, Spinner, agentMark } from "./ui.js";
 import { usageView } from "./usage.js";
+import { radarView, radarTip, polygon, spokePoint, spokeAngle } from "./radar.js";
 
 // Each agent's colours (the card's frame and the deep end of its artwork), its line of flavour text, and its number.
 const LOOK = {
@@ -24,6 +25,9 @@ const SECTIONS = [
   { value: "mcp", label: "MCP servers", icon: "server", key: "m" },
 ];
 const CARD = { w: 288, h: 516, art: 150 };
+// The artwork's two halves: the logo's share (the larger), and the usage radar's square and its labels.
+const LOGO_W = 146;
+const RADAR = { box: 104, label: 32, lineH: 12, gap: 10 };
 const PICK_KEY = "cockpit.agents.pick";
 const SECTION_KEY = "cockpit.agents.section";
 
@@ -77,25 +81,108 @@ function art(agent, look, k) {
         .absolute()
         .inset_0()
         .items_center()
-        .justify_center()
         .child(
           h_flex()
-            .size(92)
-            .rounded(46)
+            .w(LOGO_W)
+            .h_full()
+            .flex_none()
             .items_center()
             .justify_center()
-            .bg("#ffffff")
-            .border_4()
-            .border_color(alpha("#ffffff", 0.45))
-            .shadow_lg()
-            .opacity(on ? 1 : 0.55)
-            .child(mark ? image(mark).size(58) : Icon("bot", { size: 44, color: k.mutedFg })),
-        ),
+            .child(
+              h_flex()
+                .size(92)
+                .rounded(46)
+                .items_center()
+                .justify_center()
+                .bg("#ffffff")
+                .border_4()
+                .border_color(alpha("#ffffff", 0.45))
+                .shadow_lg()
+                .opacity(on ? 1 : 0.55)
+                .child(mark ? image(mark).size(58) : Icon("bot", { size: 44, color: k.mutedFg })),
+            ),
+        )
+        .child(h_flex().flex_1().h_full().items_center().justify_center().child(radar(agent, k))),
     )
     .when(!on, (e) => e.child(h_flex().absolute().top(8).right(8).child(Badge("Not installed", "secondary"))));
 }
 
-/** One of the card's "moves": an energy disc with the section's icon, its name and what it holds, and the count. */
+/**
+ * The usage radar on the card's artwork: one spoke per area of work, the agent's use of each drawn out from the centre
+ * (zero is the centre, its busiest area the rim) in the theme's accent. Over the last few days, as the hub counted them;
+ * where the agent's logs cannot draw a shape, or cannot be read, the reason stands in its place.
+ */
+function radar(agent, k) {
+  const z = settings().zoom ?? 1;
+  const view = radarView(agent.activity);
+  const id = `agent-radar-${agent.id}`;
+  if (view.state !== "read") {
+    const note = { not_installed: "", unreadable: "Usage not readable", not_enough: "Not enough usage data" }[view.state] ?? "";
+    return v_flex()
+      .id(id)
+      .w(RADAR.box)
+      .h(RADAR.box)
+      .flex_none()
+      .items_center()
+      .justify_center()
+      .px(8)
+      .text_center()
+      .text_size(TEXT.xs)
+      .text_color(k.mutedFg)
+      .when(Boolean(view.reason), (e) => e.tooltip(view.reason))
+      .child(note);
+  }
+  const n = view.axes.length;
+  const coords = (points) => points.map(({ x, y }) => [`${x}%`, `${y}%`]);
+  const shape = coords(polygon(view.axes.map((a) => a.value)));
+  // Grid rings at a third, two thirds and the rim; a spoke to each area's rim; the shape with a dot where a value is above zero.
+  let grid = PathBuilder.stroke(z);
+  for (const step of [1 / 3, 2 / 3, 1]) grid = grid.add_polygon(coords(polygon(Array(n).fill(step))), true);
+  let spokes = PathBuilder.stroke(z);
+  for (let i = 0; i < n; i++) spokes = spokes.add_polygon([["50%", "50%"], coords([spokePoint(i, n, 1)])[0]], false);
+  const full = (path, color) => window.paint_path(path.build(), color).absolute().inset_0();
+  let chart = div()
+    .relative()
+    .size(RADAR.box)
+    .flex_none()
+    .child(full(grid, alpha(k.border, 0.9)))
+    .child(full(spokes, alpha(k.border, 0.8)))
+    .child(full(PathBuilder.fill().add_polygon(shape, true), Background.solid(k.ring).opacity(0.22)))
+    .child(full(PathBuilder.stroke(1.5 * z).add_polygon(shape, true), k.ring));
+  view.axes.forEach((a, i) => {
+    const p = spokePoint(i, n, a.value);
+    if (a.value > 0) chart = chart.child(div().absolute().left(`${p.x}%`).top(`${p.y}%`).ml(-3).mt(-3).size(6).rounded_full().bg(k.ring));
+    // Each area's name just outside its rim, pushed outward along its spoke so it clears the drawing.
+    const rim = spokePoint(i, n, 1);
+    const angle = spokeAngle(i, n);
+    chart = chart.child(
+      div()
+        .absolute()
+        .left(`${rim.x}%`)
+        .top(`${rim.y}%`)
+        .w(RADAR.label)
+        .h(RADAR.lineH)
+        .ml(-RADAR.label / 2 + Math.cos(angle) * RADAR.gap)
+        .mt(-RADAR.lineH / 2 + Math.sin(angle) * RADAR.gap)
+        .text_center()
+        .text_size(TEXT.xs)
+        .font_medium()
+        .text_color(k.mutedFg)
+        .whitespace_nowrap()
+        .child(a.label),
+    );
+  });
+  return v_flex()
+    .id(id)
+    .flex_none()
+    .items_center()
+    .gap(4)
+    .tooltip(`${radarTip(view)} · last ${view.days} days`)
+    .child(chart)
+    .child(div().text_size(TEXT.xs).text_color(k.mutedFg).child(`last ${view.days} days`));
+}
+
+/** One of the card's "moves":an energy disc with the section's icon, its name and what it holds, and the count. */
 function move(icon, name, detail, value, look, k, on) {
   return h_flex()
     .h(36)

@@ -27,6 +27,8 @@ from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlparse
 
+import agent_activity  # how often each agent is used, for the card's radar; a sibling of this file
+
 try:
     import tomllib  # Python 3.11 and newer
 except ModuleNotFoundError:  # older Pythons (macOS ships 3.9): the tomli package if it is there, else Codex's config.toml is not read
@@ -371,9 +373,9 @@ def copilot() -> dict:
 
 # The agents the page shows, in its order: their command, their maker, and how to read their set-up.
 AGENTS = [
-    {"id": "claude", "label": "Claude", "command": "claude", "maker": "Anthropic", "read": claude, "usage": not_exposed("Claude does not keep its usage limits on disk, so this page cannot read them")},
-    {"id": "codex", "label": "Codex", "command": "codex", "maker": "OpenAI", "read": codex, "usage": codex_usage},
-    {"id": "copilot", "label": "Copilot", "command": "copilot", "maker": "GitHub", "read": copilot, "usage": not_exposed("Copilot does not show its usage limits on disk, so this page cannot read them")},
+    {"id": "claude", "label": "Claude", "command": "claude", "maker": "Anthropic", "read": claude, "usage": not_exposed("Claude does not keep its usage limits on disk, so this page cannot read them"), "activity": lambda: agent_activity.claude(home() / ".claude")},
+    {"id": "codex", "label": "Codex", "command": "codex", "maker": "OpenAI", "read": codex, "usage": codex_usage, "activity": lambda: agent_activity.codex(home() / ".codex")},
+    {"id": "copilot", "label": "Copilot", "command": "copilot", "maker": "GitHub", "read": copilot, "usage": not_exposed("Copilot does not show its usage limits on disk, so this page cannot read them"), "activity": lambda: agent_activity.copilot(home() / ".copilot")},
 ]
 
 
@@ -416,7 +418,7 @@ def version(command: str) -> str | None:
 def profile(agent: dict) -> dict:
     base = {**{key: agent[key] for key in ("id", "label", "command", "maker")}, "mark": mark(agent["id"])}
     if not shutil.which(agent["command"]):
-        return {**base, "installed": False, "version": None, "usage": None, "instructions": instructions(Path("/nonexistent")), "skills": [], "plugins": [], "mcp": [], "errors": []}
+        return {**base, "installed": False, "version": None, "usage": None, "activity": None, "instructions": instructions(Path("/nonexistent")), "skills": [], "plugins": [], "mcp": [], "errors": []}
     try:
         found = agent["read"]()
     except Exception as exc:  # One agent's broken set-up must not hide the others.
@@ -425,7 +427,11 @@ def profile(agent: dict) -> dict:
         usage = agent["usage"]()
     except Exception as exc:  # A usage figure that cannot be read is shown as such, and is not an error of the set-up.
         usage = {"state": "unreadable", "reason": str(exc)}
-    return {**base, "installed": True, "version": version(agent["command"]), "usage": usage, **found}
+    try:
+        activity = agent["activity"]()
+    except Exception as exc:  # The radar says what could not be read; the set-up and the usage figure are not affected.
+        activity = {"state": "unreadable", "reason": str(exc)}
+    return {**base, "installed": True, "version": version(agent["command"]), "usage": usage, "activity": activity, **found}
 
 
 class Profiles:
