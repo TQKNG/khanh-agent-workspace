@@ -14,17 +14,21 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        # 3.9 is what macOS ships: the hub must start on it.
-        python-version: ['3.9', '3.12']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: '3.12'
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
       - run: python -m unittest discover -s herdr-layouts/khanh-personal/tests -v
       - run: node --test herdr-layouts/khanh-personal/tests/*.test.mjs
+  python-3-9:
+    # macOS ships Python 3.9, so the hub must start and its tests pass there; setup-python no longer offers it.
+    runs-on: ubuntu-latest
+    container: python:3.9-slim
+    steps:
+      - run: apt-get update && apt-get install -y --no-install-recommends git
+      - uses: actions/checkout@v4
+      - run: python -m unittest discover -s herdr-layouts/khanh-personal/tests -v
