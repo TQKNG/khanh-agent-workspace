@@ -72,11 +72,11 @@ export function Chips(row, { few = false, id = row.terminal } = {}) {
         icon: row.pr.state === "merged" ? "git-merge" : row.pr.draft ? "git-pull-request-draft" : "git-pull-request",
         color: row.pr.review === "CHANGES_REQUESTED" ? k.destructive : row.pr.review === "APPROVED" ? k.success : undefined,
         tooltip: row.pr.title,
-        onClick: () => run("cockpit.target:" + row.pr.url),
+        onClick: () => run("personal.target:" + row.pr.url),
       }),
     );
   }
-  if (!few && row.ticket) out.push(Chip(row.ticket.status ? `${row.ticket.key} ${row.ticket.status}` : row.ticket.key, { id: `${id}-ticket`, icon: "ticket", color: k.info, tooltip: row.ticket.title ?? row.ticket.key, onClick: row.ticket.url ? () => run("cockpit.target:" + row.ticket.url) : undefined }));
+  if (!few && row.ticket) out.push(Chip(row.ticket.status ? `${row.ticket.key} ${row.ticket.status}` : row.ticket.key, { id: `${id}-ticket`, icon: "ticket", color: k.info, tooltip: row.ticket.title ?? row.ticket.key, onClick: row.ticket.url ? () => run("personal.target:" + row.ticket.url) : undefined }));
   if (!few && row.branch) out.push(Chip(row.branch, { id: `${id}-branch`, mono: true, icon: "git-branch" }));
   if (c && (c.files || c.ahead)) {
     out.push(
@@ -190,7 +190,7 @@ export class AgentsModel {
   }
 
   /** The hub's rows; while it doesn't answer, or answers without an agent list (the bundled hub only serves
-   *  the inbox and meetings), Herdr's own agents (status, title, place), so none vanishes. */
+   *  the inbox), Herdr's own agents (status, title, place), so none vanishes. */
   get rows() {
     if (!this.down && Array.isArray(this.value?.agents)) return this.value.agents;
     const stage = { blocked: "needs_you", working: "working", done: "done", idle: "idle" };
@@ -280,7 +280,7 @@ export class AgentsModel {
     if (!row.herdr) this.act(cx, "seen", { terminal: row.terminal });
   }
 
-  /** The right-click menu of an agent; its items come back as `cockpit.agents|<what>|<terminal>|<arg>`. */
+  /** The right-click menu of an agent; its items come back as `personal.agents|<what>|<terminal>|<arg>`. */
   menu(row) {
     // Every item is a hub action.
     if (row.herdr) return;
@@ -307,7 +307,7 @@ export class AgentsModel {
     );
   }
 
-  /** `cockpit.agents|…` from a menu, run by the sidebar's copy alone (every shown copy hears it); true when it was one. */
+  /** `personal.agents|…` from a menu, run by the sidebar's copy alone (every shown copy hears it); true when it was one. */
   command(c, cx) {
     if (!c.startsWith("agents|")) return false;
     const [, what, terminal, arg] = c.split("|");

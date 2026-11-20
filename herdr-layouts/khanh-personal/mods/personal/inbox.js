@@ -6,18 +6,21 @@
 
 import { div } from "gpui-kit";
 import { h_flex, v_flex, InputState } from "gpui-base";
-import { settings } from "herdr";
+import { settings, run as runCommand, panes, shared, setShared } from "herdr";
 import * as hub from "./hub.js";
-import { byKind, byRepo } from "./inbox-groups.js";
+import { byKind, byRepo, onlyTab, tabCounts, tabFor, TABS } from "./inbox-groups.js";
 import { openPrReview } from "./prreview.js";
 import {
-  tokens, TEXT, RADIUS, Icon, Spinner, Badge, Button, Kbd, PageHeader, SearchField, TextField, KeyHints, Empty, ErrorState,
+  tokens, TEXT as KIT_TEXT, RADIUS, Icon, Spinner, Badge, Button, Kbd, PageHeader, SearchField, TextField, KeyHints, Empty, ErrorState,
   Skeleton, Command, Toaster, Flashes, Scroller, Hover, HoverCard, openMenu, alpha, Chip, Mono, ToneButton, Pills,
-  SegBar, Avatar, personColor, Separator, CountPill, Overline,
+  SegBar, Avatar, personColor, Separator, CountPill, Overline, agentMark, Tabs,
 } from "./ui.js";
 
-const H = { heading: 52, pr: 34, ticket: 34, group: 30, line: 26, text: 32 };
-const KIND_NAME = { pr: ["PR", "PRs"], review: ["review request", "review requests"], ticket: ["ticket", "tickets"], alert: ["alert", "alerts"], brief: ["brief line", "brief lines"], muted: ["muted repo", "muted repos"], worktree: ["worktree", "worktrees"] };
+// The inbox is read more than the kit's other pages: its text is a step larger, and its rows a little taller to match.
+const TEXT = { ...KIT_TEXT, xs: 12, sm: 13, base: 14 };
+const H = { heading: 52, pr: 38, ticket: 38, group: 30, line: 28, text: 34 };
+const TAB_KEY = "cockpit.inbox.tab";
+const KIND_NAME = { pr: ["PR", "PRs"], review: ["review request", "review requests"], ticket: ["issue", "issues"], alert: ["alert", "alerts"], brief: ["brief line", "brief lines"], muted: ["muted repo", "muted repos"], worktree: ["worktree", "worktrees"] };
 const FRESH_MS = 120_000;
 
 const words = (q) => q.toLowerCase().split(/\s+/).filter(Boolean);
@@ -55,6 +58,7 @@ export default class Inbox {
     this.agents = null;
     this.status = "connecting";
     this.group = "repo"; // "repo" or "kind": how the rows are arranged
+    this.tab = TABS.some((t) => t.value === shared(TAB_KEY)) ? shared(TAB_KEY) : TABS[0].value;
     this.raw = null;
     this.sel = null;
     this.folds = new Map();
@@ -66,6 +70,7 @@ export default class Inbox {
     this.pending = new Map();
     this.outcomes = new Map();
     this.dialog = null;
+    this.lastAgent = null; // the agent last picked in the start dialog: the next one opens on it
     this.palette = null;
     this.shown = true;
     this.looked = null;
@@ -131,7 +136,7 @@ export default class Inbox {
   take(model, cx) {
     const before = this.model;
     this.raw = model;
-    model = this.group === "repo" ? byRepo(model) : byKind(model);
+    model = this.arrange(model);
     this.model = model;
     const k = tokens();
     const was = new Map();
@@ -146,7 +151,7 @@ export default class Inbox {
         this.forget(`pr_merge ${r.key}`);
       }
     }
-    if (!this.looked && model.state === "ok") this.looked = new Map(this.all(model).map((r) => [r.key, signature(r)]));
+    if (!this.looked && model.state === "ok") this.looked = new Map(this.all(this.raw).map((r) => [r.key, signature(r)]));
     for (const key of [...this.picked]) if (!this.all(model).some((r) => r.key === key)) this.picked.delete(key);
     if (!this.sel || !this.visible().some((v) => v.row.path === this.sel)) this.sel = this.visible()[0]?.row.path ?? null;
     this.settle(cx);
@@ -238,6 +243,8 @@ export default class Inbox {
   }
 
   goTo(key, cx) {
+    const elsewhere = key && !this.rowByKey(key) && this.raw?.sections ? this.all(this.raw).find((r) => r.key === key) : null;
+    if (elsewhere && tabFor(elsewhere.kind)) this.setTab(cx, tabFor(elsewhere.kind));
     const row = key && this.rowByKey(key);
     if (!row) {
       if (key) this.toasts.push(cx, `${key} is not in the inbox any more`);
@@ -347,7 +354,11 @@ export default class Inbox {
   /** A row's action: a choice asks which (the merge menu asks GitHub), a change asks first, the rest runs at once. */
   run(cx, row, act) {
     if (!act) return;
-    if (act.call?.fn === "start") return this.openStart(cx, row, act);
+    if (act.call?.fn === "start") {
+      // An issue that already has its agent goes to that agent instead of planning a second one.
+      const agent = this.agentOn(row);
+      return agent ? runCommand("agent.focus", { terminal: agent.terminal }) : this.openStart(cx, row, act);
+    }
     if (act.call?.fn === "review_pr") return openPrReview(row.item);
     if (act.label === "merge" && (row.kind === "pr" || row.kind === "review")) return this.openMerge(cx, row);
     if (act.choices?.length) {
@@ -417,6 +428,23 @@ export default class Inbox {
     if (row.children?.length) this.toggleFold(row);
   }
 
+  /** The hub's model as the inbox shows it: the tab's rows, by repository (all unfolded) or by kind. */
+  arrange(raw) {
+    const tabbed = onlyTab(raw, this.tab);
+    return this.group === "repo" ? byRepo(tabbed, { open: true }) : byKind(tabbed);
+  }
+
+  /** Shows another tab: its rows, from the top, with nothing picked (picks are per kind of row). */
+  setTab(cx, value) {
+    if (value === this.tab || !TABS.some((t) => t.value === value)) return;
+    this.tab = value;
+    setShared(TAB_KEY, value);
+    this.picked.clear();
+    if (this.raw) this.model = this.arrange(this.raw);
+    this.sel = this.visible()[0]?.row.path ?? null;
+    cx.notify();
+  }
+
   /** Switches between the rows by repository and by kind. */
   regroup(cx) {
     this.group = this.group === "repo" ? "kind" : "repo";
@@ -456,7 +484,11 @@ export default class Inbox {
     cx.spawn(async (cx) => {
       try {
         const plan = await hub.fetchDetails("start_plan", { target });
-        if (this.dialog?.kind === "start" && this.dialog.row === row) this.dialog.plan = plan;
+        if (this.dialog?.kind === "start" && this.dialog.row === row) {
+          this.dialog.plan = plan;
+          const ready = (plan.agents ?? []).filter((a) => a.available);
+          this.dialog.agent = ready.some((a) => a.id === this.lastAgent) ? this.lastAgent : plan.agent ?? null;
+        }
       } catch (e) {
         if (this.dialog?.kind === "start") this.dialog.plan = { ok: false, steps: [], blockers: [String(e?.message ?? e)] };
       }
@@ -509,7 +541,7 @@ export default class Inbox {
     } else if (c.startsWith("show:") && this.shown) {
       // Leaving the inbox: what it shows now is what you saw.
       this.shown = false;
-      if (this.model?.state === "ok") this.looked = new Map(this.all().map((r) => [r.key, signature(r)]));
+      if (this.model?.state === "ok") this.looked = new Map(this.all(this.raw).map((r) => [r.key, signature(r)]));
       this.seenNow.clear();
     }
     const [scope, action, ...rest] = c.split(":");
@@ -525,7 +557,8 @@ export default class Inbox {
           await this.call(cx, { fn: "set_state", args: [{ id }, name.join(":")] });
           this.forget(`ticket_card ${id}`);
         });
-      } else if (action === "file") this.openFile(cx);
+      } else if (action === "agent") this.pickAgent(rest[0]);
+      else if (action === "file") this.openFile(cx);
       else if (action === "refresh") this.refresh(cx);
     }
     cx.notify();
@@ -679,6 +712,10 @@ export default class Inbox {
         this.menu(row);
         break;
       default: {
+        if (/^[1-9]$/.test(k) && TABS[Number(k) - 1]) {
+          this.setTab(cx, TABS[Number(k) - 1].value);
+          break;
+        }
         const letter = e.key?.length === 1 ? (k.startsWith("shift-") ? e.key.toUpperCase() : e.key) : null;
         if (letter && !k.includes("cmd-") && !k.includes("ctrl-") && !k.includes("alt-")) {
           if (picking) {
@@ -724,20 +761,94 @@ export default class Inbox {
       }
       return true;
     }
+    const ready = d.kind === "start" ? this.readyAgents() : [];
+    if (/^[1-9]$/.test(k) && ready[Number(k) - 1]) {
+      this.pickAgent(ready[Number(k) - 1].id);
+      return true;
+    }
     if (k === "enter") {
       if (d.kind === "confirm") {
         this.closeDialog(cx);
         cx.spawn(async (cx) => d.run(cx));
-      } else if (d.kind === "start" && d.plan?.ok) this.startNow(cx);
+      } else if (d.kind === "start" && d.plan?.ok && (d.agent || !d.plan.agents)) this.startNow(cx);
       return true;
     }
     return true;
   }
 
+  /** Starts what the plan said; the hub answers an issue's start with the tab to open for its agent (`launch`). */
   startNow(cx) {
     const d = this.dialog;
     this.closeDialog(cx);
-    cx.spawn(async (cx) => this.call(cx, d.act.call, { armed: d.act.confirm, row: d.row }));
+    const call = d.agent ? { ...d.act.call, args: [{ ...(d.act.call.args?.[0] ?? {}), agent: d.agent }] } : d.act.call;
+    cx.spawn(async (cx) => {
+      const r = await this.call(cx, call, { armed: d.act.confirm, row: d.row });
+      if (r?.launch) runCommand("tab.new", r.launch);
+    });
+  }
+
+  /** The installed agents the start dialog offers, in the hub's order. */
+  readyAgents() {
+    return (this.dialog?.plan?.agents ?? []).filter((a) => a.available);
+  }
+
+  pickAgent(id) {
+    if (this.dialog?.kind !== "start" || !this.readyAgents().some((a) => a.id === id)) return;
+    this.dialog.agent = id;
+    this.lastAgent = id;
+  }
+
+  /** The start dialog's agent: a dropdown of the installed agents (1–9 pick one from the keyboard). */
+  agentPicker(d, k) {
+    const all = d.plan?.agents ?? [];
+    const ready = all.filter((a) => a.available);
+    if (!all.length) return null;
+    const current = all.find((a) => a.id === d.agent);
+    const missing = all.filter((a) => !a.available).map((a) => a.label);
+    return h_flex()
+      .gap(10)
+      .items_center()
+      .child(div().flex_none().text_size(TEXT.sm).text_color(k.mutedFg).child("Agent"))
+      .child(
+        Button("dlg-agent", {
+          label: current?.label ?? "Pick an agent",
+          iconRight: "chevron-down",
+          ...(agentMark(current?.id) ? { picture: agentMark(current.id) } : { icon: "bot" }),
+          variant: "outline",
+          size: "sm",
+          disabled: !ready.length,
+          onClick: (_e, cx) => {
+            cx.stop_propagation();
+            openMenu(ready.map((a, i) => ({ label: a.label, kbd: String(i + 1), image: agentMark(a.id), icon: "bot", checked: a.id === d.agent, command: `inbox:agent:${a.id}` })), { width: 200 });
+          },
+        }),
+      )
+      .when(missing.length > 0, (e) => e.child(div().flex_1().min_w(0).text_size(TEXT.xs).text_color(k.mutedFg).child(`Not installed: ${missing.join(", ")}`)));
+  }
+
+  /** The agent working on an issue: a terminal in a worktree the hub made for it (`<project>/issue-<n>-…`), with a status. */
+  agentOn(row) {
+    const prefix = row.item?.worktree_prefix;
+    if (row.kind !== "ticket" || !prefix) return null;
+    const inside = (p) => p.terminal && p.cwd && p.cwd.replace(/\\/g, "/").startsWith(prefix.replace(/\\/g, "/"));
+    const here = panes().filter(inside);
+    return here.find((p) => p.status) ?? here[0] ?? null;
+  }
+
+  agentChip(row, k) {
+    const agent = this.agentOn(row);
+    if (!agent) return null;
+    const status = agent.status;
+    const color = { working: k.info, blocked: k.warning, done: k.success }[status] ?? k.mutedFg;
+    const name = agent.program?.name ?? "agent";
+    const mark = agent.program?.icon ?? agentMark(`${agent.program?.key ?? ""} ${agent.program?.name ?? ""}`);
+    return Chip(status ? `${name} ${status}` : name, {
+      id: `agent-${row.path}`,
+      color,
+      ...(mark && agent.program?.key !== "shell" ? { picture: mark } : { icon: "bot" }),
+      tooltip: `Go to the agent in ${agent.cwd}`,
+      onClick: (_e, cx) => (cx.stop_propagation(), runCommand("agent.focus", { terminal: agent.terminal })),
+    });
   }
 
   mergeChoices(row) {
@@ -1010,6 +1121,7 @@ export default class Inbox {
       .child(this.refLink(row, this.refText(id), k, { color: k.foreground }))
       .child(div().flex_1().min_w(0).truncate().child(c.title))
       .when(Boolean(statusText), (e) => e.child(Badge(statusText, lead?.tone === "warn" ? "warning" : "outline")))
+      .when(Boolean(this.agentChip(row, k)), (e) => e.child(this.agentChip(row, k)))
       .when(Boolean(this.timeChip(row.key, k)), (e) => e.child(this.timeChip(row.key, k)))
       .when(Boolean(t?.cost), (e) => e.child(Mono(`$${t.cost.toFixed(2)}`)));
   }
@@ -1250,15 +1362,17 @@ export default class Inbox {
         .when(!choices.length && Boolean(got?.value?.why), (e) => e.child(div().text_size(TEXT.sm).text_color(k.mutedFg).child(got.value.why)));
     } else if (d.kind === "start") {
       const p = d.plan;
-      title = d.row.kind === "ticket" ? `Start ${d.row.key}` : `Work on ${d.row.cells?.ref ?? d.row.name}`;
+      title = d.row.kind === "ticket" && d.row.item ? `Assign ${d.row.item.repo}#${d.row.item.number} to an agent` : d.row.kind === "ticket" ? `Start ${d.row.key}` : `Work on ${d.row.cells?.ref ?? d.row.name}`;
       description = d.row.cells?.title ?? d.row.name;
       body = !p
         ? h_flex().gap(8).items_center().child(Spinner({ size: 12 })).child(div().text_size(TEXT.sm).text_color(k.mutedFg).child("Checking the ticket, the PR and your checkouts…"))
         : v_flex()
             .gap(8)
-            .children((p.blockers ?? []).map((b) => h_flex().gap(8).items_start().child(Icon("circle-x", { size: 14, color: k.destructive })).child(div().flex_1().text_size(TEXT.sm).text_color(k.destructive).child(b))))
-            .children((p.steps ?? []).map((s, i) => h_flex().gap(8).items_start().child(h_flex().size(18).flex_none().rounded(9).bg(k.muted).text_size(TEXT.xs).text_color(k.mutedFg).items_center().justify_center().child(String(i + 1))).child(div().flex_1().text_size(TEXT.sm).child(s))));
-      actions.push(Button("dlg-start", { label: p?.ok ? "Start" : "Can't start", icon: "play", kbd: "⏎", disabled: !p?.ok, onClick: (_e, cx) => p?.ok && this.startNow(cx) }));
+            .when(Boolean(p.ok && this.agentPicker(d, k)), (e) => e.child(this.agentPicker(d, k)).child(Separator()))
+            .children((p.blockers ?? []).map((b) => h_flex().gap(8).items_start().child(Icon("circle-x", { size: 14, color: k.destructive })).child(div().flex_1().min_w(0).text_size(TEXT.sm).text_color(k.destructive).child(b))))
+            .children((p.steps ?? []).map((s, i) => h_flex().gap(8).items_start().child(h_flex().size(18).flex_none().rounded(9).bg(k.muted).text_size(TEXT.xs).text_color(k.mutedFg).items_center().justify_center().child(String(i + 1))).child(div().flex_1().min_w(0).text_size(TEXT.sm).child(s))));
+      const go = Boolean(p?.ok && (d.agent || !p.agents));
+      actions.push(Button("dlg-start", { label: p?.ok ? "Start" : "Can't start", icon: "play", kbd: "⏎", disabled: !go, onClick: (_e, cx) => go && this.startNow(cx) }));
     } else if (d.kind === "file") {
       title = "File an issue";
       description = "A new issue, assigned to you";
@@ -1315,6 +1429,8 @@ export default class Inbox {
     }
     if (m.state !== "ok") return Empty({ icon: "inbox", title: m.state === "empty" ? "No inbox yet" : "Refreshing", description: m.message, action: Button("empty-refresh", { label: "Refresh", icon: "refresh-cw", kbd: "R", onClick: (_e, cx) => this.refresh(cx) }) });
     const vis = this.visible();
+    const tab = TABS.find((t) => t.value === this.tab);
+    if (!this.filter.trim() && !vis.length) return Empty({ icon: tab.icon, title: `No ${tab.label.toLowerCase()} waiting`, description: tab.empty });
     if (this.filter.trim() && !vis.length) return Empty({ icon: "search", title: "No row matches", description: `Nothing has every word of “${this.filter}”.` });
     const at = vis.findIndex((v) => v.row.path === this.sel);
     // Rows are built only when the scroller draws them: a getter per row.
@@ -1374,6 +1490,13 @@ export default class Inbox {
           .gap(8)
           .flex_none()
           .items_center()
+          .child(
+            Tabs("inbox-tabs", {
+              items: TABS.map((t) => ({ value: t.value, label: narrow ? "" : t.label, icon: t.icon, count: m?.state === "ok" ? tabCounts(this.raw)[t.value] : null })),
+              value: this.tab,
+              onChange: (value, cx) => this.setTab(cx, value),
+            }),
+          )
           .child(h_flex().id("filter").flex_1().on_mouse_down("left", (_e, cx) => this.startFilter(cx)).child(SearchField(this.search, { active: this.filtering, kbd: "/" })))
           .when(this.picked.size > 0, (e) => e.child(Badge(`${this.picked.size} picked`, "info", { id: "picked-badge", onClick: (_e, cx) => (this.picked.clear(), cx.notify()), tooltip: "Drop the picks  esc" })))
           .when(changed > 0, (e) => e.child(Badge(`${changed} changed`, "secondary", { dot: k.ring })))
@@ -1389,7 +1512,7 @@ export default class Inbox {
             return panel ? e.child(panel) : e;
           }),
       )
-      .child(KeyHints([["j k", "move"], ["⏎", "main"], ["space", "fold"], ["tab", "details"], ["/", "filter"], ["ctrl p", "commands"]]));
+      .child(KeyHints([["1 2 3", "tabs"], ["j k", "move"], ["⏎", "main"], ["space", "fold"], ["tab", "details"], ["/", "filter"], ["ctrl p", "commands"]]));
     let out = root;
     const toasts = this.toasts.render();
     if (toasts) out = out.child(toasts);
@@ -1442,6 +1565,7 @@ const ICON = {
   "mark ready": "git-pull-request",
   "work on it": "play",
   start: "play",
+  "assign to agent": "bot",
   plan: "map",
   continue: "play",
   talk: "message-circle",

@@ -1,9 +1,12 @@
 {
   "layout:personal": {
-    "cmd-alt-0": "personal.go:dashboard",
-    "cmd-alt-1": "personal.go:workqueue",
-    "cmd-alt-2": "personal.go:calendar",
+    "cmd-alt-0": "personal.go:home",
+    "cmd-alt-1": "personal.go:inbox",
+    "cmd-alt-2": "personal.go:agents",
     "cmd-alt-3": "personal.go:work",
+    "cmd-alt-5": "personal.go:monitor",
+    "cmd-alt-6": "personal.go:routines",
+    "cmd-alt-7": "personal.go:mail",
     "cmd-r": "personal.refresh"
   }
 }

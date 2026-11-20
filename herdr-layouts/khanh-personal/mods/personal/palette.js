@@ -1,6 +1,6 @@
 // The palette (cmd-shift-p in the cockpit layout), a superset of Herdr's on its geometry: Herdr's commands with their
 // keys, layouts, then cockpit's apps and commands, the spaces, tabs and agents, and what the hub finds (tickets, PRs,
-// steps, meetings, releases, the week's events, past sessions). Over an agent, a found item goes into it: put in
+// releases, the week's events, past sessions). Over an agent, a found item goes into it: put in
 // its prompt (ctrl-r), asked about (ctrl-a) or looked into by a fork (ctrl-f). Enter runs, ↑/↓ move, Esc closes.
 
 import { div } from "gpui-kit";
@@ -26,12 +26,10 @@ const GROUPS = ["Recent", "Session", "Here", "Cockpit", "Places", "Tab", "Pane",
 
 // [child of the center stack, label, icon, the command its key is bound to].
 const APPS = [
-  ["home", "Home", "layout-dashboard", "cockpit.home"],
+  ["home", "Home", "layout-dashboard", "personal.home"],
   ["work", "Work", "terminal"],
   ["inbox", "Inbox", "inbox"],
-  ["runbook", "Runbook", "book"],
-  ["todo", "To-do", "list-todo"],
-  ["meetings", "Meetings", "calendar"],
+  ["agents", "Agents", "bot"],
   ["monitor", "Monitor", "activity"],
   ["routines", "Routines", "clock"],
   ["mail", "Mail", "mail"],
@@ -39,21 +37,20 @@ const APPS = [
 
 // cockpit's window keys (keys.json's layout:cockpit), by name: [command, title, icon, keywords].
 const COCKPIT_COMMANDS = [
-  ["cockpit.recap", "Recap the agents", "sparkles", "whose move stages summary"],
-  ["cockpit.next-waiting", "Next agent waiting for you", "bell", "needs you question jump"],
-  ["cockpit.next:blocked", "Next blocked agent", "circle-dot", "needs you"],
-  ["cockpit.next:done", "Next finished agent", "circle-check", "done"],
-  ["cockpit.agent-view", "Agent view", "bot", "focus lone terminal tab toggle"],
-  ["cockpit.panel", "Side panel", "panel-right", "show review runbook files changes toggle"],
-  ["cockpit.panel:show", "Side panel: Show", "layout", "charts tables diagrams"],
-  ["cockpit.panel:review", "Side panel: Review", "git-pull-request", "diff comments"],
-  ["cockpit.panel:runbook", "Side panel: Runbook", "book", "steps ticket"],
-  ["cockpit.panel:files", "Side panel: Files", "folder", "tree"],
-  ["cockpit.panel:changes", "Side panel: Changes", "git-fork", "git diff"],
-  ["cockpit.queue", "Prompt queue", "list", "follow-ups send later"],
-  ["cockpit.resume", "Resume stopped agents", "play", "restart reboot resume session"],
-  ["cockpit.pr", "This branch's PR", "git-pull-request", "pull request github"],
-  ["cockpit.ticket", "This branch's ticket", "ticket", "linear jira issue"],
+  ["personal.recap", "Recap the agents", "sparkles", "whose move stages summary"],
+  ["personal.next-waiting", "Next agent waiting for you", "bell", "needs you question jump"],
+  ["personal.next:blocked", "Next blocked agent", "circle-dot", "needs you"],
+  ["personal.next:done", "Next finished agent", "circle-check", "done"],
+  ["personal.agent-view", "Agent view", "bot", "focus lone terminal tab toggle"],
+  ["personal.panel", "Side panel", "panel-right", "show review files changes toggle"],
+  ["personal.panel:show", "Side panel: Show", "layout", "charts tables diagrams"],
+  ["personal.panel:review", "Side panel: Review", "git-pull-request", "diff comments"],
+  ["personal.panel:files", "Side panel: Files", "folder", "tree"],
+  ["personal.panel:changes", "Side panel: Changes", "git-fork", "git diff"],
+  ["personal.queue", "Prompt queue", "list", "follow-ups send later"],
+  ["personal.resume", "Resume stopped agents", "play", "restart reboot resume session"],
+  ["personal.pr", "This branch's PR", "git-pull-request", "pull request github"],
+  ["personal.ticket", "This branch's ticket", "ticket", "linear jira issue"],
 ];
 
 // Herdr's own names for its commands: [command, args, group, title, keywords].
@@ -108,16 +105,16 @@ const HIDDEN = new Set([
 ]);
 
 const FOUND = {
-  pr: ["PR", "git-pull-request"], review: ["Review", "git-pull-request"], ticket: ["Ticket", "ticket"], step: ["Step", "book"],
-  runbook: ["Runbook", "book"], block: ["Documents", "layers"], view: ["Documents", "layers"], todo: ["To-do", "list-todo"],
-  meeting: ["Meeting", "calendar"], release: ["Release", "rocket"], app: ["Monitor", "activity"], routine: ["Routine", "clock"],
+  pr: ["PR", "git-pull-request"], review: ["Review", "git-pull-request"], ticket: ["Ticket", "ticket"],
+  block: ["Documents", "layers"], view: ["Documents", "layers"],
+  release: ["Release", "rocket"], app: ["Monitor", "activity"], routine: ["Routine", "clock"],
   changed: ["Changed", "history"], session: ["Session", "message"],
 };
 
 const STATUS = new Set(["working", "blocked", "done", "idle"]);
 
-// The sidebar copy shows a block of the cockpit layout on `cockpit.go:<child>`.
-const show = (child) => run(`cockpit.go:${child}`);
+// The sidebar copy shows a block of the cockpit layout on `personal.go:<child>`.
+const show = (child) => run(`personal.go:${child}`);
 
 const titleOf = (name) => {
   const [noun, verb] = name.split(".");
@@ -154,7 +151,7 @@ export function fuzzy(q, text) {
 const OPEN = { mod: "personal", props: { app: "palette" }, kind: "popup", frame: "none", width: 1, height: 1, at: { x: 0, y: 0 } };
 
 /**
- * Opens the palette over the window, or closes it when it is open: `cockpit.palette` reaches the open palette too,
+ * Opens the palette over the window, or closes it when it is open: `personal.palette` reaches the open palette too,
  * which closes itself and says so, so the sidebar opens one only when none answered.
  */
 export function togglePalette(cx) {
@@ -264,13 +261,13 @@ export default class Palette {
       add({ id: "editor", group: this.over ? "Session" : "Here", icon: "code", title: `Open ${p.name} in ${this.editor}`, words: `editor vscode code cursor ${p.folder}`, act: () => this.editorOpen() });
     }
     for (const [child, label, icon, bound] of APPS) {
-      add({ id: `app:${child}`, group: "Cockpit", icon, title: label, name: bound ?? `cockpit.go:${child}`, words: "cockpit app go", act: () => (show(child), null) });
+      add({ id: `app:${child}`, group: "Cockpit", icon, title: label, name: bound ?? `personal.go:${child}`, words: "cockpit app go", act: () => (show(child), null) });
     }
     for (const [name, title, icon, words] of COCKPIT_COMMANDS) add({ id: name, group: "Cockpit", icon, title, name, words, act: () => (run(name), null) });
     add({ id: "refresh", group: "Cockpit", icon: "refresh", title: "Refresh the inbox", words: "fetch PRs reviews tickets CI now", act: () => hub.act("inbox", "request_refresh") });
     add({ id: "doctor", group: "Cockpit", icon: "shield-check", title: "Check cockpit", words: "doctor health report", page: "doctor" });
-    add({ id: "brief", group: "Cockpit", icon: "newspaper", title: "Today's brief", words: "morning meetings reviews CI tickets", page: "brief" });
-    add({ id: "kit", group: "Cockpit", icon: "palette", title: "Design kit", words: "components gallery ui", name: "cockpit.kit", act: () => (run("cockpit.kit"), null) });
+    add({ id: "brief", group: "Cockpit", icon: "newspaper", title: "Today's brief", words: "morning reviews CI tickets", page: "brief" });
+    add({ id: "kit", group: "Cockpit", icon: "palette", title: "Design kit", words: "components gallery ui", name: "personal.kit", act: () => (run("personal.kit"), null) });
 
     for (const s of spaces()) {
       add({ id: `space:${s.id}`, group: "Places", icon: "folder", title: s.name, hint: s.branch ?? "", status: s.status, words: `space ${s.branch ?? ""}`, act: () => (run("space.select", { id: s.id }), show("work"), null) });
@@ -409,7 +406,7 @@ export default class Palette {
     });
   }
 
-  /** A key, from the window or `cockpit.key:` (tests): true when the palette used it. */
+  /** A key, from the window or `personal.key:` (tests): true when the palette used it. */
   key(e, cx, typed = false) {
     const key = e.keystroke;
     if (this.page) {
@@ -436,7 +433,7 @@ export default class Palette {
     return true;
   }
 
-  /** `cockpit.palette` again closes it; `cockpit.palette:type:<text>` types into the search (tests drive it this way). */
+  /** `personal.palette` again closes it; `personal.palette:type:<text>` types into the search (tests drive it this way). */
   command(c, cx) {
     if (c === "palette") {
       setShared("cockpit.palette.closed", Date.now());

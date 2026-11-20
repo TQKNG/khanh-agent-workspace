@@ -1083,7 +1083,7 @@ export class MonitorWindow {
     this.sub?.stop();
   }
 
-  /** `cockpit.monitor:close-windows` closes every release window, `monitor:close:<key>` this one. */
+  /** `personal.monitor:close-windows` closes every release window, `monitor:close:<key>` this one. */
   command(c) {
     if (c === "monitor:close-windows" || c === `monitor:close:${this.key}`) closeOverlay(props().overlay);
   }

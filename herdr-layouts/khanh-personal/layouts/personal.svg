@@ -7,8 +7,7 @@
   <rect x="6" y="20" width="64" height="9" rx="2.5" fill="none" stroke="#2e3035"/>
   <rect x="6" y="33" width="64" height="9" rx="2.5" fill="#24262a"/>
   <g font-family="Geist, Helvetica, sans-serif" font-size="5.5" fill="#9ba0a8">
-    <text x="11" y="39.5" fill="#e8e9eb">Home</text><text x="11" y="51">Work</text><text x="11" y="61">Inbox</text>
-    <text x="11" y="71">To-do</text><text x="11" y="81">Runbook</text><text x="11" y="91">Meetings</text>
+    <text x="11" y="39.5" fill="#e8e9eb">Home</text><text x="11" y="51">Work</text><text x="11" y="61">Inbox</text><text x="11" y="71">Agents</text>
   </g>
   <rect x="60" y="35" width="7" height="5.5" rx="2" fill="#e0707f"/>
   <line x1="6" y1="98" x2="70" y2="98" stroke="#26282c"/>

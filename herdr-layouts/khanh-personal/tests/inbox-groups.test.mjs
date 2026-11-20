@@ -2,7 +2,7 @@
 
 import assert from "node:assert/strict";
 import test from "node:test";
-import { byKind, byRepo } from "../mods/personal/inbox-groups.js";
+import { byKind, byRepo, onlyTab, tabCounts, tabFor, TABS } from "../mods/personal/inbox-groups.js";
 
 const row = (kind, repo, extra = {}) => ({ key: `${kind}:${repo}:${extra.n ?? 0}`, path: `/${kind}/${repo}/${extra.n ?? 0}`, kind, repo, name: `${repo} ${kind}`, text: [], children: [], ...extra });
 const section = (key, children) => ({ key, path: `/${key}`, kind: "plain", name: key, title: key, children, expand: true });
@@ -41,8 +41,8 @@ test("the summary says what is wrong, what waits and what is open", () => {
   const [old, mid, neu, quiet] = byRepo(model()).sections;
   assert.deepEqual(old.parts, [{ text: "CI failing", tone: "bad" }]);
   assert.deepEqual(mid.parts, [{ text: "1 review", tone: "warn" }, { text: "1 PR" }]);
-  assert.deepEqual(neu.parts, [{ text: "CI running", tone: "warn" }, { text: "2 tickets" }]);
-  assert.deepEqual(quiet.parts, [{ text: "1 ticket" }]);
+  assert.deepEqual(neu.parts, [{ text: "CI running", tone: "warn" }, { text: "2 issues" }]);
+  assert.deepEqual(quiet.parts, [{ text: "1 issue" }]);
 });
 
 test("repos with something to act on start open; a repo with only tickets starts folded", () => {
@@ -86,4 +86,34 @@ test("by kind: alerts, reviews, PRs, runs, tickets", () => {
   assert.deepEqual(byKind(model()).sections.map((s) => s.key), ["alerts", "review", "prs", "runs", "tickets"]);
   assert.equal(byKind(null), null);
   assert.equal(byRepo(undefined), undefined);
+});
+
+test("each tab holds its own kinds: review requests with pull requests, a failing branch with actions", () => {
+  assert.deepEqual(TABS.map((t) => t.value), ["prs", "issues", "runs"]);
+  assert.deepEqual(tabCounts(model()), { prs: 2, issues: 3, runs: 3 });
+  assert.equal(tabFor("review"), "prs");
+  assert.equal(tabFor("alert"), "runs");
+  assert.equal(tabFor("ticket"), "issues");
+  assert.equal(tabFor("worktree"), null);
+});
+
+test("a tab, by repository: only its rows, every repository unfolded", () => {
+  const issues = byRepo(onlyTab(model(), "issues"), { open: true });
+  assert.deepEqual(heads(issues), [["o/new", ["ticket", "ticket"]], ["o/quiet", ["ticket"]]]);
+  assert.ok(issues.sections.every((s) => s.expand), "a repository of tickets alone is not folded away in its own tab");
+  assert.deepEqual(heads(byRepo(onlyTab(model(), "runs"), { open: true })), [["o/old", ["alert", "run"]], ["o/new", ["run"]]]);
+  assert.deepEqual(heads(byRepo(onlyTab(model(), "prs"), { open: true })), [["o/mid", ["review", "pr"]]]);
+});
+
+test("an empty tab has no sections, and an unknown tab falls back to the first", () => {
+  const quiet = model({ sections: [section("work", [row("ticket", "o/new")])] });
+  assert.deepEqual(onlyTab(quiet, "runs").sections, []);
+  assert.deepEqual(byRepo(onlyTab(quiet, "runs"), { open: true }).sections, []);
+  assert.deepEqual(onlyTab(model(), "nope").sections[0].children.map((r) => r.kind), ["review", "pr"]);
+});
+
+test("a row in two sections shows once in its tab", () => {
+  const twice = row("pr", "o/mid", { n: 1 });
+  const m = model({ sections: [section("review", [twice]), section("work", [twice])] });
+  assert.equal(onlyTab(m, "prs").sections[0].children.length, 1);
 });

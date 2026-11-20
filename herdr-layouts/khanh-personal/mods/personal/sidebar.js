@@ -1,6 +1,6 @@
 // The cockpit sidebar, in place of Herdr's Spaces and Agents lists: the work area and the pinned apps (the config's
 // `spaces`) with their counts, then the spaces with their tabs' agents. It is the one copy always shown, so it also
-// carries the window-wide plumbing: `cockpit.go:<app>`, `cockpit.palette`, `cockpit.target:<target>` (a notification's
+// carries the window-wide plumbing: `personal.go:<app>`, `personal.palette`, `personal.target:<target>` (a notification's
 // click) and the hub's notifications, posted as Herdr toasts while the window is in front, as system ones otherwise.
 
 import { div, image } from "gpui-kit";
@@ -11,25 +11,18 @@ import * as hub from "./hub.js";
 import { togglePalette } from "./palette.js";
 import { openCode } from "./code.js";
 import { deliver, follow } from "./notify.js";
-import { tokens, alpha, TEXT, RADIUS, Icon, Kbd, Button, SectionHeader, StageHeading, HoverCard, Hover, Flashes, CornerCount, dur } from "./ui.js";
+import { tokens, alpha, TEXT, RADIUS, Icon, agentMark, Kbd, Button, SectionHeader, StageHeading, HoverCard, Hover, Flashes, CornerCount, dur } from "./ui.js";
 import { AgentsModel, QuestionCard, QuotaBars, StageMark, Chips, STAGES, stageColor, stageAge, hours } from "./agentsui.js";
 
 const APPS = {
   inbox: { label: "Inbox", icon: "inbox", key: "⌘⌥1" },
-  runbook: { label: "Runbook", icon: "book", key: "⌘⌥2" },
-  "to-do": { child: "todo", label: "To-do", icon: "list-todo", key: "⌘⌥3" },
-  meetings: { label: "Meetings", icon: "calendar", key: "⌘⌥4" },
+  agents: { label: "Agents", icon: "bot", key: "⌘⌥2" },
   monitor: { label: "Monitor", icon: "activity", key: "⌘⌥5" },
   routines: { label: "Routines", icon: "clock", key: "⌘⌥6" },
   mail: { label: "Mail", icon: "mail", key: "⌘⌥7" },
 };
-const DEFAULT_SPACES = ["inbox", "terminal", "actions", "to-do", "runbook", "meetings"];
+const DEFAULT_SPACES = ["inbox", "agents"];
 
-const AGENT_ICONS = [
-  { match: "codex", image: "icons/codex.svg" },
-  { match: "claude", image: "icons/claude.svg" },
-  { match: "copilot", image: "icons/copilot.svg" },
-];
 const CRITTER_ART = "mods/personal/critters/art";
 const CRITTER_NAMES = [
   "pixel", "byte", "nova", "rook", "ziggy", "mochi", "bolt", "echo", "juno", "kiwi",
@@ -45,10 +38,9 @@ function critterStatus(stage) {
 }
 
 function agentIcon(k, r) {
-  const program = `${r.program?.key ?? ""} ${r.program?.name ?? ""}`.toLowerCase();
-  const found = AGENT_ICONS.find((entry) => program.includes(entry.match));
+  const mark = agentMark(`${r.program?.key ?? ""} ${r.program?.name ?? ""}`);
   return h_flex().size(20).flex_none().items_center().justify_center().rounded(RADIUS.sm).bg(alpha(k.muted, 0.16))
-    .child(found?.image ? image(found.image).size(14) : Icon("bot", { size: 13, color: k.mutedFg }));
+    .child(mark ? image(mark).size(14) : Icon("bot", { size: 13, color: k.mutedFg }));
 }
 
 function agentAvatar(k, r) {
@@ -62,7 +54,6 @@ function agentAvatar(k, r) {
 function appBadge(app, v) {
   if (!v) return null;
   const of = (count, tone) => (count ? { count, tone } : null);
-  if (app === "todo") return of(v.open, null);
   if (app === "inbox") return of(v.counts?.direct, "warning");
   if (app === "monitor") {
     const t = v.tiles ?? {};
@@ -70,11 +61,6 @@ function appBadge(app, v) {
   }
   if (app === "routines") return of(v.tiles?.unread, v.tiles?.failing ? "destructive" : "warning");
   if (app === "mail") return of(v.counts?.needs, "warning");
-  if (app === "meetings") {
-    const now = Date.now();
-    const left = (v.meetings ?? []).filter((m) => m.day === v.today && (m.end ?? 0) > now).length;
-    return of(left, v.banner?.soon ? "warning" : "info");
-  }
   return null;
 }
 
@@ -82,7 +68,7 @@ function appBadge(app, v) {
 export function show(child) {
   run("layout.select", { stack: "center", child });
   setShared("cockpit.app", child);
-  if (child !== "work") run(`cockpit.show:${child}`);
+  if (child !== "work") run(`personal.show:${child}`);
 }
 
 /** The palette over the window, on Herdr's palette geometry; again: closes it. */
@@ -115,7 +101,7 @@ export default class Sidebar {
       } catch {}
       cx.notify();
     });
-    this.sub = hub.subscribe(cx, { views: ["todo", "inbox", "monitor", "routines", "meetings", "mail"], notify: true }, (m, cx) => {
+    this.sub = hub.subscribe(cx, { views: ["inbox", "monitor", "routines", "mail"], notify: true }, (m, cx) => {
       if (m.view) this.counts[m.view] = appBadge(m.view, m.value);
       if (m.notify) this.toast(m.notify, cx);
       cx.notify();

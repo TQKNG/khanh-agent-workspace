@@ -9,6 +9,7 @@
                                       set your own name and logo (also works with --only-brand)
 
 Anything it would replace is moved to <home>/.install-backups/<time>/ first.
+It keeps worktrees in <home>/worktrees by setting Herdr's worktrees.directory, unless one is already set.
 It never touches credentials.json or data/ under the hub folder, and it leaves an
 existing cockpit.json alone when that points at another cockpit (use --force-hub).
 """
@@ -30,10 +31,22 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 LAYOUT = "personal"
 MODS = ["personal", "workspace-chrome-swiss"]
-HUB_FILES = ["cockpit_hub.py", "github_inbox.py", "github_pulls.py", "github_checks.py", "cockpit-hub", "cockpit-hub.cmd", "credentials.example.json"]
+# Herdr's own mods the layout shows (tabs, files, changes) or opens (help, picker): they come with Herdr, not with this
+# package, so the installer says which a Herdr version lacks rather than leaving a blank space in the window.
+HERDR_MODS = ["tabs", "files", "changes", "help", "picker"]
+HUB_FILES = ["cockpit_hub.py", "github_inbox.py", "github_pulls.py", "github_checks.py", "github_start.py", "agent_profiles.py", "worker-prompt.md", "cockpit-hub", "cockpit-hub.cmd"]
 HUB_VERSION = "0.2.0"
 # The Herdr app version this setup was built and tested against (`herdr-app --version`).
 TESTED_HERDR = "0.1.16"
+# Shortcuts earlier versions of this package shipped that point at pages it no longer has (or never had): replaced or
+# dropped when keys.json still holds exactly these values, so a shortcut the person changed is kept.
+STALE_KEYS = {
+    "layout:personal": {
+        "cmd-alt-0": "personal.go:dashboard",
+        "cmd-alt-1": "personal.go:workqueue",
+        "cmd-alt-2": "personal.go:calendar",
+    },
+}
 LOGO_TYPES = {".png", ".jpg", ".jpeg", ".webp", ".svg"}
 IS_WINDOWS = os.name == "nt"
 # Files the Herdr app and Python generate next to the sources: never copied, and never a reason to reinstall.
@@ -122,7 +135,7 @@ class Installer:
                 print(
                     f"NOTE: {path} already points at another cockpit ({current.get('bin')}).\n"
                     "      Leaving it alone, so the inbox keeps using that one.\n"
-                    "      Re-run with --force-hub to use the bundled GitHub and calendar hub instead."
+                    "      Re-run with --force-hub to use the bundled GitHub hub instead."
                 )
                 return
             self.stash(path)
@@ -141,12 +154,61 @@ class Installer:
             return
         current = json.loads(path.read_text(encoding="utf-8"))
         added = {section: binds for section, binds in wanted.items() if section not in current}
-        if not added:
+        fixed = []
+        for section, stale in STALE_KEYS.items():
+            binds = current.get(section)
+            if section in added or not isinstance(binds, dict):
+                continue
+            for key, old in stale.items():
+                if binds.get(key) != old:
+                    continue
+                if key in wanted.get(section, {}):
+                    binds[key] = wanted[section][key]
+                else:
+                    del binds[key]
+                fixed.append(f"{section} {key}")
+            # Shortcuts this version adds to a section the person already has, where the key is still free.
+            for key, value in wanted.get(section, {}).items():
+                if key not in binds:
+                    binds[key] = value
+                    fixed.append(f"{section} {key}")
+        if not added and not fixed:
             return
         self.stash(path, keep=True)
         current.update(added)
-        self.say(f"adding shortcut section(s) {', '.join(added)} to keys.json")
+        if added:
+            self.say(f"adding shortcut section(s) {', '.join(added)} to keys.json")
+        if fixed:
+            self.say(f"updating shortcut(s) {', '.join(fixed)} in keys.json")
         if not self.dry:
+            path.write_text(json.dumps(current, indent=2) + "\n", encoding="utf-8")
+
+    def worktrees(self) -> None:
+        """Keeps worktrees beside the rest of the Herdr setup, in <home>/worktrees: sets Herdr's worktrees.directory, which
+        both its own worktree feature and the inbox's "assign to agent" use. A directory the person already chose is kept."""
+        path = self.home / "settings.json"
+        if not path.exists():
+            print(
+                "NOTE: settings.json does not exist yet, so worktrees stay in Herdr's default folder.\n"
+                "      Start the Herdr app once, then run this installer again."
+            )
+            return
+        try:
+            current = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            print("NOTE: settings.json is not valid JSON, so the worktrees folder was not set.")
+            return
+        if not isinstance(current, dict) or (current.get("worktrees") or {}).get("directory"):
+            return
+        target = self.home / "worktrees"
+        try:
+            directory = "~/" + target.relative_to(Path.home()).as_posix()
+        except ValueError:
+            directory = target.as_posix()
+        self.stash(path, keep=True)
+        self.say(f"setting worktrees.directory to {directory} in settings.json")
+        if not self.dry:
+            current["worktrees"] = {**(current.get("worktrees") or {}), "directory": directory}
             path.write_text(json.dumps(current, indent=2) + "\n", encoding="utf-8")
 
     def brand(self, name: str | None, logo: str | None, shortcut_logo: str | None) -> None:
@@ -209,7 +271,7 @@ def prerequisites() -> None:
         elif found.group(0) != TESTED_HERDR:
             print(
                 f"WARNING: this setup was tested with herdr-app {TESTED_HERDR}, you have {found.group(0)}.\n"
-                "         Herdr rewrites its shipped mods (tabs, files, changes, menu, prompt, shortcut-help) at every start,\n"
+                "         Herdr rewrites its shipped mods (tabs, files, changes, menu, prompt, help) at every start,\n"
                 "         so the look may differ. If a mod fails `herdr-app check`, see the README section on versions."
             )
     gh = shutil.which("gh")
@@ -219,8 +281,19 @@ def prerequisites() -> None:
         print("WARNING: gh is not signed in. Run `gh auth login` for the GitHub inbox to show data.")
 
 
+def missing_herdr_mods(home: Path) -> list[str]:
+    return [mod for mod in HERDR_MODS if not (home / "mods" / mod / "main.js").is_file()]
+
+
 def verify(home: Path, activate: bool) -> None:
     env = {**os.environ, "HERDR_APP_HOME": str(home)}
+    missing = missing_herdr_mods(home)
+    if missing:
+        print(
+            f"WARNING: this Herdr has no {', '.join(missing)} mod, which the layout uses; that part of the window stays empty.\n"
+            "         Start the Herdr app once so it writes its mods, or update it (`herdr-app --version`; tested with "
+            f"{TESTED_HERDR})."
+        )
     herdr = shutil.which("herdr-app")
     if herdr:
         for mod in MODS:
@@ -268,13 +341,14 @@ def main() -> int:
     installer.layout_and_mods()
     installer.hub(args.force_hub)
     installer.keys()
+    installer.worktrees()
     installer.brand(args.brand_name, args.brand_logo, args.brand_shortcut_logo)
     if not args.dry_run:
         print("Checking the install:")
         verify(home, args.activate)
         if installer.backup.exists():
             print(f"Replaced files were backed up under {installer.backup}")
-    print("Done. The hub needs `gh auth login`; Google Calendar needs the steps in the README.")
+    print("Done. The hub needs `gh auth login`.")
     return 0
 
 

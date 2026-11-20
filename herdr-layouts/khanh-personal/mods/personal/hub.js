@@ -186,7 +186,7 @@ export const history = async (kind, key) => (await request("history", { kind, ke
  * hub's notifications too, as `{notify}` (the sidebar asks, one copy per window). `onState` hears
  * "connecting", "live" and "error: …". Reconnects with backoff whenever the hub goes.
  *
- *   subscribe(cx, { views: ["todo"] }, (m, cx) => { this.model = m.value; cx.notify(); });
+ *   subscribe(cx, { views: ["inbox"] }, (m, cx) => { this.model = m.value; cx.notify(); });
  */
 export function subscribe(cx, { views = [], docs = [], notify = false }, onMessage, onState = () => {}) {
   const state = { stopped: false };

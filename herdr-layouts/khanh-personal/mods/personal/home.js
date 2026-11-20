@@ -20,7 +20,7 @@ function cx_go(e) {
   hub.go({ app: e.app, key: e.key }).catch(() => {});
 }
 
-const DEFAULT_PINNED = ["inbox", "to-do", "runbook", "meetings"];
+const DEFAULT_PINNED = ["inbox", "agents"];
 const many = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
 /** Home's overview: each pinned app in a few words, from the view the app itself draws. */
@@ -37,9 +37,6 @@ const OVERVIEW = [
     view: "mail", space: "mail", label: "Mail", icon: "mail",
     line: (v) => (v.waiting ? null : { text: v.counts?.unread ? `${v.counts.unread} unread` : "nothing unread", tone: v.counts?.unread ? "warning" : null }),
   },
-  { view: "meetings", space: "meetings", label: "Next", icon: "calendar", line: (v) => ({ text: v.banner?.title ? `${v.banner.title} · ${v.banner.when}` : "no meeting", tone: v.banner?.soon ? "warning" : null }) },
-  { view: "runbook", space: "runbook", label: "Runbooks", icon: "book", line: (v) => (v.books?.length ? { text: `${many(v.left ?? 0, "step")} left` } : null) },
-  { view: "todo", space: "to-do", label: "To-do", icon: "list-todo", line: (v) => ({ text: v.open ? `${v.open} open` : "all done" }) },
   { view: "monitor", space: "monitor", label: "Prod", icon: "activity", line: (v) => (v.headline ? { text: v.headline, tone: v.bad ? "destructive" : null } : null) },
   {
     view: "routines", space: "routines", label: "Routines", icon: "clock",
@@ -328,7 +325,7 @@ export default class Home {
     else if (action === "fork" && a) cx.spawn(async (cx) => this.act(cx, card.key, "Forking…", () => agentAct("fork", { terminal: a.handle, place: "tab" })));
     else if (action === "queue" && a) {
       setShared("cockpit.queue.for", a.address);
-      run("cockpit.queue", {});
+      run("personal.queue", {});
     }
     else if (action === "pr" && pr?.url) this.openUrl(cx, pr.url);
     else if (action === "merge" && pr?.url) this.merge(cx, pr);
@@ -576,7 +573,7 @@ export default class Home {
                 div()
                   .text_size(TEXT.base)
                   .text_color(k.foreground)
-                  .child("cockpit puts every coding agent beside its work: whose move it is, its ticket, PR, CI and deploy, with your inbox, runbooks, meetings and releases one key away."),
+                  .child("cockpit puts every coding agent beside its work: whose move it is, its ticket, PR, CI and deploy, with your inbox and releases one key away."),
               )
               .child(way("install-claude", "In Claude Code", ["/plugin install cockpit --marketplace quaresc/cockpit", "/cockpit:setup"]))
               .child(way("install-shell", "With any other agent, in a shell", ["curl -fsSL https://raw.githubusercontent.com/quaresc/cockpit/main/install.sh | sh", "cockpit setup"]))
@@ -670,7 +667,7 @@ export default class Home {
       .when(Boolean(this.nextMove(cols, narrow)), (e) => e.child(this.nextMove(cols, narrow)))
       .child(this.board(cols, wide, narrow))
       .when(cols.prs.length > 0, (e) => e.child(this.prList(cols.prs, narrow)));
-    const right = v_flex().w(320).flex_none().gap(16).child(this.upNext()).child(this.appsCard()).child(this.activity());
+    const right = v_flex().w(320).flex_none().gap(16).child(this.appsCard()).child(this.activity());
     // Two columns from a laptop's width; under it the side cards follow the board.
     const two = !narrow && this.width >= 900;
     return (two ? h_flex() : v_flex()).w_full().items_start().gap(20).child(left).child(right.when(!two, (e) => e.w_full()));
@@ -698,35 +695,11 @@ export default class Home {
     });
   }
 
-  upNext() {
-    const k = tokens();
-    const m = this.apps.meetings;
-    const now = Date.now();
-    const next = (m?.meetings ?? []).filter((x) => (x.end ?? 0) > now).slice(0, 3);
-    return this.side(
-      "home-next-meetings",
-      "Up next",
-      "calendar",
-      next.map((x) =>
-        h_flex()
-          .id(`mt-${x.id}`)
-          .gap(10)
-          .items_center()
-          .child(v_flex().w(52).flex_none().child(Mono(x.time ?? new Date(x.start).toTimeString().slice(0, 5), { color: k.foreground })).child(div().text_size(TEXT.xs).text_color(k.dim).child(x.day === m.today ? "today" : new Date(x.start).toDateString().slice(0, 3))))
-          .child(div().flex_1().min_w(0).truncate().text_size(TEXT.sm).text_color(k.foreground).child(x.title))
-          .when(Boolean(x.join), (e) => e.child(Button(`mt-join-${x.id}`, { label: "Join", size: "sm", variant: "outline", onClick: (_e, cx) => this.openUrl(cx, x.join) }))),
-      ),
-      "No more meetings",
-      () => show("meetings"),
-    );
-  }
-
   /** One line per pinned app, a click away. */
   appsCard() {
     const k = tokens();
-    // Meetings have their own card above.
     // Mail shows wherever it is set up, pinned or not.
-    const items = OVERVIEW.filter((o) => o.view !== "meetings" && ((this.pinned ?? DEFAULT_PINNED).includes(o.space) || (o.view === "mail" && this.apps.mail?.enabled)))
+    const items = OVERVIEW.filter((o) => (this.pinned ?? DEFAULT_PINNED).includes(o.space) || (o.view === "mail" && this.apps.mail?.enabled))
       .map((o) => ({ ...o, line: this.apps[o.view] ? o.line(this.apps[o.view]) : null }))
       .filter((o) => o.line);
     return this.side(

@@ -4,8 +4,9 @@ Builds the `inbox` view model the cockpit inbox mod expects (sections of PR, rev
 ticket and alert rows) plus the on-demand details it fetches (merge readiness,
 review threads, an issue's card). No tokens are stored here: `gh` owns the login.
 
-Reads only, apart from `file_issue` (the inbox's "File issue" dialog) and the reviews and
-merges github_pulls.py sends; each is triggered by the user.
+Reads only, apart from `file_issue` (the inbox's "File issue" dialog), the reviews and
+merges github_pulls.py sends, and the assignment github_start.py makes when an issue is
+given to an agent; each is triggered by the user.
 """
 
 from __future__ import annotations
@@ -133,6 +134,11 @@ def pr_ready(node: dict, ci: str | None) -> dict:
 
 def open_act(url: str, label: str = "open", main: bool = True) -> dict:
     return {"label": label, "key": "o", "main": main, "call": {"fn": "open_url", "args": [url]}}
+
+
+def start_act(url: str) -> dict:
+    """Assigns the issue to an agent: the mod asks for the plan (start_plan) and starts only once the person confirms."""
+    return {"label": "assign to agent", "key": "s", "main": False, "call": {"fn": "start", "args": [{"id": url}]}}
 
 
 def review_act(url: str, main: bool) -> dict:
@@ -294,7 +300,8 @@ def issue_row(node: dict) -> tuple[dict, dict]:
         "Tickets",
         repo=repo,
         cells={"ref": ref, "title": node["title"], "notes": status, "lead": [{"icon": "circle-dot", "tone": "good"}], "age": age(node.get("updatedAt"))},
-        acts=[open_act(url)],
+        item={"url": url, "repo": repo, "number": number, "title": node["title"]},
+        acts=[open_act(url), start_act(url)],
         info=[[{"text": repo, "tone": "dim"}], [{"text": f"Updated {age(node.get('updatedAt'))} ago", "tone": "dim"}]],
     )
     return issue, {"id": url, "url": url, "status": status or "open", "project": repo, "secs": 0, "cost": 0}

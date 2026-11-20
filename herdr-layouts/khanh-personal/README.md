@@ -1,7 +1,7 @@
 # Personal layout for the Herdr app
 
 A complete, self-contained setup for the [Herdr app](https://herdr.dev).
-It contains the `personal` layout, the mods it needs, and a small local hub that connects its Inbox to GitHub and its Meetings page to Google Calendar.
+It contains the `personal` layout, the mods it needs, and a small local hub that connects its Inbox to GitHub.
 Nothing in it depends on the author's machine.
 
 ## For an AI agent: set this up on a new machine
@@ -24,24 +24,29 @@ Stop and report if a step fails, instead of working around it.
    - `herdr-app status` shows `"layout": "personal"` and `"errors": []`.
    - The installer printed `hub started on 127.0.0.1:<port>`.
    - Open the Inbox page from the page icons at the top of the sidebar and confirm it lists the user's GitHub PRs and issues without error text.
-6. Report what is not connected: Google Calendar (needs the steps below) and the pages listed under "What is and is not connected".
+6. Report what is not connected: the pages listed under "What is and is not connected".
 
 Do not edit files under `mods/` of the Herdr home by hand afterwards.
 Change this package in the repository and run the installer again instead.
 
 ## What you get
 
-- A sidebar with spaces and agents, a top bar with tabs, a status bar, and a center area that switches between your terminals and the Inbox, Meetings and other pages.
-- An Inbox page backed by your GitHub account, grouped by repository: your PRs with CI and merge readiness, review requests, your open issues, failing or running workflow runs, and repositories whose default branch CI is failing.
+- A sidebar with spaces and agents, a top bar with tabs, a status bar, and a center area that switches between your terminals, the Inbox and the other pages.
+- An Inbox page backed by your GitHub account, with a tab each for pull requests, issues and Actions, each grouped by repository: your PRs with CI and merge readiness, review requests, your open issues, failing or running workflow runs, and repositories whose default branch CI is failing.
 - A review window opened from any PR row: read the diff, comment on lines, approve, request changes or comment, merge, and see why a check failed and re-run it, without leaving Herdr.
-- A Meetings page backed by Google Calendar (read only).
+- An Agents page: a trading card each for Claude, Codex and Copilot, and under the picked one its instructions, skills, plugins and MCP servers, read from this machine.
+- "Assign to agent" on any issue: a fresh worktree and a Claude, Codex or Copilot session in its own tab, working towards a pull request.
 
 ## Requirements
 
 - The Herdr app, started at least once (it creates `~/.config/herdr-app`).
-- Python 3.9 or newer.
+- Python 3.9 or newer (the one macOS ships works).
+  Turning Codex's skills, plugins and MCP servers on and off also needs Python 3.11 or the `tomli` package; without either the Agents page still shows Codex, with its switches off and a note saying why.
 - The [GitHub CLI](https://cli.github.com), signed in with `gh auth login`.
   The hub reads GitHub through it, so no token is stored anywhere in this setup.
+  Without it the Inbox says so and the rest of the layout works.
+- Optional: Claude Code, Codex and GitHub Copilot CLI, for the Agents page and for "Assign to agent".
+  One that is not installed shows as a grey card, and is left out of the agent picker.
 
 ## Install
 
@@ -59,14 +64,15 @@ The installer:
 - copies the layout and the mods `personal` and `workspace-chrome-swiss`,
 - installs the hub into `<herdr home>/cockpit-hub` and writes `cockpit.json` so the mods find it,
 - adds the layout's shortcuts to `keys.json` without replacing any key you already have,
+- keeps worktrees in `<herdr home>/worktrees` by setting Herdr's `worktrees.directory` in `settings.json`, unless you already chose a folder,
 - runs `herdr-app check` on each mod and starts the hub once to prove it works.
 
 Anything it replaces is moved to `<herdr home>/.install-backups/<time>/` first.
 If your `cockpit.json` already points at another cockpit, the installer leaves it alone and says so.
 
 The Herdr app starts the hub by itself when a page needs it.
-This is tested on Windows.
-On macOS and Linux the mods use the same mechanism as the original cockpit (`env <launcher> hub start`), but that path is not tested yet.
+This is tested on Windows and macOS.
+On macOS and Linux the mods start it with `HOME` set to the hub's folder; the hub puts back the account's real home, so `gh` finds its login and `git` its config.
 If a page says it cannot reach the hub, run `<herdr home>/cockpit-hub/cockpit-hub hub start` once.
 
 ## Herdr version
@@ -75,8 +81,10 @@ This setup was built and tested with herdr-app 0.1.16.
 The installer prints a warning when your version is different.
 It does not stop, because a newer version often works.
 
-Herdr rewrites its shipped mods (`tabs`, `files`, `changes`, `menu`, `prompt`, `shortcut-help`) at every start.
-The layout uses them, so a newer Herdr can change how the top bar, file panels or menus look.
+Herdr rewrites its shipped mods at every start.
+The layout shows `tabs`, `files` and `changes` and opens `help` and `picker`, so a newer Herdr can change how the top bar, file panels or menus look.
+The installer names any of them a Herdr version lacks, and that part of the window then stays empty rather than failing.
+The agents' logos on the Agents page are Herdr's too (`icons/claude.svg`, `codex.svg`, `copilot.svg`); a Herdr without one shows a robot icon in its place.
 If something looks wrong after an upgrade:
 
 - Run `herdr-app check <herdr home>/mods/<mod>` for `personal` and `workspace-chrome-swiss`, and read any error.
@@ -86,56 +94,98 @@ The theme (`paper` and `graphite`) and the fonts (Geist for the UI) ship with He
 
 ## Upgrading from the previous package
 
-The previous version of this package shipped a calendar-only hub in `calendar-cockpit/` and the mods `personal-swiss` and `herdr-critters`.
+Earlier versions of this package shipped a calendar-only hub in `calendar-cockpit/`, the mods `personal-swiss` and `herdr-critters`, and the To-do, Runbook and Meetings pages (with Google Calendar in the hub).
 To move to this version:
 
 1. Run `python install.py --activate --force-hub`.
    The installer would otherwise leave your existing `cockpit.json`, which points at the old hub, alone.
-2. If you had set up Google Calendar, copy `calendar-cockpit/credentials.json` to `cockpit-hub/credentials.json` and `calendar-cockpit/data/token.json` to `cockpit-hub/data/token.json` in your Herdr home, or run `cockpit-hub auth` again.
-3. Delete `calendar-cockpit/`, `mods/personal-swiss` and `mods/herdr-critters` from your Herdr home when you like.
+   It also fixes the layout's old shortcuts that pointed at pages it does not have, and keeps any shortcut you changed.
+2. Delete `calendar-cockpit/`, `mods/personal-swiss` and `mods/herdr-critters` from your Herdr home when you like, and `cockpit-hub/credentials.json` and `cockpit-hub/data/` if you had set up Google Calendar.
    The installer does not delete anything it did not replace, and nothing uses them any more.
-
-## Google Calendar (optional)
-
-1. Enable the Google Calendar API in a Google Cloud project.
-2. Create OAuth credentials of type "Desktop app".
-3. Save the downloaded JSON as `<herdr home>/cockpit-hub/credentials.json`.
-4. Run `<herdr home>/cockpit-hub/cockpit-hub auth` once (`cockpit-hub.cmd` on Windows).
-
-The hub asks only for the read only `calendar.events.readonly` scope.
-Your token is stored in `<herdr home>/cockpit-hub/data/token.json`.
-Neither file is ever part of this repository.
 
 ## What is and is not connected
 
-Only two pages have a real backend in the bundled hub.
+Only the Inbox has a real backend in the bundled hub: GitHub, through `gh`.
 
-| Page | Backend |
-|---|---|
-| Inbox | GitHub, through `gh` |
-| Meetings | Google Calendar |
-
-The layout also contains pages that belong to the full cockpit: the home dashboard, queue, todo, mail, monitor, routines and runbook.
+The layout also contains pages that belong to the full cockpit: the home dashboard, queue, mail, monitor and routines.
 The bundled hub does not implement their data, so they stay empty or on "Loading".
 The status counts and agent lists that come from the hub are stubs for the same reason.
 
-The Inbox writes to GitHub in four places: "File issue" (type the repository as `owner/name` in the team field), reviews, merges and re-runs of failed jobs.
-Changing a ticket's status, auto-merge, the merge queue and starting work from a row are not implemented.
+The Inbox writes to GitHub in five places: "File issue" (type the repository as `owner/name` in the team field), reviews, merges, re-runs of failed jobs, and assigning an issue to you when you give it to an agent.
+Changing an issue's status, auto-merge and the merge queue are not implemented.
 
 ## How the Inbox is organized
 
-By default the Inbox has one heading per repository, holding everything about it:
+The Inbox has three tabs, each with its count; click one or press `1`, `2` or `3`, and the Inbox remembers the last one:
 
-- a failing default-branch alert and failing or running workflow runs first, then review requests, then your PRs, then your tickets;
-- a summary on the heading (`CI failing` in red, review requests in amber, then PR and ticket counts) so a folded repository still tells you what is in it;
-- repositories that need you come first (failing CI, then review requests, then open PRs), the rest by how recently they were pushed;
-- repositories with only tickets start folded, the others start open.
+- **Pull requests**: your open PRs and the ones you are asked to review;
+- **Issues**: open issues assigned to you or opened by you;
+- **Actions**: failing or running workflow runs, and repositories whose default branch CI is failing.
 
-Press `w` to switch to the older arrangement by kind (alerts, reviews, your PRs, runs, tickets).
-`/` filters by repository name as well as by title.
+Inside a tab there is one heading per repository, all unfolded:
+
+- what is wrong first (a failing default branch, failing runs), then review requests, then your PRs;
+- a summary on the heading (`CI failing` in red, review requests in amber, then PR and issue counts);
+- repositories that need you come first (failing CI, then review requests, then open PRs), the rest by how recently they were pushed.
+
+Press `w` to switch to the older arrangement by kind within the tab.
+`/` filters the tab by repository name as well as by title.
 
 Workflow runs are shown only when they matter: the latest run of each workflow on the default branch and on the branches of your open PRs (and the PRs you are asked to review), if it failed in the last seven days or is still going.
 They are read for up to twelve repositories at a time, and a repository whose runs cannot be read simply shows none.
+
+## The Agents page
+
+`cmd-alt-2` (or the bot icon in the sidebar) shows a card for each coding agent: its version, how many skills, plugins and MCP servers it has, and what needs a look (MCP servers waiting for a sign-in, anything that could not be read).
+Click a card or press `1` to `3` to pick an agent, and `i`, `s`, `p` or `m` to show its instructions, skills, plugins or MCP servers; `R` reads everything again.
+
+| | Instructions | Skills | Plugins and MCP servers |
+|---|---|---|---|
+| Claude | `~/.claude/CLAUDE.md` | `~/.claude/skills` (yours and synced from claude.ai) and its plugins' skills | `claude plugin list`, `claude mcp list` |
+| Codex | `~/.codex/AGENTS.md` | `~/.codex/skills` and `~/.agents/skills`, marked off when `config.toml` turns them off | `codex plugin list`, `codex mcp list` |
+| Copilot | `~/.copilot/copilot-instructions.md` | `copilot skill list` | `copilot plugin list`, `copilot mcp list` |
+
+It also changes them:
+
+- **Instructions and skills**: `e` (or Edit) opens the instructions file in Herdr's editor on the page, and the pencil on a skill opens its `SKILL.md`; `⌘S` saves, `esc` closes (twice with unsaved edits).
+  A save is refused when the file changed on disk since it was opened, so an agent's own edit is never overwritten; a missing instructions file can be created.
+- **On and off**: skills, plugins and MCP servers all show the same enabled or disabled badge (an MCP server also its connection state), enabled first, with a switch wherever the agent can turn the item on or off:
+
+  | | Skills | Plugins | MCP servers |
+  |---|---|---|---|
+  | Claude | no switch (Claude has none for one skill) | `claude plugin enable\|disable` | no switch (`claude mcp` has none) |
+  | Codex | `config.toml` | `config.toml` | `config.toml`, for servers it defines (a plugin's server follows its plugin) |
+  | Copilot | `copilot skill enable\|disable` | `copilot plugin enable\|disable` | `copilot mcp enable\|disable` |
+
+  Codex has no such commands, so the hub changes the one `enabled` value in `~/.codex/config.toml`, after a daily backup (`config.toml.bak-cockpit-<date>`), and only when the file still parses to what it was with just that value changed.
+- Changes apply to sessions started afterwards; an agent already running keeps what it loaded.
+
+An MCP server shows its name, transport, state and the host of its URL, never its environment, headers, arguments or tokens.
+`claude mcp list` checks every server, so the hub keeps the result five minutes.
+The cards' logos are Herdr's own (`icons/`), redrawn by the hub at 256 px into `cockpit-hub/cache/marks/`, because Herdr's files are sized for 16 px and blur when scaled up.
+
+## Assigning an issue to an agent
+
+Select an issue and press `s` (or click its bot icon), pick the agent, and confirm:
+
+1. A dialog shows the plan first: the local clone, the branch `issue-<n>-<title>` from `origin/<default branch>`, the new worktree, assigning the issue to you, and the tab that opens.
+   It says what stops it instead (no local clone, the worktree or branch already exists, the issue is closed, no agent installed) and keeps Start disabled.
+2. The **Agent** dropdown offers Claude, Codex and Copilot, with their marks; `1`, `2` and `3` pick one, and the next dialog opens on the last one picked.
+   One that is not installed is left out and named.
+3. On Start the hub fetches the repository, creates the branch and the worktree, and assigns the issue to you on GitHub; the Inbox opens the tab `issue-<n>` in the background with the agent and its task.
+4. The issue's row then shows that agent and its state (working, blocked, done); a click goes to it, and `s` on that issue goes to it instead of starting a second one.
+
+The worktree goes where Herdr's own worktree feature puts them, `<worktrees.directory>/<clone folder>/<branch>` (the installer sets `worktrees.directory` to `<herdr home>/worktrees`), so Herdr lists it too.
+The local clone is found by its `origin`, under `~/Documents/Development/Repositories`, `~/Developer`, `~/code`, `~/src`, `~/projects`, `~/repos` and `~/git`.
+
+The agent's task is `hub/worker-prompt.md`: the issue's address and the rules, never the issue's own text.
+It reads the issue itself and treats it as untrusted, follows the repository's own instructions, tests, commits, opens a pull request that closes the issue, and never merges.
+
+`<herdr home>/cockpit-hub/settings.json` (optional, never overwritten) changes the defaults:
+
+```json
+{ "repos": { "owner/name": "~/path/to/clone" }, "roots": ["~/work"], "agent": "codex", "agents": { "claude": ["claude", "--model", "opus"] } }
+```
 
 ## Reviewing a pull request
 
@@ -227,11 +277,13 @@ The pictures come from the herdr-critters mod, whose upstream repository does no
 
 ```
 layouts/personal.json, personal.svg   the layout and its settings preview
-mods/personal                         the pages (Inbox, Meetings, Home and others), the PR review window and the sidebar
+mods/personal                         the pages (Inbox, Agents, Home and others), the PR review window and the sidebar
 mods/personal/critters/art            the sidebar's critter pictures
 mods/workspace-chrome-swiss           the header, shortcuts button and footer (reads your brand)
-hub/                                  the local hub (Python) and its launchers
-tests/                                unit tests: the hub's GitHub code (Python) and the inbox grouping (Node)
+hub/                                  the local hub (Python), its launchers, and the agent's task (worker-prompt.md)
+tests/                                unit tests: the hub's GitHub code, the issue start, the agent profiles and the installer, and the package itself
+                                      (every asset it names is in it, every page it links to exists, a fresh install is complete) (Python);
+                                      the inbox's tabs and grouping (Node)
 package.json                          marks the JavaScript as ES modules, so `node --test tests/*.test.mjs` runs
 keys.layout-personal.json             the layout's shortcuts
 install.py                            the installer
@@ -242,5 +294,6 @@ RECIPE.md                             the brief to rebuild this layout from scra
 
 - The hub listens on `127.0.0.1` only and requires a random token that the mods read from a local file.
 - GitHub access uses your existing `gh` login.
-- Do not commit `credentials.json` or `data/token.json`.
-  The included `.gitignore` already excludes them.
+- An agent started from the Inbox gets the issue's address, never its text, and is told to treat what it reads there as untrusted.
+  The hub accepts only an agent's name from the Inbox, never a command.
+- An earlier version kept a Google token in `cockpit-hub/data/`; the included `.gitignore` still excludes `credentials.json` and `data/`.

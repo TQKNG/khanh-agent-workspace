@@ -1,4 +1,4 @@
-// The side panel's activity bar: one icon per panel (Documents, Review, Runbook, Files, Changes), the shown one marked by
+// The side panel's activity bar: one icon per panel (Documents, Review, Files, Changes), the shown one marked by
 // an accent edge, each with the badge its view publishes as shared `badge.<name>` = {count, tone}; a click switches the
 // panel, the last button closes it.
 
@@ -11,9 +11,8 @@ import { findNode, PANELS } from "./status.js";
 const ITEMS = [
   { name: "show", icon: "layers", label: "Documents", key: "⌃⌘1" },
   { name: "review", icon: "message-square", label: "Review", key: "⌃⌘2" },
-  { name: "runbook", icon: "book", label: "Runbook", key: "⌃⌘3" },
-  { name: "files", icon: "folder", label: "Files", key: "⌃⌘4" },
-  { name: "changes", icon: "git-commit", label: "Changes", key: "⌃⌘5" },
+  { name: "files", icon: "folder", label: "Files", key: "⌃⌘3" },
+  { name: "changes", icon: "git-commit", label: "Changes", key: "⌃⌘4" },
 ];
 
 export default class Activity {
