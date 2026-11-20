@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/TQKNG/khanh-agent-workspace/compare/v0.3.0...v0.3.1) (2026-11-20)
+
+
+### Bug Fixes
+
+* **herdr-layout:** give codex plugin list time to answer ([#10](https://github.com/TQKNG/khanh-agent-workspace/issues/10)) ([9759b58](https://github.com/TQKNG/khanh-agent-workspace/commit/9759b58ec792d0ae2d88692748e34c4c97ac0980))
+
 ## [0.3.0](https://github.com/TQKNG/khanh-agent-workspace/compare/v0.2.2...v0.3.0) (2026-11-20)
 
 
