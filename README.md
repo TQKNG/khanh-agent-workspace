@@ -122,6 +122,8 @@ For repository-driven documentation, try:
 
 ## Upgrade
 
+Each release has its notes on the repository's [Releases](https://github.com/TQKNG/khanh-agent-workspace/releases) page and in `CHANGELOG.md`; see [RELEASING.md](RELEASING.md) for how versions are made.
+
 Refresh the marketplace after a new version is published:
 
 ```powershell
