@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/TQKNG/khanh-agent-workspace/compare/v0.6.0...v0.6.1) (2026-11-20)
+
+
+### Bug Fixes
+
+* **herdr-layout:** fix low contrast and overlapping text on agent cards ([#25](https://github.com/TQKNG/khanh-agent-workspace/issues/25)) ([939d4da](https://github.com/TQKNG/khanh-agent-workspace/commit/939d4da0bb96c8c3a7dd9b00a9cc06373dd65508)), closes [#24](https://github.com/TQKNG/khanh-agent-workspace/issues/24)
+
 ## [0.6.0](https://github.com/TQKNG/khanh-agent-workspace/compare/v0.5.0...v0.6.0) (2026-11-20)
 
 
