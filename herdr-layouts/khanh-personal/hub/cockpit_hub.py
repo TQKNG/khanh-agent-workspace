@@ -21,6 +21,7 @@ from socketserver import ThreadingMixIn, StreamRequestHandler, TCPServer
 import agent_profiles
 import github_inbox
 import github_checks
+import github_draft
 import github_pulls
 import github_start
 
@@ -81,7 +82,7 @@ WRITES = {
     "rerun_failed": lambda args: github_checks.rerun_failed(first_dict(args)),
     "start": lambda args: github_start.start(first_dict(args)),
 }
-FETCHERS = {kind: module.fetch for module in (github_pulls, github_checks, github_start, agent_profiles) for kind in module.KINDS}
+FETCHERS = {kind: module.fetch for module in (github_pulls, github_checks, github_start, github_draft, agent_profiles) for kind in module.KINDS}
 
 
 def with_worktrees(model: dict) -> dict:

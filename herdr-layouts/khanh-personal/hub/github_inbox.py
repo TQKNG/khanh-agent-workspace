@@ -662,11 +662,23 @@ def fetch(kind: str, args: dict) -> dict:
 
 
 def file_issue(spec: dict) -> str:
+    """Files the issue the dialog shows. An issue type or labels (from a draft) go in one REST call, since `gh issue create` has no
+    flag for a type; without them the call is the same as before."""
     title = str(spec.get("title") or "").strip()
     repo = str(spec.get("team") or "").strip()
+    body = str(spec.get("description") or "")
+    issue_type = str(spec.get("type") or "").strip()
+    labels = [str(name).strip() for name in spec.get("labels") or [] if str(name).strip()]
     if not title:
         raise GitHubError("An issue needs a title.")
     if not REPO_RE.match(repo):
-        raise GitHubError("Type the repository as owner/name in the Team key field.")
-    url = gh(["issue", "create", "--repo", repo, "--title", title, "--body", str(spec.get("description") or "")]).strip()
+        raise GitHubError("Type the repository as owner/name in the Repository field.")
+    if issue_type or labels:
+        payload = {"title": title, "body": body, **({"type": issue_type} if issue_type else {}), **({"labels": labels} if labels else {})}
+        created = json.loads(gh(["api", f"repos/{repo}/issues", "--method", "POST", "--input", "-"], stdin=json.dumps(payload)))
+        url = str(created.get("html_url") or "").strip()
+        if not url:
+            raise GitHubError("GitHub did not return the new issue.")
+    else:
+        url = gh(["issue", "create", "--repo", repo, "--title", title, "--body", body]).strip()
     return f"Filed {url}"

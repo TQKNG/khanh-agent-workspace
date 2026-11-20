@@ -102,7 +102,7 @@ sequenceDiagram
     H-->>HC: view updates (pushed)
     HC-->>UI: model
     UI->>HC: hover a PR
-    HC->>H: fetch review_threads / pr_merge / ticket_card / start_plan / agent_profiles
+    HC->>H: fetch review_threads / pr_merge / ticket_card / start_plan / issue_draft / agent_profiles
     H-->>HC: top-level reply object
     UI->>HC: click an action
     HC->>H: act request_refresh / file_issue / submit_review / merge / start / open_url, toggle (agents)

@@ -111,7 +111,9 @@ The layout also contains pages that belong to the full cockpit: the home dashboa
 The bundled hub does not implement their data, so they stay empty or on "Loading".
 The status counts and agent lists that come from the hub are stubs for the same reason.
 
-The Inbox writes to GitHub in five places: "File issue" (type the repository as `owner/name` in the team field), reviews, merges, re-runs of failed jobs, and assigning an issue to you when you give it to an agent.
+The Inbox writes to GitHub in five places: "File issue" (type the repository as `owner/name`), reviews, merges, re-runs of failed jobs, and assigning an issue to you when you give it to an agent.
+"File issue" can also draft the issue from a short idea: an agent (Claude or Codex) writes the title, body and type, using the `github-issues` skill when it is installed in `~/.agents/skills/github-issues`.
+The draft is shown for editing, and nothing is posted until you click "File it".
 Changing an issue's status, auto-merge and the merge queue are not implemented.
 
 ## How the Inbox is organized
