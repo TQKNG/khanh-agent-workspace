@@ -106,7 +106,8 @@ class TestHelpers(unittest.TestCase):
 
 class TestPlan(Repos):
     def test_ready_plan(self):
-        plan = self.plan(FakeGh())
+        with mock.patch.object(start.shutil, "which", side_effect=agent_on_path):
+            plan = self.plan(FakeGh())
         self.assertTrue(plan["ok"], plan["blockers"])
         ctx = plan["ctx"]
         self.assertEqual(Path(ctx["clone"]), self.clone)
@@ -125,11 +126,24 @@ class TestPlan(Repos):
         (self.trees / "r" / "issue-7-old-title").mkdir(parents=True)
         self.assertTrue(any("issue-7-old-title already exists" in b for b in self.plan(FakeGh())["blockers"]))
 
-    def test_no_clone(self):
-        self.settings.write_text(json.dumps({"roots": [str(self.root / "elsewhere")], "agents": AGENTS}))
+    def test_no_clone_is_planned_not_a_blocker(self):
+        managed = self.root.parent / "managed"
+        self.settings.write_text(json.dumps({"roots": [str(self.root / "elsewhere")], "clones": str(managed), "agents": AGENTS}))
+        with mock.patch.object(start.shutil, "which", side_effect=agent_on_path):
+            plan = self.plan(FakeGh())
+        self.assertTrue(plan["ok"], plan["blockers"])
+        self.assertEqual(plan["ctx"]["clone_repo"], "o/r")
+        self.assertEqual(Path(plan["ctx"]["clone"]), managed / "o" / "r")
+        self.assertTrue(any(step.startswith("Clone o/r into") for step in plan["steps"]))
+        self.assertFalse((managed / "o" / "r").exists(), "planning changes nothing")
+
+    def test_a_folder_in_the_way_is_a_blocker(self):
+        managed = self.root.parent / "managed"
+        (managed / "o" / "r").mkdir(parents=True)
+        self.settings.write_text(json.dumps({"roots": [str(self.root / "elsewhere")], "clones": str(managed), "agents": AGENTS}))
         plan = self.plan(FakeGh())
         self.assertFalse(plan["ok"])
-        self.assertIn("No local clone of o/r", plan["blockers"][0])
+        self.assertIn("is not a clone of o/r", plan["blockers"][0])
 
     def test_missing_agent(self):
         none = {key: ["no-such-agent-cli"] for key in AGENTS}
@@ -164,6 +178,10 @@ class TestPlan(Repos):
         self.assertNotIn("ctx", got)
 
 
+def agent_on_path(name):
+    """`sh` stands in for the agent CLIs so the start can run on any machine, Windows included."""
+    return "/bin/sh" if name == "sh" else None
+
 class TestStart(Repos):
     def test_creates_worktree_assigns_and_launches(self):
         fake = FakeGh()
@@ -186,6 +204,42 @@ class TestStart(Repos):
         self.assertIn("Do not merge", prompt)
         self.assertNotIn("Fix the login page", prompt, "the issue's own text never goes into the prompt")
         self.assertNotIn("{", prompt)
+
+    def test_clones_a_repository_it_does_not_have_first(self):
+        base = Path(self.tmp.name)
+        managed = base / "managed"
+        self.settings.write_text(json.dumps({"roots": [str(self.root / "elsewhere")], "clones": str(managed), "agents": AGENTS}))
+        # The clone's origin reads as GitHub's o/r, so the start's fetch and push reach the bare repository, as in setUp.
+        origin = base / "origin.git"
+        fake = FakeGh()
+        calls = []
+
+        def gh_fake(args, timeout=60, stdin=None):
+            if args[:2] == ["repo", "clone"]:
+                calls.append(args)
+                target = Path(args[3])
+                sh(base, "clone", "-q", str(origin), str(target))
+                sh(target, "remote", "set-url", "origin", "git@github.com:o/r.git")
+                sh(target, "config", f"url.{origin}.insteadOf", "git@github.com:o/r.git")
+                return ""
+            return fake(args, timeout, stdin)
+
+        with mock.patch.object(start, "gh", gh_fake), mock.patch.object(start.shutil, "which", side_effect=agent_on_path):
+            got = start.start({"id": URL})
+        self.assertEqual(calls, [["repo", "clone", "o/r", str(managed / "o" / "r")]])
+        self.assertTrue((managed / "o" / "r" / ".git").is_dir())
+        self.assertTrue((self.tree.parent / "issue-7-fix-the-login-page" / ".git").is_file(), "the worktree is under the new clone's project folder")
+        self.assertIn("Claude", got["note"])
+
+    def test_a_clone_already_there_is_not_cloned_again(self):
+        def gh_fake(args, timeout=60, stdin=None):
+            if args[:2] == ["repo", "clone"]:
+                raise AssertionError("the clone exists, so nothing is cloned")
+            return FakeGh()(args, timeout, stdin)
+
+        with mock.patch.object(start, "gh", gh_fake), mock.patch.object(start.shutil, "which", side_effect=agent_on_path):
+            start.start({"id": URL})
+        self.assertTrue((self.tree / ".git").is_file())
 
     def test_picked_agent(self):
         with mock.patch.object(start, "gh", FakeGh()):

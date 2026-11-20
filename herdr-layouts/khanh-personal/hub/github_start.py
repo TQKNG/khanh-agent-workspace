@@ -6,7 +6,9 @@ repository, creates the branch and worktree from origin/<default branch>, assign
 person, and returns the tab the mod opens with `tab.new`. The hub never merges, pushes or deletes.
 
 The local clone of a repository is found in cockpit-hub/settings.json (`repos`), else by looking for a
-clone whose origin is that repository under the usual folders (`roots`). Worktrees go where Herdr's own
+clone whose origin is that repository under the usual folders (`roots`) and the clones folder (`clones`,
+default <herdr home>/repos). When there is none, the start clones it with gh into the clones folder, so
+no clone has to be placed by hand. Worktrees go where Herdr's own
 worktree feature puts them, so it lists them too: <worktrees.directory>/<clone folder>/<branch>, with
 worktrees.directory from the Herdr app's settings.json (default ~/.herdr/worktrees). The agent's
 instructions come from worker-prompt.md beside this file.
@@ -66,6 +68,14 @@ def roots(config: dict) -> list[Path]:
     listed = config.get("roots")
     names = listed if isinstance(listed, list) and listed else DEFAULT_ROOTS
     return [Path(str(name)).expanduser() for name in names]
+
+
+def clones_root(config: dict) -> Path:
+    """Where the hub clones a repository it does not have yet: settings.json `clones`, else <herdr home>/repos/<owner>/<name>."""
+    listed = config.get("clones")
+    if isinstance(listed, str) and listed.strip():
+        return Path(listed.strip()).expanduser()
+    return Path(os.environ.get("HERDR_APP_HOME") or ROOT.parent) / "repos"
 
 
 def agents(config: dict) -> list[dict]:
@@ -163,7 +173,7 @@ class Clones:
         if listed:
             path = Path(str(listed)).expanduser()
             return path if (path / ".git").exists() else None
-        folders = roots(config)
+        folders = [*roots(config), clones_root(config)]
         with self.lock:
             key = tuple(str(f) for f in folders)
             if key != self.key or time.time() - self.at > SCAN_SECONDS or (fresh and repo.lower() not in self.found):
@@ -246,8 +256,11 @@ def make_plan(target: dict) -> dict:
     base = info.get("default_branch") or "main"
     branch = f"issue-{number}-{slug(issue.get('title') or '')}"
     offered = agents(config)
-    clone = CLONES.find(repo, config, fresh=True)
-    worktree = project_dir(clone) / branch if clone else None
+    found = CLONES.find(repo, config, fresh=True)
+    # No clone yet: the plan names where one will be made, and the start makes it, so opening the dialog changes nothing.
+    clone = found or clones_root(config) / owner / name
+    will_clone = found is None
+    worktree = project_dir(clone) / branch
     assignees = [a.get("login") for a in issue.get("assignees") or []]
 
     blockers = []
@@ -255,10 +268,9 @@ def make_plan(target: dict) -> dict:
         blockers.append(f"#{number} is a pull request, not an issue.")
     if issue.get("state") != "open":
         blockers.append(f"#{number} is closed.")
-    if not clone:
-        where = ", ".join(short_path(r) for r in roots(config))
-        blockers.append(f"No local clone of {repo} was found under {where}. Clone it there, or add it to cockpit-hub/settings.json under \"repos\".")
-    else:
+    if will_clone and clone.exists():
+        blockers.append(f"{short_path(clone)} exists but is not a clone of {repo}. Move or remove it, or add the clone to cockpit-hub/settings.json under \"repos\".")
+    if not will_clone:
         for existing in issue_worktrees(clone, number) or ([worktree] if worktree.exists() else []):
             blockers.append(f"{short_path(existing)} already exists, so an agent may already be on it. Open that tab, or remove the worktree first.")
         if has_ref(clone, f"refs/heads/{branch}"):
@@ -267,9 +279,9 @@ def make_plan(target: dict) -> dict:
         blockers.append(f"None of the agents ({', '.join(a['argv'][0] for a in offered)}) was found on PATH.")
 
     steps = [
-        f"Fetch origin in {short_path(clone) if clone else 'the local clone'}",
+        f"Clone {repo} into {short_path(clone)} with gh" if will_clone else f"Fetch origin in {short_path(clone)}",
         f"Create the branch {branch} from origin/{base}",
-        f"Check it out in the new worktree {short_path(worktree) if worktree else short_path(worktrees_root()) + '/<project>/' + branch}",
+        f"Check it out in the new worktree {short_path(worktree)}",
     ]
     if viewer not in assignees:
         steps.append(f"Assign #{number} to you ({viewer}) on GitHub")
@@ -287,8 +299,9 @@ def make_plan(target: dict) -> dict:
             "url": url,
             "base": base,
             "branch": branch,
-            "clone": str(clone) if clone else None,
-            "worktree": str(worktree) if worktree else None,
+            "clone": str(clone),
+            "clone_repo": repo if will_clone else None,
+            "worktree": str(worktree),
             "agents": offered,
             "assign": viewer not in assignees,
         },
@@ -331,6 +344,10 @@ def start(spec: dict) -> dict:
     if not agent["available"]:
         raise GitHubError(f"{agent['label']} (`{agent['argv'][0]}`) was not found on PATH.")
     clone, branch, base = Path(ctx["clone"]), ctx["branch"], ctx["base"]
+    if ctx.get("clone_repo") and not (clone / ".git").exists():
+        clone.parent.mkdir(parents=True, exist_ok=True)
+        gh(["repo", "clone", ctx["clone_repo"], str(clone)], timeout=600)
+        CLONES.at = 0.0  # the next scan sees the new clone
     git_ok(clone, ["fetch", "--prune", "origin"], timeout=180)
     if has_ref(clone, f"refs/remotes/origin/{branch}"):
         raise GitHubError(f"origin already has a branch {branch}: someone may be on this issue.")
