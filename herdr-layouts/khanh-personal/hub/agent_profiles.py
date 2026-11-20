@@ -40,6 +40,9 @@ KINDS = ("agent_profiles",)
 ROOT = Path(__file__).resolve().parent
 CACHE_SECONDS = 300
 CLI_TIMEOUT = 45
+# `codex plugin list` fetches the remote marketplaces, which took 58 s on a cold start; later runs answer in about 1 s.
+PLUGIN_LIST_TIMEOUT = 150
+ERROR_CACHE_SECONDS = 20  # a read with errors (a slow CLI, a missing login) is tried again soon, not kept for CACHE_SECONDS
 MAX_INSTRUCTIONS = 20_000  # characters of an instructions file the page shows
 CREATE_NO_WINDOW = 0x08000000 if os.name == "nt" else 0
 
@@ -233,7 +236,7 @@ def codex() -> dict:
     skills += skills_in(home() / ".agents" / "skills", "~/.agents", disabled, toggle=switches)
     plugins = []
     try:
-        for p in json.loads(run(["codex", "plugin", "list", "--json"])).get("installed") or []:
+        for p in json.loads(run(["codex", "plugin", "list", "--json"], timeout=PLUGIN_LIST_TIMEOUT)).get("installed") or []:
             key = p.get("pluginId") or f"{p.get('name')}@{p.get('marketplaceName')}"
             plugins.append({"name": p.get("name"), "key": key, "version": p.get("version"), "enabled": bool(p.get("enabled")), "source": p.get("marketplaceName"), "toggle": switches})
     except (RuntimeError, json.JSONDecodeError, AttributeError) as exc:
@@ -366,12 +369,17 @@ class Profiles:
 
     def get(self, refresh: bool = False) -> dict:
         with self.lock:
-            if self.value and not refresh and time.time() - self.at < CACHE_SECONDS:
+            if self.value and not refresh and time.time() - self.at < self.lifetime():
                 return self.value
             with ThreadPoolExecutor(max_workers=len(AGENTS)) as pool:
                 agents = list(pool.map(profile, AGENTS))
             self.value, self.at = {"agents": agents, "updated": time.strftime("%H:%M")}, time.time()
             return self.value
+
+    def lifetime(self) -> float:
+        """How long the last read stays fresh: a read that had errors expires quickly, so a fixed CLI shows at once."""
+        failed = any(agent.get("errors") for agent in (self.value or {}).get("agents", []))
+        return ERROR_CACHE_SECONDS if failed else CACHE_SECONDS
 
     def reread(self, agent_id: str) -> None:
         """Reads one agent again after a change to it, keeping the others as they were."""
