@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.0](https://github.com/TQKNG/khanh-agent-workspace/compare/v0.4.0...v0.5.0) (2026-11-20)
+
+
+### Features
+
+* **herdr-layout:** show remaining usage as an HP bar on agent cards ([e6586cf](https://github.com/TQKNG/khanh-agent-workspace/commit/e6586cfa65cd207fbcf705343149a1432c452b27))
+* **herdr-layout:** show remaining usage as an HP bar on agent cards ([ed0d473](https://github.com/TQKNG/khanh-agent-workspace/commit/ed0d4735ba62d5aa4b2ede1d05a0fb7fbf526718))
+
 ## [0.4.0](https://github.com/TQKNG/khanh-agent-workspace/compare/v0.3.1...v0.4.0) (2026-11-20)
 
 
