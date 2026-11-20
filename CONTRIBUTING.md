@@ -34,6 +34,9 @@ State any visual or runtime checks that could not be performed.
 
 ## Submit a pull request
 
+Write commit messages, or the pull request title for a squash merge, as [Conventional Commits](https://www.conventionalcommits.org/) such as `feat: …`, `fix: …` or `docs: …`.
+Versions and `CHANGELOG.md` are generated from them; see [RELEASING.md](RELEASING.md).
+
 Describe the problem, the affected package, and any related issue.
 List automated and manual checks with results.
 Include a preview or screenshots for visible Herdr layout changes.
