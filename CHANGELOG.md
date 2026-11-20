@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/TQKNG/khanh-agent-workspace/compare/v0.5.0...v0.6.0) (2026-11-20)
+
+
+### Features
+
+* **herdr-layout:** show a usage radar beside the logo on agent cards ([#21](https://github.com/TQKNG/khanh-agent-workspace/issues/21)) ([eb5ee1f](https://github.com/TQKNG/khanh-agent-workspace/commit/eb5ee1f54f779545080da7662a1b02858dfb6747))
+
 ## [0.5.0](https://github.com/TQKNG/khanh-agent-workspace/compare/v0.4.0...v0.5.0) (2026-11-20)
 
 
