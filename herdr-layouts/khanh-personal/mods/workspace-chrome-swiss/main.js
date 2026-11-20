@@ -84,7 +84,7 @@ export default class WorkspaceChrome extends View {
       return h_flex().size_full().bg(t.chrome).items_center().justify_center()
         .child(div().id("shortcuts").size(30).flex_none().flex().items_center().justify_center().rounded(7)
           .hover(s => s.bg(t.hover)).on_mouse_down("left", (_e, cx) => cx.stop_propagation())
-          .on_click(() => openOverlay({ mod: "shortcut-help", kind: "dialog", width: 720, height: 680 }))
+          .on_click(() => openOverlay({ mod: "help", kind: "dialog", width: 720, height: 680 }))
           .child(this.brand.shortcut_logo ? image(this.brand.shortcut_logo).size(23) : div().text_color(t.muted).font_semibold().child("?")));
     }
     if (props()?.footer) {

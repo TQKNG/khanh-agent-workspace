@@ -91,7 +91,7 @@ export default class AgentHead {
           tooltip: "Queue a prompt for it  ⌘⌥Q",
           onClick: () => {
             setShared("cockpit.queue.for", a.address);
-            run("cockpit.queue", {});
+            run("personal.queue", {});
           },
         }),
       )

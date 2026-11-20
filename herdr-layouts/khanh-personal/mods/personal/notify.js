@@ -7,7 +7,7 @@ import * as hub from "./hub.js";
 
 const LEVEL = { "🔴": "error", "❌": "error", "⚠️": "warning", "✅": "success", "🟢": "success", "🚀": "success" };
 
-const WHERE = { inbox: "the inbox", runbook: "the runbook", meeting: "Meetings", monitor: "the monitor", routine: "Routines", space: "cockpit" };
+const WHERE = { inbox: "the inbox", monitor: "the monitor", routine: "Routines", space: "cockpit" };
 
 /** A notification from the hub, {title, body, action, row, buttons}: shown as fits the window. */
 export function deliver(n, install, cx) {
@@ -28,7 +28,7 @@ export function deliver(n, install, cx) {
     level,
     icon: "mods/personal/cockpit.svg",
     timeout: level === "error" ? 12000 : 6000,
-    ...(target ? { action: { name: `cockpit.target:${target}` } } : {}),
+    ...(target ? { action: { name: `personal.target:${target}` } } : {}),
   });
 }
 

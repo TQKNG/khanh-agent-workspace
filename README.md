@@ -6,7 +6,7 @@ The Codex marketplace distributes `arc42-gitbook-docs` and `session-token-audit`
 
 The repository is also a source for reusable agent guidance that can be included in future plugins or used as shared project resources.
 
-The Herdr package distributes Khanh's personal cockpit layout, its custom mods and a local hub that connects its Inbox to GitHub and its Meetings page to Google Calendar.
+The Herdr package distributes Khanh's personal cockpit layout, its custom mods and a local hub that connects its Inbox to GitHub and its Agents page to the coding agents on the machine.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution and pull request guidance.
 
@@ -97,9 +97,9 @@ python install.py --activate
 
 The package includes `layouts/personal.json` and `layouts/personal.svg`, the `personal` mod (the pages, the PR review window and the sidebar) and the `workspace-chrome-swiss` mod, the local hub in `hub/`, `install.py`, `RECIPE.md`, `ARCHITECTURE.md` and tests.
 
-The Inbox shows your GitHub PRs, review requests, issues and workflow runs grouped by repository, and a PR can be reviewed, approved, merged and have its failed checks inspected and re-run from a review window.
-It needs Python 3.9 or newer and the GitHub CLI signed in with `gh auth login`.
-Google Calendar is optional and needs your own OAuth credentials.
+The Inbox shows your GitHub pull requests, issues and Actions in three tabs grouped by repository; a PR can be reviewed, approved, merged and have its failed checks inspected and re-run from a review window, and an issue can be assigned to Claude, Codex or Copilot in its own worktree and tab.
+The Agents page shows each coding agent's instructions, skills, plugins and MCP servers, to edit and turn on or off.
+It needs Python 3.9 or newer and the GitHub CLI signed in with `gh auth login`; the agent CLIs are optional.
 
 Set your own workspace name and logo with `python install.py --only-brand --brand-name "<name>" --brand-logo <file>`.
 If you installed the previous version of this package, follow "Upgrading from the previous package" in its README.

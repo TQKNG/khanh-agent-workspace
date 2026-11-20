@@ -9,18 +9,21 @@ All diagrams are Mermaid and render on GitHub.
 flowchart TB
     subgraph External["External services"]
         GH["GitHub<br/>(gh CLI, GraphQL)"]
-        GC["Google Calendar<br/>(OAuth, read only)"]
     end
 
     subgraph Hub["Local hub (Python, detached process)"]
         HS["cockpit_hub.py<br/>TCP server 127.0.0.1:port, token auth"]
         GI["github_inbox.py<br/>InboxSource, 55 s cache"]
+        GS["github_start.py<br/>issue to agent: plan, worktree"]
+        AP["agent_profiles.py<br/>agents' set-up, switches"]
         HS --- GI
+        HS --- GS
+        HS --- AP
     end
 
     subgraph Mods["Mods (gpui-kit JS, hot reload)"]
         HJ["personal/hub.js<br/>hub client"]
-        PG["personal (other apps)<br/>pages: inbox, meetings, home, work ..."]
+        PG["personal (other apps)<br/>pages: inbox, agents, home, work ..."]
         SB["personal (app: sidebar)<br/>sidebar page"]
         WC["workspace-chrome-swiss<br/>header, shortcuts button, footer"]
         PG --> HJ
@@ -34,7 +37,7 @@ flowchart TB
     end
 
     GH --> GI
-    GC --> HS
+    CLI["Agent CLIs<br/>claude, codex, copilot"] --> AP
     HJ <-->|"JSON lines over TCP"| HS
     LY --> PG
     LY --> SB
@@ -59,8 +62,8 @@ flowchart LR
     CENTER --> P1["home"]
     CENTER --> P2["work (terminals)"]
     CENTER --> P3["inbox"]
-    CENTER --> P4["meetings"]
-    CENTER --> P5["todo, mail, monitor,<br/>routines, runbook"]
+    CENTER --> P4["agents"]
+    CENTER --> P5["mail, monitor,<br/>routines"]
     ROOT -.-> DRAWER["floating queue drawer"]
 ```
 
@@ -94,19 +97,19 @@ sequenceDiagram
     participant HC as hub.js
     participant H as Hub
 
-    UI->>HC: need views inbox, meetings
-    HC->>H: subscribe [inbox, meetings]
+    UI->>HC: need views inbox, agents
+    HC->>H: subscribe [inbox, agents]
     H-->>HC: view updates (pushed)
     HC-->>UI: model
     UI->>HC: hover a PR
-    HC->>H: fetch review_threads / pr_merge / ticket_card
+    HC->>H: fetch review_threads / pr_merge / ticket_card / start_plan / agent_profiles
     H-->>HC: top-level reply object
     UI->>HC: click an action
-    HC->>H: act request_refresh / file_issue / submit_review / merge / open_url
+    HC->>H: act request_refresh / file_issue / submit_review / merge / start / open_url, toggle (agents)
     H-->>HC: result
 ```
 
-A failing view (for example the calendar without credentials) is isolated, so the other subscribed views keep streaming.
+A failing view is isolated, so the other subscribed views keep streaming.
 
 ## 5. Inbox data flow
 
@@ -238,9 +241,9 @@ flowchart LR
     R --> DOCS["README.md, RECIPE.md, ARCHITECTURE.md"]
     MD --> M1["personal<br/>+ critters/art"]
     MD --> M3["workspace-chrome-swiss"]
-    HB --> H1["cockpit_hub.py, github_inbox.py,<br/>github_pulls.py, github_checks.py"]
+    HB --> H1["cockpit_hub.py, github_inbox.py,<br/>github_pulls.py, github_checks.py,<br/>github_start.py, agent_profiles.py"]
     HB --> H2["cockpit-hub, cockpit-hub.cmd"]
-    HB --> H3["credentials.example.json"]
+    HB --> H3["worker-prompt.md"]
 ```
 
 ## 11. Platform notes and limits

@@ -24,7 +24,7 @@ export function findNode(node, id) {
 }
 
 /** The side panel's children by the names keys and the activity bar use. */
-export const PANELS = { show: "show", review: "review", runbook: "runbook-panel", files: "files", changes: "changes" };
+export const PANELS = { show: "show", review: "review", files: "files", changes: "changes" };
 
 /** Opens the side panel on that child, left open when it already shows it. */
 export function openPanel(name) {
@@ -106,7 +106,7 @@ export default class Status {
     else if (c.startsWith("link:")) cx.spawn(async () => hub.openUrl(c.slice(5)));
     else if (c.startsWith("doc:")) {
       openPanel("show");
-      run("cockpit.show:go:" + c.slice(4));
+      run("personal.show:go:" + c.slice(4));
     }
     cx.notify();
   }
@@ -178,7 +178,7 @@ export default class Status {
           }),
         );
     }
-    if (queued) right.push(item("st-queue", [Icon("list-ordered", { size: 14, color: k.info }), div().child(w >= 800 ? `${queued} queued` : String(queued))], { tooltip: "Prompts waiting to be sent  ⌘⌥Q", onClick: () => run("cockpit.queue", {}) }));
+    if (queued) right.push(item("st-queue", [Icon("list-ordered", { size: 14, color: k.info }), div().child(w >= 800 ? `${queued} queued` : String(queued))], { tooltip: "Prompts waiting to be sent  ⌘⌥Q", onClick: () => run("personal.queue", {}) }));
     if (lost) right.push(item("st-lost", [Icon("rotate-ccw", { size: 14, color: k.info }), div().text_color(k.info).child(`${lost} to resume`)], { tooltip: "Agents a restart stopped: resume them  ⌘⌥R", onClick: (_e, cx) => cx.spawn(async () => hub.act("home", "resume", [])) }));
     // The hub shows only when it does not answer.
     if (this.state !== "live") right.push(item("st-hub", [dot(this.state === "connecting" ? k.warning : k.destructive), div().child(this.state === "connecting" ? "connecting" : "hub offline")], { tooltip: this.state }));

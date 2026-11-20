@@ -4,9 +4,9 @@
 // Rhythm: a 4px grid, 13px body, 12px secondary, 11px captions; radius 8 (cards), 6 (controls), 4 (checkbox, kbd);
 // 1px borders; muted-foreground for what is secondary; color only for state.
 
-import { div, svg, PathBuilder, Background } from "gpui-kit";
+import { div, svg, image, PathBuilder, Background } from "gpui-kit";
 import { h_flex, v_flex, Input, HoverCard as BaseHoverCard } from "gpui-base";
-import { theme, settings, openOverlay } from "herdr";
+import { theme, settings, openOverlay, readTextFile, appHome } from "herdr";
 
 export const RADIUS = { sm: 4, md: 6, lg: 8, xl: 12 };
 export const TEXT = { xs: 11, sm: 12, base: 13, lg: 15, xl: 18 };
@@ -54,6 +54,31 @@ export function alpha(color, a) {
 // Primitives
 
 /** A lucide icon from icons/, tinted with `color` (else the text color). */
+/** Herdr's marks for the agents it knows (icons/ in the Herdr home): full colour, so drawn as images, not tinted icons. */
+export const AGENT_MARKS = [
+  { match: "codex", image: "icons/codex.svg" },
+  { match: "claude", image: "icons/claude.svg" },
+  { match: "copilot", image: "icons/copilot.svg" },
+];
+
+// Which of those Herdr has: they ship with Herdr, not with this layout, so a version without one draws the kit's icon
+// instead of a blank square. Looked up once, the first time a mark is asked for.
+const MARKS_FOUND = new Set();
+let marksLooked = false;
+function lookForMarks() {
+  marksLooked = true;
+  for (const entry of AGENT_MARKS)
+    readTextFile(`${appHome()}/${entry.image}`).then((text) => text && MARKS_FOUND.add(entry.image), () => {});
+}
+
+/** An agent's mark from its id or its program's name ("claude", "Claude Code"), once Herdr is known to have it; else null. */
+export function agentMark(name) {
+  if (!marksLooked) lookForMarks();
+  const text = String(name ?? "").toLowerCase();
+  const image = AGENT_MARKS.find((entry) => text.includes(entry.match))?.image;
+  return image && MARKS_FOUND.has(image) ? image : null;
+}
+
 export function Icon(name, { size = 16, color } = {}) {
   const el = svg(`mods/personal/icons/${name}.svg`).size(size).flex_none();
   return color ? el.text_color(color) : el;
@@ -148,7 +173,7 @@ const SIZE = { default: [32, 12, TEXT.base, 16], sm: [28, 10, TEXT.sm, 14], lg: 
  * A button: variant default | secondary | outline | ghost | destructive | link, size default | sm | lg | icon |
  * icon-sm; `kbd` shows its key; `tooltip` on hover. `onClick(event, cx)`.
  */
-export function Button(id, { label, icon, iconRight, variant = "default", size = "default", kbd, disabled = false, tooltip, onClick, grow = false } = {}) {
+export function Button(id, { label, icon, picture, iconRight, variant = "default", size = "default", kbd, disabled = false, tooltip, onClick, grow = false } = {}) {
   const k = tokens();
   const v = (BUTTON[variant] ?? BUTTON.default)(k);
   const [h, px, text, iconSize] = SIZE[size] ?? SIZE.default;
@@ -170,6 +195,7 @@ export function Button(id, { label, icon, iconRight, variant = "default", size =
   if (v.bg) el = el.bg(v.bg);
   if (v.border) el = el.border_1().border_color(v.border);
   if (icon) el = el.child(Icon(icon, { size: iconSize }));
+  if (picture) el = el.child(image(picture).size(iconSize).flex_none());
   if (label && !square) el = el.child(label);
   if (iconRight) el = el.child(Icon(iconRight, { size: iconSize }));
   if (kbd && !square) el = el.child(Kbd(kbd));
@@ -712,7 +738,7 @@ export class Toaster {
  * A list of fixed-height rows that keeps the selected one in view: only the rows on screen are drawn, the wheel
  * scrolls, a thin bar shows where it is. Keep one per list on the view (created in init), and call `view()` in render:
  *
- *   this.scroller.view("todo-list", rows.map((r) => ({ height: 36, el: ListRow(...) })), selectedIndex)
+ *   this.scroller.view("rows", rows.map((r) => ({ height: 36, el: ListRow(...) })), selectedIndex)
  */
 export class Scroller {
   constructor() {
@@ -806,7 +832,7 @@ export function HoverCard(id, trigger, content, { width = 320, openDelay = 500 }
 
 /**
  * A right-click menu at the pointer: items [{ label, icon, kbd, command, destructive } | "separator"]. Choosing one
- * runs `cockpit.<command>`, which reaches the view's `command()` (give commands a prefix of the view's own).
+ * runs `personal.<command>`, which reaches the view's `command()` (give commands a prefix of the view's own).
  */
 export function openMenu(items, { width = 220 } = {}) {
   const rows = items.filter(Boolean);
@@ -1117,7 +1143,7 @@ export function dur(ms) {
 }
 
 /** A fact as a chip: a faint tint of its state color behind it (12%, 22% on hover), mono for what you would type. */
-export function Chip(text, { id, color, mono = false, icon, tooltip, onClick } = {}) {
+export function Chip(text, { id, color, mono = false, icon, picture, tooltip, onClick } = {}) {
   const k = tokens();
   let el = h_flex()
     .h(22)
@@ -1132,6 +1158,7 @@ export function Chip(text, { id, color, mono = false, icon, tooltip, onClick } =
     .when(mono, (e) => e.font_family("JetBrains Mono"))
     .when(!mono, (e) => e.font_medium());
   if (icon) el = el.child(Icon(icon, { size: 12 }));
+  if (picture) el = el.child(image(picture).size(12).flex_none());
   el = el.child(div().max_w(220).truncate().child(String(text ?? "")));
   if (id) el = el.id(id);
   if (id && onClick)

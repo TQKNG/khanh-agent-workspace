@@ -1,7 +1,8 @@
 // A right-click menu (shadcn's <ContextMenu>), opened by ui.js's openMenu() at the pointer: each item runs
-// `cockpit.<command>`, which reaches the shown views' command(). ↑/↓ and Enter work, Esc closes.
+// `personal.<command>`, which reaches the shown views' command(). An item shows an `icon`, or an `image` in its own
+// colours (an agent's mark), and a check when `checked`. ↑/↓ and Enter work, Esc closes.
 
-import { div } from "gpui-kit";
+import { div, image } from "gpui-kit";
 import { h_flex, v_flex } from "gpui-base";
 import { props, run, closeOverlay } from "herdr";
 import { tokens, TEXT, RADIUS, Icon, Kbd } from "./ui.js";
@@ -15,7 +16,7 @@ export default class Menu {
 
   choose(item) {
     closeOverlay(props().overlay);
-    if (item?.command) run(`cockpit.${item.command}`);
+    if (item?.command) run(`personal.${item.command}`);
   }
 
   render() {
@@ -58,8 +59,9 @@ export default class Menu {
                 .when(pickable[this.at] === item, (e) => e.bg(k.accent))
                 .hover((s) => s.bg(k.accent))
                 .on_click(() => this.choose(item))
-                .child(item.icon ? Icon(item.icon, { size: 16, color: item.destructive ? k.destructive : k.mutedFg }) : div().w(16))
+                .child(item.image ? image(item.image).size(16).flex_none() : item.icon ? Icon(item.icon, { size: 16, color: item.destructive ? k.destructive : k.mutedFg }) : div().w(16))
                 .child(div().flex_1().truncate().child(item.label))
+                .when(Boolean(item.checked), (e) => e.child(Icon("check", { size: 14, color: k.mutedFg })))
                 .when(Boolean(item.kbd), (e) => e.child(Kbd(item.kbd))),
         ),
       );

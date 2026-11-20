@@ -24,3 +24,11 @@ jobs:
           node-version: '22'
       - run: python -m unittest discover -s herdr-layouts/khanh-personal/tests -v
       - run: node --test herdr-layouts/khanh-personal/tests/*.test.mjs
+  python-3-9:
+    # macOS ships Python 3.9, so the hub must start and its tests pass there; setup-python no longer offers it.
+    runs-on: ubuntu-latest
+    container: python:3.9-slim
+    steps:
+      - run: apt-get update && apt-get install -y --no-install-recommends git
+      - uses: actions/checkout@v4
+      - run: python -m unittest discover -s herdr-layouts/khanh-personal/tests -v

@@ -131,7 +131,6 @@
                       "children": [
                         { "id": "show", "type": "block", "content": { "mod": "personal", "props": { "app": "show" } } },
                         { "id": "review", "type": "block", "content": { "mod": "personal", "props": { "app": "review" } } },
-                        { "id": "runbook-panel", "type": "block", "content": { "mod": "personal", "props": { "app": "runbook", "scope": "focused" } } },
                         { "id": "files", "type": "block", "content": { "mod": "files" } },
                         { "id": "changes", "type": "block", "content": { "mod": "changes" } }
                       ]
@@ -142,9 +141,7 @@
               ]
             },
             { "id": "inbox", "type": "block", "content": { "mod": "personal", "props": { "app": "inbox" } }, "radius": 6, "border": { "width": 1, "color": "border" }, "background": "background" },
-            { "id": "runbook", "type": "block", "content": { "mod": "personal", "props": { "app": "runbook" } }, "radius": 6, "border": { "width": 1, "color": "border" }, "background": "background" },
-            { "id": "todo", "type": "block", "content": { "mod": "personal", "props": { "app": "todo" } }, "radius": 6, "border": { "width": 1, "color": "border" }, "background": "background" },
-            { "id": "meetings", "type": "block", "content": { "mod": "personal", "props": { "app": "meetings" } }, "radius": 6, "border": { "width": 1, "color": "border" }, "background": "background" },
+            { "id": "agents", "type": "block", "content": { "mod": "personal", "props": { "app": "agents" } }, "radius": 6, "border": { "width": 1, "color": "border" }, "background": "background" },
             { "id": "monitor", "type": "block", "content": { "mod": "personal", "props": { "app": "monitor" } }, "radius": 6, "border": { "width": 1, "color": "border" }, "background": "background" },
             { "id": "routines", "type": "block", "content": { "mod": "personal", "props": { "app": "routines" } }, "radius": 6, "border": { "width": 1, "color": "border" }, "background": "background" },
             { "id": "mail", "type": "block", "content": { "mod": "personal", "props": { "app": "mail" } }, "radius": 6, "border": { "width": 1, "color": "border" }, "background": "background" }
