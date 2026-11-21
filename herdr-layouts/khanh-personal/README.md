@@ -48,6 +48,16 @@ Change this package in the repository and run the installer again instead.
 - Optional: Claude Code, Codex and GitHub Copilot CLI, for the Agents page and for "Assign to agent".
   One that is not installed shows as a grey card, and is left out of the agent picker.
 
+### Agent card usage readings
+
+Codex usage is read from local session logs.
+Claude usage is captured from Claude Code's documented status-line JSON after a session receives its first API response.
+To enable it, add `"statusLine": {"type": "command", "command": "python3 <herdr home>/cockpit-hub/claude_status.py"}` to `~/.claude/settings.json`, replacing `<herdr home>` with the installed Herdr home.
+If a status line is already configured, incorporate the capture script into that command so the existing display is preserved.
+Copilot usage requires the optional official Python SDK: create `<herdr home>/cockpit-hub/.venv` and install `github-copilot-sdk` in it.
+The reader uses the signed-in Copilot CLI account and shows a bar only when the SDK returns a current finite quota.
+When a provider has no current reading, the card shows an empty track with an explanation instead of treating missing data as zero remaining.
+
 ## Install
 
 ```sh

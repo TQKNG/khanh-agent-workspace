@@ -367,11 +367,12 @@ class TestUsage(Home):
 
     def test_a_profile_carries_its_agents_usage(self):
         self.sessions("rollout-2026-11-18T10-00-00-a.jsonl", codex_event("2026-11-18T10:00:00.000Z", codex_limits(15.0, 1795100000, 96.0, 1795235821)))
-        got = self.profiles()
+        agents = [{**agent, "usage": (lambda: {"state": "unreadable", "reason": "no current reading"}) if agent["id"] != "codex" else agent["usage"]} for agent in ap.AGENTS]
+        with mock.patch.object(ap, "AGENTS", agents):
+            got = self.profiles()
         self.assertEqual(got["codex"]["usage"]["state"], "read")
-        self.assertEqual(got["claude"]["usage"]["state"], "not_exposed")
-        self.assertIn("Claude", got["claude"]["usage"]["reason"])
-        self.assertEqual(got["copilot"]["usage"]["state"], "not_exposed")
+        self.assertEqual(got["claude"]["usage"]["state"], "unreadable")
+        self.assertEqual(got["copilot"]["usage"]["state"], "unreadable")
 
     def test_a_missing_agent_has_no_usage(self):
         with mock.patch.object(ap.shutil, "which", side_effect=lambda c: None if c == "copilot" else f"/bin/{c}"):
