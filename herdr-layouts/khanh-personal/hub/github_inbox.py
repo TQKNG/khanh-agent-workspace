@@ -69,7 +69,7 @@ def gh(args: list[str], timeout: int = 60, stdin: str | None = None) -> str:
         detail = (done.stderr or done.stdout).strip()
         if "gh auth login" in detail or "not logged in" in detail.lower():
             raise GitHubError("gh is not signed in. Run `gh auth login`, then refresh.")
-        raise GitHubError(detail.splitlines()[0][:300] if detail else f"gh exited with {done.returncode}")
+        raise GitHubError(" ".join(detail.splitlines())[:600] if detail else f"gh exited with {done.returncode}")
     return done.stdout
 
 
