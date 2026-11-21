@@ -120,6 +120,12 @@ class Submit(unittest.TestCase):
         fake = FakeGh(me="alice")
         self.assertEqual(self.run_with(fake, self.spec(event="COMMENT", body="note")), "Commented on o/r#7")
 
+    def test_author_cannot_request_changes_on_their_own_pull_request(self):
+        fake = FakeGh(me="alice")
+        with self.assertRaisesRegex(github_inbox.GitHubError, "Use Comment"):
+            self.run_with(fake, self.spec(event="REQUEST_CHANGES", body="Please revise this"))
+        self.assertIsNone(fake.posted)
+
     def test_event_rules(self):
         for spec in (self.spec(event="MERGE"), self.spec(head_sha="abc"), self.spec(head_sha=SHA.upper()), self.spec(event="REQUEST_CHANGES"),
                      self.spec(event="COMMENT"), self.spec(body="x" * (pulls.MAX_TEXT + 1))):

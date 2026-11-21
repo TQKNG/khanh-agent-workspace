@@ -237,8 +237,9 @@ def submit_review(spec: dict) -> str:
     with submit_lock:
         pr = get_pull(repo, number)
         require_open_at(pr, repo, number, sha)
-        if event == "APPROVE" and (pr.get("user") or {}).get("login") == viewer():
-            raise GitHubError("You cannot approve your own pull request.")
+        if event in {"APPROVE", "REQUEST_CHANGES"} and (pr.get("user") or {}).get("login", "").lower() == viewer().lower():
+            action = "approve" if event == "APPROVE" else "request changes on"
+            raise GitHubError(f"You cannot {action} your own pull request. Use Comment to leave feedback instead.")
         payload = {"commit_id": sha, "event": event, "body": body, "comments": comments}
         gh(["api", "-X", "POST", f"repos/{repo}/pulls/{number}/reviews", "--input", "-"], stdin=json.dumps(payload))
     return f"{EVENTS[event]} {repo}#{number}"
