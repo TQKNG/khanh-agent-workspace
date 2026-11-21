@@ -10,7 +10,6 @@ import { settings, shared, setShared, theme, readTextFile, writeTextFile } from 
 import * as hub from "./hub.js";
 import { tokens, alpha, TEXT, RADIUS, Icon, Button, Badge, Chip, Tabs, PageHeader, ErrorState, Skeleton, Mono, KeyHints, Callout, Toggle, Toaster, Spinner, agentMark } from "./ui.js";
 import { usageView } from "./usage.js";
-import { radarView, radarTip, polygon, spokePoint, spokeAngle } from "./radar.js";
 
 // Each agent's colours (the card's frame and the deep end of its artwork), its line of flavour text, and its number.
 const LOOK = {
@@ -24,12 +23,10 @@ const SECTIONS = [
   { value: "plugins", label: "Plugins", icon: "layers", key: "p" },
   { value: "mcp", label: "MCP servers", icon: "server", key: "m" },
 ];
-const CARD = { w: 288, h: 516, art: 150 };
+const CARD = { w: 304, h: 472, art: 112 };
 // The artwork's two halves: the logo's share, and the usage radar's panel. The panel is the card's own surface, so its
 // labels read on every frame colour, and it is wide enough for the labels outside the radar's rim (a 44px label at
 // 10px out from the rim) to stay inside it. The radar's square is 80px, so its rim is 24px from the centre.
-const LOGO_W = 128;
-const RADAR = { box: 80, label: 44, lineH: 12, gap: 10 };
 const PICK_KEY = "cockpit.agents.pick";
 const SECTION_KEY = "cockpit.agents.section";
 
@@ -67,6 +64,8 @@ function art(agent, look, k) {
   const on = agent.installed;
   const from = on ? look.color : k.muted;
   const to = on ? look.deep : k.border;
+  const skillsOn = agent.skills.filter((skill) => skill.enabled).length;
+  const mcpOn = agent.mcp.filter((server) => server.enabled).length;
   return div()
     .relative()
     .mx(10)
@@ -74,119 +73,18 @@ function art(agent, look, k) {
     .flex_none()
     .rounded(RADIUS.lg)
     .overflow_hidden()
-    .border_2()
-    .border_color(on ? look.deep : k.border)
-    .child(window.paint_path(box(), Background.linear_gradient(135, Background.stop(from, 0), Background.stop(to, 100))).absolute().inset_0())
-    .child(window.paint_path(box(), Background.pattern_slash("#ffffff", 1 * zoom, 9 * zoom).opacity(on ? 0.13 : 0.06)).absolute().inset_0())
-    .child(
-      h_flex()
-        .absolute()
-        .inset_0()
-        .items_center()
-        .child(
-          h_flex()
-            .w(LOGO_W)
-            .h_full()
-            .flex_none()
-            .items_center()
-            .justify_center()
-            .child(
-              h_flex()
-                .size(92)
-                .rounded(46)
-                .items_center()
-                .justify_center()
-                .bg("#ffffff")
-                .border_4()
-                .border_color(alpha("#ffffff", 0.45))
-                .shadow_lg()
-                .opacity(on ? 1 : 0.55)
-                .child(mark ? image(mark).size(58) : Icon("bot", { size: 44, color: k.mutedFg })),
-            ),
-        )
-        .child(h_flex().flex_1().h_full().py(8).pr(8).child(radar(agent, k))),
-    )
-    .when(!on, (e) => e.child(h_flex().absolute().top(8).right(8).child(Badge("Not installed", "secondary"))));
-}
-
-/**
- * The usage radar on the card's artwork: one spoke per area of work, the agent's use of each drawn out from the centre
- * (zero is the centre, its busiest area the rim) in the theme's accent. Over the last few days, as the hub counted them;
- * where the agent's logs cannot draw a shape, or cannot be read, the reason stands in its place.
- */
-function radar(agent, k) {
-  const z = settings().zoom ?? 1;
-  const view = radarView(agent.activity);
-  const id = `agent-radar-${agent.id}`;
-  if (view.state !== "read") {
-    const note = { not_installed: "", unreadable: "Usage not readable", not_enough: "Not enough usage data" }[view.state] ?? "";
-    return v_flex()
-      .id(id)
-      .w_full()
-      .h_full()
-      .items_center()
-      .justify_center()
-      .rounded(RADIUS.lg)
-      .bg(k.card)
-      .px(8)
-      .text_center()
-      .text_size(TEXT.xs)
-      .text_color(k.mutedFg)
-      .when(Boolean(view.reason), (e) => e.tooltip(view.reason))
-      .child(note);
-  }
-  const n = view.axes.length;
-  const coords = (points) => points.map(({ x, y }) => [`${x}%`, `${y}%`]);
-  const shape = coords(polygon(view.axes.map((a) => a.value)));
-  // Grid rings at a third, two thirds and the rim; a spoke to each area's rim; the shape with a dot where a value is above zero.
-  let grid = PathBuilder.stroke(z);
-  for (const step of [1 / 3, 2 / 3, 1]) grid = grid.add_polygon(coords(polygon(Array(n).fill(step))), true);
-  let spokes = PathBuilder.stroke(z);
-  for (let i = 0; i < n; i++) spokes = spokes.add_polygon([["50%", "50%"], coords([spokePoint(i, n, 1)])[0]], false);
-  const full = (path, color) => window.paint_path(path.build(), color).absolute().inset_0();
-  let chart = div()
-    .relative()
-    .size(RADAR.box)
-    .flex_none()
-    .child(full(grid, alpha(k.mutedFg, 0.45)))
-    .child(full(spokes, alpha(k.mutedFg, 0.6)))
-    .child(full(PathBuilder.fill().add_polygon(shape, true), Background.solid(k.ring).opacity(0.22)))
-    .child(full(PathBuilder.stroke(1.5 * z).add_polygon(shape, true), k.ring));
-  view.axes.forEach((a, i) => {
-    const p = spokePoint(i, n, a.value);
-    if (a.value > 0) chart = chart.child(div().absolute().left(`${p.x}%`).top(`${p.y}%`).ml(-3).mt(-3).size(6).rounded_full().bg(k.ring));
-    // Each area's name just outside its rim, pushed outward along its spoke so it clears the drawing.
-    const rim = spokePoint(i, n, 1);
-    const angle = spokeAngle(i, n);
-    chart = chart.child(
-      div()
-        .absolute()
-        .left(`${rim.x}%`)
-        .top(`${rim.y}%`)
-        .w(RADAR.label)
-        .h(RADAR.lineH)
-        .ml(-RADAR.label / 2 + Math.cos(angle) * RADAR.gap)
-        .mt(-RADAR.lineH / 2 + Math.sin(angle) * RADAR.gap)
-        .text_center()
-        .text_size(TEXT.xs)
-        .font_medium()
-        .text_color(k.foreground)
-        .whitespace_nowrap()
-        .child(a.label),
-    );
-  });
-  return v_flex()
-    .id(id)
-    .w_full()
-    .h_full()
-    .items_center()
-    .justify_center()
-    .gap(4)
-    .rounded(RADIUS.lg)
-    .bg(k.card)
-    .tooltip(`${radarTip(view)} · last ${view.days} days`)
-    .child(chart)
-    .child(div().text_size(TEXT.xs).text_color(k.mutedFg).child(`last ${view.days} days`));
+    .child(window.paint_path(box(), Background.linear_gradient(120, Background.stop(from, 0), Background.stop(to, 100))).absolute().inset_0())
+    .child(window.paint_path(box(), Background.pattern_slash("#ffffff", 1 * zoom, 12 * zoom).opacity(0.08)).absolute().inset_0())
+    .child(h_flex().absolute().inset_0().px(16).gap(14).items_center()
+      .child(h_flex().size(70).flex_none().rounded(20).items_center().justify_center().bg("#ffffff")
+        .child(mark ? image(mark).size(46) : Icon("bot", { size: 34, color: k.mutedFg })))
+      .child(v_flex().flex_1().min_w(0).gap(7).text_color("#ffffff")
+        .child(div().text_size(TEXT.xs).font_bold().child(agent.maker.toUpperCase()))
+        .child(h_flex().gap(14)
+          .child(v_flex().gap(1).child(div().text_size(TEXT.xl).font_bold().child(String(skillsOn)))
+            .child(div().text_size(TEXT.xs).child("skills active")))
+          .child(v_flex().gap(1).child(div().text_size(TEXT.xl).font_bold().child(String(mcpOn)))
+            .child(div().text_size(TEXT.xs).child("MCP active"))))));
 }
 
 /** One of the card's "moves":an energy disc with the section's icon, its name and what it holds, and the count. */
@@ -422,7 +320,6 @@ export default class Agents {
     const look = LOOK[agent.id] ?? { color: k.ring, deep: k.border, flavor: "", no: 0 };
     const on = agent.installed;
     const picked = agent.id === this.current()?.id;
-    const skillsOn = agent.skills.filter((s) => s.enabled).length;
     const signIn = agent.mcp.filter(needsSignIn).length;
     const frame = on ? look.color : k.border;
     const inner = v_flex()
@@ -434,7 +331,7 @@ export default class Agents {
       .overflow_hidden()
       .gap(8)
       .pb(10)
-      // The name, the version, and the card's "HP": how many skills it has on.
+      // Name, version and availability stay visible above the summary banner.
       .child(
         h_flex()
           .px(14)
@@ -444,25 +341,9 @@ export default class Agents {
           .child(div().text_size(TEXT.xl).font_bold().child(agent.label))
           .child(Mono(agent.version ? `v${agent.version}` : "", { color: k.mutedFg }))
           .child(div().flex_1())
-          .child(div().text_size(TEXT.xs).font_bold().text_color(on ? look.deep : k.mutedFg).pb(3).child("SKILLS"))
-          .child(div().text_size(22).font_bold().text_color(on ? look.deep : k.mutedFg).child(String(skillsOn))),
+          .child(Badge(on ? "Installed" : "Not installed", on ? "success" : "secondary")),
       )
       .child(art(agent, look, k))
-      // The type strip under the artwork.
-      .child(
-        h_flex()
-          .mx(18)
-          .mt(-14)
-          .h(20)
-          .justify_center()
-          .items_center()
-          .rounded(10)
-          .bg(on ? look.deep : k.muted)
-          .text_size(TEXT.xs)
-          .font_semibold()
-          .text_color("#ffffff")
-          .child(`Coding agent · ${agent.maker}`),
-      )
       .child(
         v_flex()
           .px(14)
@@ -472,22 +353,32 @@ export default class Agents {
           .child(move("layers", "Plugins", enabledOf(agent.plugins), agent.plugins.length, look, k, on))
           .child(move("server", "MCP servers", `${enabledOf(agent.mcp)}${signIn ? ` · ${signIn} sign-in` : ""}`, agent.mcp.length, look, k, on)),
       )
-      .child(div().mx(14).h(1).bg(k.border))
-      // The card's HP: how much of the agent's usage is left, and when it refreshes. Its command sits under it.
+      .child(div().flex_1())
+      // A distinct footer gives the allowance and launch command a clear home.
       .child(
         v_flex()
-          .px(14)
+          .mx(12)
+          .h(110)
+          .flex_none()
+          .p(10)
           .gap(6)
+          .rounded(RADIUS.lg)
+          .bg(k.muted)
+          .child(h_flex().items_center().child(div().text_size(TEXT.xs).font_bold().text_color(k.mutedFg).child("ACCOUNT CAPACITY")))
           .child(this.hp(agent, k))
-          .child(h_flex().gap(6).items_center().text_size(TEXT.xs).text_color(k.mutedFg).child(div().font_semibold().child("command")).child(Mono(agent.command))),
-      )
-      .child(div().px(14).text_size(TEXT.xs).italic().text_color(k.mutedFg).child(look.flavor))
-      .child(h_flex().px(14).text_size(10).text_color(k.mutedFg).child(div().flex_1().child(agent.maker)).child(Mono(`№ ${String(look.no).padStart(3, "0")}/${String(Object.keys(LOOK).length).padStart(3, "0")}`, { size: 10, color: k.mutedFg })));
+          .child(h_flex().gap(7).items_center().text_size(TEXT.xs).text_color(k.mutedFg)
+            .child(div().font_semibold().child("RUN"))
+            .child(Mono(agent.command))
+            .child(div().flex_1())
+            .child(div().child("View setup →"))),
+      );
     return v_flex()
       .id(`agent-card-${agent.id}`)
       .w(CARD.w)
+      .min_w(CARD.w)
+      .max_w(420)
       .h(CARD.h)
-      .flex_none()
+      .flex_grow_1()
       .p(7)
       .rounded(18)
       .bg(frame)
@@ -510,22 +401,25 @@ export default class Agents {
    */
   hp(agent, k) {
     const view = usageView(agent.usage);
-    const label = (color) => div().w(22).flex_none().text_size(TEXT.xs).font_bold().text_color(color).child("HP");
+    const label = (color) => div().w(72).flex_none().text_size(TEXT.xs).font_bold().text_color(color).child("USAGE LEFT");
     if (view.state !== "read") {
-      const note = { not_exposed: "usage not exposed", unreadable: "usage not readable", not_installed: "not installed" }[view.state];
-      return h_flex()
+      const note = { not_exposed: "Provider does not share usage", unreadable: "No current reading", not_installed: "Waiting for usage data" }[view.state];
+      return v_flex()
         .id(`agent-hp-${agent.id}`)
-        .h(22)
-        .gap(8)
-        .items_center()
+        .h(43)
+        .gap(3)
         .when(Boolean(view.reason), (e) => e.tooltip(view.reason))
-        .child(label(k.mutedFg))
-        .child(h_flex().flex_1().h(22).px(8).items_center().rounded(RADIUS.md).border_1().border_color(k.border).text_size(TEXT.xs).text_color(k.mutedFg).child(note));
+        .child(h_flex().h(22).gap(8).items_center()
+          .child(label(k.mutedFg))
+          .child(div().relative().flex_1().h(12).rounded(6).bg(k.border))
+          .child(Mono("—", { size: TEXT.xs, color: k.mutedFg })))
+        .child(div().pl(80).text_size(TEXT.xs).text_color(k.mutedFg).truncate().child(note));
     }
     const tone = k[view.tone];
     const tip = view.windows.map((w) => `${w.name}: ${w.left === null ? "not known" : `${Math.round(w.left)}% left`}${w.resetsIn ? `, resets in ${w.resetsIn}` : ""}`).join(" · ");
     return v_flex()
       .id(`agent-hp-${agent.id}`)
+      .h(43)
       .gap(3)
       .tooltip(tip)
       .child(
@@ -549,7 +443,7 @@ export default class Agents {
       )
       .child(
         h_flex()
-          .pl(30)
+          .pl(80)
           .gap(6)
           .flex_wrap()
           .text_size(TEXT.xs)
@@ -561,7 +455,7 @@ export default class Agents {
   }
 
   cardSkeleton(i, k) {
-    return v_flex().id(`agent-card-loading-${i}`).w(CARD.w).h(CARD.h).flex_none().p(7).rounded(18).bg(k.muted).child(v_flex().size_full().rounded(RADIUS.xl).bg(k.card).p(14).gap(12).child(Skeleton({ w: 140, h: 22 })).child(Skeleton({ h: CARD.art })).child(Skeleton({ w: 200 })).child(Skeleton({ w: 220 })).child(Skeleton({ w: 180 })));
+    return v_flex().id(`agent-card-loading-${i}`).w(CARD.w).min_w(CARD.w).max_w(420).h(CARD.h).flex_grow_1().p(7).rounded(18).bg(k.muted).child(v_flex().size_full().rounded(RADIUS.xl).bg(k.card).p(14).gap(12).child(Skeleton({ w: 140, h: 22 })).child(Skeleton({ h: CARD.art })).child(Skeleton({ w: 200 })).child(Skeleton({ w: 220 })).child(Skeleton({ w: 180 })));
   }
 
   // -------------------------------------------------------------------------------------------------------------------

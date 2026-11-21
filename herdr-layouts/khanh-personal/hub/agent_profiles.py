@@ -288,6 +288,41 @@ def codex_usage(now: float | None = None) -> dict:
     return {"state": "unreadable", "reason": "Codex's session logs hold no limit reading yet"}
 
 
+def claude_usage() -> dict:
+    """Read Claude's documented status-line rate limits captured by this package."""
+    path = herdr_home() / "cockpit-hub" / "claude-usage.json"
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {"state": "unreadable", "reason": "Open a Claude session and send a message to populate its usage reading"}
+    now = time.time()
+    windows = []
+    for key, name in (("five_hour", "5h"), ("seven_day", "7d")):
+        value = (data.get("rate_limits") or {}).get(key) or {}
+        used = value.get("used_percentage")
+        reset = value.get("resets_at")
+        if isinstance(used, (int, float)) and (not isinstance(reset, (int, float)) or reset > now):
+            windows.append({"name": name, "used_percent": used, "resets_at": reset})
+    if not windows:
+        return {"state": "unreadable", "reason": "Claude has not supplied a current limit reading"}
+    return {"state": "read", "observed_at": data.get("observed_at"), "windows": windows}
+
+
+def copilot_usage() -> dict:
+    """Ask the official Copilot SDK for the signed-in account's quota."""
+    import subprocess
+    python = herdr_home() / "cockpit-hub" / ".venv" / "bin" / "python"
+    if not python.exists():
+        python = herdr_home() / "cockpit-hub" / ".venv" / "Scripts" / "python.exe"
+    if not python.exists():
+        return {"state": "unreadable", "reason": "Install github-copilot-sdk in cockpit-hub/.venv"}
+    try:
+        result = subprocess.run([str(python), str(ROOT / "copilot_quota.py")], capture_output=True, text=True, timeout=35, check=True)
+        return json.loads(result.stdout)
+    except (OSError, subprocess.SubprocessError, json.JSONDecodeError) as exc:
+        return {"state": "unreadable", "reason": f"Copilot quota could not be read: {exc}"}
+
+
 def codex() -> dict:
     root = home() / ".codex"
     errors = [] if tomllib else [NO_TOML]
@@ -373,9 +408,9 @@ def copilot() -> dict:
 
 # The agents the page shows, in its order: their command, their maker, and how to read their set-up.
 AGENTS = [
-    {"id": "claude", "label": "Claude", "command": "claude", "maker": "Anthropic", "read": claude, "usage": not_exposed("Claude does not keep its usage limits on disk, so this page cannot read them"), "activity": lambda: agent_activity.claude(home() / ".claude")},
+    {"id": "claude", "label": "Claude", "command": "claude", "maker": "Anthropic", "read": claude, "usage": claude_usage, "activity": lambda: agent_activity.claude(home() / ".claude")},
     {"id": "codex", "label": "Codex", "command": "codex", "maker": "OpenAI", "read": codex, "usage": codex_usage, "activity": lambda: agent_activity.codex(home() / ".codex")},
-    {"id": "copilot", "label": "Copilot", "command": "copilot", "maker": "GitHub", "read": copilot, "usage": not_exposed("Copilot does not show its usage limits on disk, so this page cannot read them"), "activity": lambda: agent_activity.copilot(home() / ".copilot")},
+    {"id": "copilot", "label": "Copilot", "command": "copilot", "maker": "GitHub", "read": copilot, "usage": copilot_usage, "activity": lambda: agent_activity.copilot(home() / ".copilot")},
 ]
 
 

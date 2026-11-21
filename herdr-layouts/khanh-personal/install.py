@@ -34,7 +34,7 @@ MODS = ["personal", "workspace-chrome-swiss"]
 # Herdr's own mods the layout shows (tabs, files, changes) or opens (help, picker): they come with Herdr, not with this
 # package, so the installer says which a Herdr version lacks rather than leaving a blank space in the window.
 HERDR_MODS = ["tabs", "files", "changes", "help", "picker"]
-HUB_FILES = ["cockpit_hub.py", "github_inbox.py", "github_pulls.py", "github_checks.py", "github_start.py", "github_draft.py", "agent_profiles.py", "agent_activity.py", "worker-prompt.md", "issue-draft-prompt.md", "issue-draft-fallback.md", "cockpit-hub", "cockpit-hub.cmd"]
+HUB_FILES = ["cockpit_hub.py", "github_inbox.py", "github_pulls.py", "github_checks.py", "github_start.py", "github_draft.py", "agent_profiles.py", "agent_activity.py", "copilot_quota.py", "claude_status.py", "worker-prompt.md", "issue-draft-prompt.md", "issue-draft-fallback.md", "cockpit-hub", "cockpit-hub.cmd"]
 HUB_VERSION = "0.2.0"
 # The Herdr app version this setup was built and tested against (`herdr-app --version`).
 TESTED_HERDR = "0.1.16"
