@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.7.0](https://github.com/TQKNG/khanh-agent-workspace/compare/v0.6.1...v0.7.0) (2026-11-21)
+
+
+### Features
+
+* **herdr-layout:** redesign agent cards and add usage readers ([11d800e](https://github.com/TQKNG/khanh-agent-workspace/commit/11d800e12111a6de6ed76baca8ea46bdb8015319))
+* improve Herdr agent usage cards ([3464473](https://github.com/TQKNG/khanh-agent-workspace/commit/346447396eed04db9139ba6e89b47d05013f99d3))
+
+
+### Bug Fixes
+
+* **herdr-layout:** explain self review failures ([#29](https://github.com/TQKNG/khanh-agent-workspace/issues/29)) ([5a0fd42](https://github.com/TQKNG/khanh-agent-workspace/commit/5a0fd42c64514f47bf837227aa7ed349d5312b4d))
+
 ## [0.6.1](https://github.com/TQKNG/khanh-agent-workspace/compare/v0.6.0...v0.6.1) (2026-11-20)
 
 
