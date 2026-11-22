@@ -664,15 +664,25 @@ def fetch(kind: str, args: dict) -> dict:
 def file_issue(spec: dict) -> str:
     """Files the issue the dialog shows. An issue type or labels (from a draft) go in one REST call, since `gh issue create` has no
     flag for a type; without them the call is the same as before."""
+    import github_draft
+    import issue_format
+
     title = str(spec.get("title") or "").strip()
     repo = str(spec.get("team") or "").strip()
     body = str(spec.get("description") or "")
+    template = str(spec.get("template") or "")
     issue_type = str(spec.get("type") or "").strip()
     labels = [str(name).strip() for name in spec.get("labels") or [] if str(name).strip()]
-    if not title:
-        raise GitHubError("An issue needs a title.")
     if not REPO_RE.match(repo):
         raise GitHubError("Type the repository as owner/name in the Repository field.")
+    _, _, templates = github_draft.guidance(repo)
+    if template not in templates:
+        raise GitHubError("Draft the issue using a template for this repository before filing it.")
+    try:
+        title = issue_format.normalize_title(title)
+        body = issue_format.normalize_markdown(body, issue_format.headings_for_template(templates[template]))
+    except ValueError as exc:
+        raise GitHubError(str(exc)) from exc
     if issue_type or labels:
         payload = {"title": title, "body": body, **({"type": issue_type} if issue_type else {}), **({"labels": labels} if labels else {})}
         created = json.loads(gh(["api", f"repos/{repo}/issues", "--method", "POST", "--input", "-"], stdin=json.dumps(payload)))

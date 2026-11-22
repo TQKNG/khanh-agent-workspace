@@ -122,8 +122,11 @@ The bundled hub does not implement their data, so they stay empty or on "Loading
 The status counts and agent lists that come from the hub are stubs for the same reason.
 
 The Inbox writes to GitHub in five places: "File issue" (type the repository as `owner/name`), reviews, merges, re-runs of failed jobs, and assigning an issue to you when you give it to an agent.
-"File issue" can also draft the issue from a short idea: an agent (Claude or Codex) writes the title, body and type, using the `github-issues` skill when it is installed in `~/.agents/skills/github-issues`.
-The draft is shown for editing, and nothing is posted until you click "File it".
+"File issue" drafts from a short idea with Claude or Codex, using the repository's matching issue template and the bundled repo-scaffold references when needed.
+The agent must choose a template and return a conventional title such as `feat(ui): add search`, `fix(auth): correct login`, or `chore: update tooling`.
+The body must keep that template's Markdown headings in order, with content in every section.
+You can edit the Markdown, preview it, and choose up to three existing repository labels, including when an issue type is selected.
+The hub validates the title and body again when you click "File it"; nothing is posted before that click.
 Changing an issue's status, auto-merge and the merge queue are not implemented.
 
 ## How the Inbox is organized
@@ -180,14 +183,15 @@ The cards' logos are Herdr's own (`icons/`), redrawn by the hub at 256 px into `
 
 Select an issue and press `s` (or click its bot icon), pick the agent, and confirm:
 
-1. A dialog shows the plan first: the local clone, the branch `issue-<n>-<title>` from `origin/<default branch>`, the new worktree, assigning the issue to you, and the tab that opens.
+1. A dialog shows the plan first: the local clone, a branch such as `fix/<n>-<slug>` from `origin/<default branch>`, the new worktree, assigning the issue to you, and the tab that opens.
    It says what stops it instead (no local clone, the worktree or branch already exists, the issue is closed, no agent installed) and keeps Start disabled.
 2. The **Agent** dropdown offers Claude, Codex and Copilot, with their marks; `1`, `2` and `3` pick one, and the next dialog opens on the last one picked.
    One that is not installed is left out and named.
 3. On Start the hub fetches the repository, creates the branch and the worktree, and assigns the issue to you on GitHub; the Inbox opens the tab `issue-<n>` in the background with the agent and its task.
 4. The issue's row then shows that agent and its state (working, blocked, done); a click goes to it, and `s` on that issue goes to it instead of starting a second one.
 
-The worktree goes where Herdr's own worktree feature puts them, `<worktrees.directory>/<clone folder>/<branch>` (the installer sets `worktrees.directory` to `<herdr home>/worktrees`), so Herdr lists it too.
+The worktree goes where Herdr's own worktree feature puts them, `<worktrees.directory>/<clone folder>/issue-<n>-<slug>` (the installer sets `worktrees.directory` to `<herdr home>/worktrees`), so Herdr lists it too.
+The agent reads the bundled repo-scaffold instructions and the repository's PR template before committing or opening a PR.
 The local clone is found by its `origin`, under `~/Documents/Development/Repositories`, `~/Developer`, `~/code`, `~/src`, `~/projects`, `~/repos` and `~/git`.
 
 The agent's task is `hub/worker-prompt.md`: the issue's address and the rules, never the issue's own text.
@@ -292,7 +296,7 @@ layouts/personal.json, personal.svg   the layout and its settings preview
 mods/personal                         the pages (Inbox, Agents, Home and others), the PR review window and the sidebar
 mods/personal/critters/art            the sidebar's critter pictures
 mods/workspace-chrome-swiss           the header, shortcuts button and footer (reads your brand)
-hub/                                  the local hub (Python), its launchers, and the agent's task (worker-prompt.md)
+hub/                                  the local hub (Python), its launchers, bundled repo-scaffold references, and the agent's task (worker-prompt.md)
 tests/                                unit tests: the hub's GitHub code, the issue start, the agent profiles and the installer, and the package itself
                                       (every asset it names is in it, every page it links to exists, a fresh install is complete) (Python);
                                       the inbox's tabs and grouping (Node)

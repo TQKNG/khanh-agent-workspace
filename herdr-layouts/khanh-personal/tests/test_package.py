@@ -137,6 +137,10 @@ class TestInstall(unittest.TestCase):
                 self.assertEqual(sorted(map(str, source - copied)), [], f"mods/{mod} is copied whole")
             for name in install.HUB_FILES:
                 self.assertTrue((home / "cockpit-hub" / name).is_file(), name)
+            for name in install.SCAFFOLD_FILES:
+                installed = home / "cockpit-hub" / "repo-scaffold" / name
+                source = ROOT.parents[1] / "skills" / "repo-scaffold" / name
+                self.assertEqual(installed.read_bytes(), source.read_bytes(), name)
             config = json.loads((home / "cockpit.json").read_text())
             self.assertTrue(Path(config["bin"]).is_file())
             self.assertIn("layout:personal", json.loads((home / "keys.json").read_text()))

@@ -5,7 +5,7 @@
 // the outcomes of the requests the rows filed.
 
 import { div } from "gpui-kit";
-import { h_flex, v_flex, InputState } from "gpui-base";
+import { h_flex, v_flex, InputState, TextareaState, Textarea, TextView } from "gpui-base";
 import { settings, run as runCommand, panes, shared, setShared } from "herdr";
 import * as hub from "./hub.js";
 import { byKind, byRepo, onlyTab, tabCounts, tabFor, TABS } from "./inbox-groups.js";
@@ -102,11 +102,12 @@ export default class Inbox {
     this.query.on("submit", (_e, cx) => this.runPalette(cx));
     this.issueIdea = InputState.new({ placeholder: "Idea: what the issue should say, in a line or two" });
     this.issueTitle = InputState.new({ placeholder: "Title" });
-    this.issueBody = InputState.new({ placeholder: "What and why, in a line or two" });
+    this.issueBody = TextareaState.new({ placeholder: "Issue body in Markdown", rows: 9 });
     this.issueTeam = InputState.new({ placeholder: "Repository (owner/name)" });
+    this.issueLabelSearch = InputState.new({ placeholder: "Find an existing label" });
+    this.issueLabelSearch.on("change", (_e, cx) => cx.notify());
     this.issueIdea.on("submit", (_e, cx) => this.draftIssue(cx));
     this.issueTitle.on("submit", (_e, cx) => this.fileIssue(cx));
-    this.issueBody.on("submit", (_e, cx) => this.fileIssue(cx));
     this.subscribe(cx);
   }
 
@@ -503,10 +504,11 @@ export default class Inbox {
   }
 
   openFile(cx) {
-    this.dialog = { kind: "file", draft: null, busy: false, error: null, type: null, labels: [], types: [], similar: [] };
+    this.dialog = { kind: "file", draft: null, busy: false, error: null, preview: false, type: null, labels: [], availableLabels: [], types: [], similar: [] };
     this.issueIdea.set_value("");
     this.issueTitle.set_value("");
     this.issueBody.set_value("");
+    this.issueLabelSearch.set_value("");
     this.issueIdea.focus();
     cx.notify();
   }
@@ -531,8 +533,8 @@ export default class Inbox {
         if (this.dialog !== d) return;
         this.issueTitle.set_value(got.title);
         this.issueBody.set_value(got.body);
-        Object.assign(d, { type: got.type ?? null, labels: got.labels ?? [], types: got.types ?? [], similar: got.similar ?? [] });
-        d.draft = { source: got.source, agent: got.agent };
+        Object.assign(d, { type: got.type ?? null, labels: got.labels ?? [], availableLabels: got.available_labels ?? [], types: got.types ?? [], similar: got.similar ?? [] });
+        d.draft = { source: got.source, agent: got.agent, template: got.template, repo: got.repo };
       } catch (e) {
         if (this.dialog === d) d.draft = { error: String(e?.message ?? e) };
       } finally {
@@ -547,9 +549,14 @@ export default class Inbox {
   fileIssue(cx) {
     const d = this.dialog;
     if (d?.kind !== "file" || d.busy) return;
+    if (!d.draft?.template || d.draft.repo !== this.issueTeam.value().trim()) {
+      d.error = "Draft the issue for this repository before filing it.";
+      cx.notify();
+      return;
+    }
     const title = this.issueTitle.value().trim();
     if (!title) return;
-    const spec = { title, description: this.issueBody.value().trim(), team: this.issueTeam.value().trim(), type: d.type, labels: d.labels };
+    const spec = { title, description: this.issueBody.value().trim(), team: this.issueTeam.value().trim(), template: d.draft?.template, type: d.type, labels: d.labels };
     d.busy = true;
     d.error = null;
     cx.notify();
@@ -576,11 +583,13 @@ export default class Inbox {
   fileBody(d, k) {
     const draft = d.draft ?? {};
     const agent = draft.agent ?? "An agent";
-    let status = div().text_size(TEXT.sm).text_color(k.mutedFg).child("Type an idea and a repository, then draft it. Or write the title and description yourself.");
+    const labelQuery = this.issueLabelSearch.value().trim().toLowerCase();
+    const labelChoices = d.availableLabels.filter((name) => !d.labels.includes(name) && (!labelQuery || name.toLowerCase().includes(labelQuery))).slice(0, 6);
+    let status = div().text_size(TEXT.sm).text_color(k.mutedFg).child("Type an idea and a repository, then draft with an agent. Review the structured Markdown before filing.");
     if (draft.loading) status = h_flex().gap(8).items_center().child(Spinner({ size: 12 })).child(div().text_size(TEXT.sm).text_color(k.mutedFg).child("An agent is drafting the issue…"));
     else if (draft.error) status = div().text_size(TEXT.sm).text_color(k.destructive).child(draft.error);
-    else if (draft.source === "github-issues skill") status = div().text_size(TEXT.sm).text_color(k.mutedFg).child(`${agent} drafted it with the github-issues skill. Check it before filing.`);
-    else if (draft.source) status = div().text_size(TEXT.sm).text_color(k.mutedFg).child(`The github-issues skill is not installed, so ${agent} followed GitHub's issue best practice. Check it before filing.`);
+    else if (draft.source === "repository and repo-scaffold templates") status = div().text_size(TEXT.sm).text_color(k.mutedFg).child(`${agent} used this repository's issue templates and repo-scaffold guidance. Check it before filing.`);
+    else if (draft.source) status = div().text_size(TEXT.sm).text_color(k.mutedFg).child(`${agent} used the repo-scaffold issue templates. Check it before filing.`);
     const similar = d.similar.map((s) =>
       h_flex()
         .id(`dlg-similar-${s.number}`)
@@ -594,6 +603,8 @@ export default class Inbox {
     );
     return v_flex()
       .gap(10)
+      .max_h(520)
+      .overflow_y_scrollbar()
       .child(TextField(this.issueIdea))
       .child(TextField(this.issueTeam))
       .child(h_flex().gap(10).items_center().child(div().flex_1().min_w(0).child(status)).child(Button("dlg-draft", { label: "Draft with an agent", icon: "bot", variant: "outline", size: "sm", disabled: d.busy, onClick: (_e, cx) => this.draftIssue(cx) })))
@@ -611,19 +622,22 @@ export default class Inbox {
                 .children([...d.types, null].map((t) => Button(`dlg-type-${t ?? "none"}`, { label: t ?? "None", variant: d.type === t ? "default" : "outline", size: "sm", onClick: (_e, cx) => ((d.type = t), cx.notify()) }))),
             ),
           )
-          .when(d.types.length === 0 && d.labels.length > 0, (e) =>
+          .when(d.availableLabels.length > 0, (e) =>
             e.child(
-              h_flex()
+              v_flex()
                 .gap(6)
-                .items_center()
-                .child(div().flex_none().text_size(TEXT.sm).text_color(k.mutedFg).child("Labels"))
-                .children(d.labels.map((name) => Button(`dlg-label-${name}`, { label: name, variant: "secondary", size: "sm", onClick: (_e, cx) => ((d.labels = d.labels.filter((x) => x !== name)), cx.notify()) }))),
+                .child(div().text_size(TEXT.sm).text_color(k.mutedFg).child(`Labels (${d.labels.length}/3)`))
+                .when(d.labels.length > 0, (row) => row.child(h_flex().gap(4).flex_wrap().children(d.labels.map((name) => Button(`dlg-label-${name}`, { label: `${name} ×`, variant: "secondary", size: "sm", onClick: (_e, cx) => ((d.labels = d.labels.filter((x) => x !== name)), cx.notify()) })))))
+                .when(d.labels.length < 3, (row) => row.child(TextField(this.issueLabelSearch)).child(h_flex().gap(4).flex_wrap().children(labelChoices.map((name) => Button(`dlg-add-label-${name}`, { label: name, variant: "outline", size: "sm", onClick: (_e, cx) => ((d.labels = [...d.labels, name]), cx.notify()) }))))),
             ),
           ),
       )
       .child(Separator())
       .child(TextField(this.issueTitle))
-      .child(TextField(this.issueBody))
+      .child(h_flex().items_center().justify_between().child(div().text_size(TEXT.xs).text_color(k.mutedFg).child(d.draft?.template ? `Template: ${d.draft.template}` : "Markdown issue body")).child(Button("dlg-preview", { label: d.preview ? "Edit Markdown" : "Preview Markdown", variant: "ghost", size: "sm", onClick: (_e, cx) => ((d.preview = !d.preview), cx.notify()) })))
+      .child(d.preview
+        ? div().h(190).p(10).rounded(RADIUS.md).border_1().border_color(k.input).bg(k.background).overflow_y_scrollbar().child(TextView.markdown("issue-body-preview", this.issueBody.value()).selectable(true).text_size(TEXT.sm))
+        : div().h(190).px(10).py(6).rounded(RADIUS.md).border_1().border_color(k.input).bg(k.background).child(Textarea.new(this.issueBody).w_full().h_full().text_size(TEXT.base)))
       .when(Boolean(d.error), (e) => e.child(div().text_size(TEXT.sm).text_color(k.destructive).child(`Not filed: ${d.error}`)));
   }
 
@@ -1485,7 +1499,7 @@ export default class Inbox {
       title = "File an issue";
       description = "A new issue, assigned to you";
       body = this.fileBody(d, k);
-      actions.push(Button("dlg-file", { label: "File it", icon: "file-plus", kbd: "⏎", disabled: d.busy, onClick: (_e, cx) => this.fileIssue(cx) }));
+      actions.push(Button("dlg-file", { label: "File it", icon: "file-plus", kbd: "⏎", disabled: d.busy || !d.draft?.template, onClick: (_e, cx) => this.fileIssue(cx) }));
     }
     return div()
       .id("inbox-dialog")
@@ -1501,7 +1515,7 @@ export default class Inbox {
           .child(
             v_flex()
               .id("inbox-dialog-card")
-              .w(460)
+              .w(d.kind === "file" ? 560 : 460)
               .p(20)
               .gap(14)
               .rounded(RADIUS.lg)

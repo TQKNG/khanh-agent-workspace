@@ -111,7 +111,7 @@ class TestPlan(Repos):
         self.assertTrue(plan["ok"], plan["blockers"])
         ctx = plan["ctx"]
         self.assertEqual(Path(ctx["clone"]), self.clone)
-        self.assertEqual(ctx["branch"], "issue-7-fix-the-login-page")
+        self.assertEqual(ctx["branch"], "fix/7-fix-the-login-page")
         self.assertEqual(Path(ctx["worktree"]), self.tree)
         self.assertTrue(any("Assign #7 to you" in s for s in plan["steps"]))
 
@@ -190,7 +190,7 @@ class TestStart(Repos):
         tree = self.tree
         self.assertTrue((tree / ".git").is_file(), "a worktree, not a clone")
         branch = subprocess.run(["git", "-C", str(tree), "branch", "--show-current"], capture_output=True, text=True).stdout.strip()
-        self.assertEqual(branch, "issue-7-fix-the-login-page")
+        self.assertEqual(branch, "fix/7-fix-the-login-page")
         self.assertEqual(fake.assigned, [URL, "--add-assignee", "@me"])
         launch = got["launch"]
         self.assertEqual(launch["name"], "issue-7")
@@ -270,7 +270,7 @@ class TestStart(Repos):
                 start.start({"id": URL})
 
     def test_refuses_when_origin_has_the_branch(self):
-        sh(self.clone, "push", "-q", "origin", "HEAD:refs/heads/issue-7-fix-the-login-page")
+        sh(self.clone, "push", "-q", "origin", "HEAD:refs/heads/fix/7-fix-the-login-page")
         with mock.patch.object(start, "gh", FakeGh()), self.assertRaises(github_inbox.GitHubError):
             start.start({"id": URL})
         self.assertFalse(self.tree.exists())

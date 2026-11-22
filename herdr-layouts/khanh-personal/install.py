@@ -34,8 +34,9 @@ MODS = ["personal", "workspace-chrome-swiss"]
 # Herdr's own mods the layout shows (tabs, files, changes) or opens (help, picker): they come with Herdr, not with this
 # package, so the installer says which a Herdr version lacks rather than leaving a blank space in the window.
 HERDR_MODS = ["tabs", "files", "changes", "help", "picker"]
-HUB_FILES = ["cockpit_hub.py", "github_inbox.py", "github_pulls.py", "github_checks.py", "github_start.py", "github_draft.py", "agent_profiles.py", "agent_activity.py", "copilot_quota.py", "claude_status.py", "worker-prompt.md", "issue-draft-prompt.md", "issue-draft-fallback.md", "cockpit-hub", "cockpit-hub.cmd"]
-HUB_VERSION = "0.2.0"
+HUB_FILES = ["cockpit_hub.py", "github_inbox.py", "github_pulls.py", "github_checks.py", "github_start.py", "github_draft.py", "issue_format.py", "agent_profiles.py", "agent_activity.py", "copilot_quota.py", "claude_status.py", "worker-prompt.md", "issue-draft-prompt.md", "issue-task-template.md", "cockpit-hub", "cockpit-hub.cmd"]
+SCAFFOLD_FILES = ["SKILL.md", "assets/starter/.github/ISSUE_TEMPLATE/bug_report.md", "assets/starter/.github/ISSUE_TEMPLATE/feature_request.md", "assets/starter/.github/pull_request_template.md"]
+HUB_VERSION = "0.3.0"
 # The Herdr app version this setup was built and tested against (`herdr-app --version`).
 TESTED_HERDR = "0.1.16"
 # Shortcuts earlier versions of this package shipped that point at pages it no longer has (or never had): replaced or
@@ -121,6 +122,9 @@ class Installer:
             self.copy_file(source, folder / name)
             if not IS_WINDOWS and name == "cockpit-hub" and not self.dry:
                 (folder / name).chmod(0o755)
+        scaffold = HERE.parents[1] / "skills" / "repo-scaffold"
+        for name in SCAFFOLD_FILES:
+            self.copy_file(scaffold / name, folder / "repo-scaffold" / name)
         launcher = folder / ("cockpit-hub.cmd" if IS_WINDOWS else "cockpit-hub")
         config = {"bin": str(launcher), "home": str(folder), "cache": str(folder / "cache"), "version": HUB_VERSION}
         path = self.home / "cockpit.json"

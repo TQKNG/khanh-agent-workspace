@@ -25,6 +25,7 @@ import threading
 import time
 from pathlib import Path
 
+import issue_format
 from github_inbox import CREATE_NO_WINDOW, ISSUE_URL_RE, GitHubError, gh
 
 KINDS = ("start_plan",)
@@ -231,9 +232,7 @@ def short_path(path: Path) -> str:
     return "~" + text[len(home):] if text == home or text.startswith(home + os.sep) else text
 
 
-def slug(title: str, size: int = 40) -> str:
-    text = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
-    return text[:size].rstrip("-") or "work"
+slug = issue_format.slug
 
 
 def issue_ref(target: dict) -> tuple[str, str, int, str]:
@@ -254,13 +253,15 @@ def make_plan(target: dict) -> dict:
     info = json.loads(gh(["api", f"repos/{repo}"]))
     viewer = gh(["api", "user", "--jq", ".login"]).strip()
     base = info.get("default_branch") or "main"
-    branch = f"issue-{number}-{slug(issue.get('title') or '')}"
+    kind = issue_format.issue_kind(issue)
+    summary = issue_format.slug(str(issue.get("title") or ""))
+    branch = f"{kind}/{number}-{summary}"
     offered = agents(config)
     found = CLONES.find(repo, config, fresh=True)
     # No clone yet: the plan names where one will be made, and the start makes it, so opening the dialog changes nothing.
     clone = found or clones_root(config) / owner / name
     will_clone = found is None
-    worktree = project_dir(clone) / branch
+    worktree = project_dir(clone) / f"issue-{number}-{summary}"
     assignees = [a.get("login") for a in issue.get("assignees") or []]
 
     blockers = []
@@ -302,6 +303,7 @@ def make_plan(target: dict) -> dict:
             "clone": str(clone),
             "clone_repo": repo if will_clone else None,
             "worktree": str(worktree),
+            "scaffold": str(issue_format.repo_scaffold_path(ROOT)),
             "agents": offered,
             "assign": viewer not in assignees,
         },
