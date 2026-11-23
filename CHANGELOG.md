@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.0](https://github.com/TQKNG/khanh-agent-workspace/compare/v0.7.0...v0.8.0) (2026-11-23)
+
+
+### Features
+
+* **arc42-mintlify-docs:** add Claude Code marketplace and plugin manifest ([81f4558](https://github.com/TQKNG/khanh-agent-workspace/commit/81f45581c6dd0bbe15add88c2974d5bd08e46736))
+* **arc42-mintlify-docs:** add Claude Code marketplace and plugin manifest ([3684c2d](https://github.com/TQKNG/khanh-agent-workspace/commit/3684c2d405b6622f6481c586ef8f2a6af677df02))
+
 ## [0.7.0](https://github.com/TQKNG/khanh-agent-workspace/compare/v0.6.1...v0.7.0) (2026-11-23)
 
 
