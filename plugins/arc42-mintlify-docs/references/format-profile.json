@@ -40,7 +40,8 @@
     "sc": "SC",
     "l1-whitebox": "LVL1_Whitebox",
     "l1-deployment": "LVL1-DeploymentView",
-    "l2-component": "LVL2_ComponentView"
+    "l2-component": "LVL2_ComponentView",
+    "seq": "SEQ"
   },
   "spaces": [
     {
@@ -199,16 +200,23 @@
           "title": "2.2 Runtime View",
           "description": "Runtime View for {product_name}.",
           "sections": [
-            "2.2.n SD-RT-nn: <scenario>, one Mermaid sequenceDiagram with autonumber per scenario",
+            "2.2.n SD-RT-nn: <scenario>, one sequence diagram per scenario, authored as Mermaid and delivered as a draw.io image",
             "Use alt blocks for failure and recovery paths, one sentence of lead-in per scenario"
           ],
           "blocks": [
-            "mermaid-sequence"
+            "paragraph",
+            "diagram"
           ],
           "match": [
             "runtime-view"
           ],
-          "notes": "Runtime scenarios stay in Mermaid by decision. No draw.io template."
+          "notes": "Runtime scenarios use the diagram-standards seq template. The Mermaid source stays in diagrams/src as a .mmd file next to the .drawio.",
+          "diagrams": [
+            {
+              "type": "seq",
+              "role": "runtime scenario, one per SD-RT-nn"
+            }
+          ]
         },
         {
           "key": "deployment",

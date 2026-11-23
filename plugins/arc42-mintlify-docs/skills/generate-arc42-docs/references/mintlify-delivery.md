@@ -13,7 +13,8 @@ Create pages with `write_page` and navigation with `create_node`, `move_node` or
 Change existing pages with `edit_page` and send only the changed text.
 Read a page with `read` and `forEdit` before changing it.
 Pass the returned `version` as `baseVersion` and, on conflict, read the latest page again and keep concurrent human edits.
-Upload diagram PNGs with `upload_file` and `finalize_file_upload`.
+Commit diagram sources to the branch and let the export workflow create the PNGs, as references/diagram-integration.md describes.
+Use `upload_file` and `finalize_file_upload` for a PNG only when the workflow cannot run.
 Keep batches small and record each page path and returned version in the run manifest before continuing.
 After an uncertain write, stop and reconcile state before retrying.
 

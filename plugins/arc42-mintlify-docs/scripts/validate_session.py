@@ -15,7 +15,8 @@ REQUIRED_ANSWERS = ('input_kind', 'source', 'product_name', 'product_slug', 'aud
                     'scope', 'content_policy', 'delivery_mode', 'generation_mode', 'project_mode')
 USER_ONLY = tuple(key for key in REQUIRED_ANSWERS if key != 'project_mode')
 DIAGRAM_PREFIX = {'bc': 'BC', 'sc': 'SC', 'l1-whitebox': 'LVL1_Whitebox',
-                  'l1-deployment': 'LVL1-DeploymentView', 'l2-component': 'LVL2_ComponentView'}
+                  'l1-deployment': 'LVL1-DeploymentView', 'l2-component': 'LVL2_ComponentView',
+                  'seq': 'SEQ'}
 
 
 def source_fingerprint(session):

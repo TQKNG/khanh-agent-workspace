@@ -69,6 +69,8 @@ def check_page(path, root):
     for name in sorted(set(PNG.findall(text))):
         if not (root / 'diagrams/src' / f'{name}.drawio').is_file():
             errors.append(f'Diagram {name}.png has no source diagrams/src/{name}.drawio.')
+    if 'runtime-view' in path.name and re.search(r'```mermaid\s+sequenceDiagram', text):
+        errors.append('Runtime view still has a Mermaid sequenceDiagram; deliver it as a diagram-standards seq diagram.')
     for match in re.finditer(r'!\[[^\]]*\]\((https?://[^)]+)\)', text):
         warnings.append(f'External image {match.group(1)[:60]}; prefer /images/diagrams/ for architecture diagrams.')
     for match in re.finditer(r'<img\b[^>]*>', text):

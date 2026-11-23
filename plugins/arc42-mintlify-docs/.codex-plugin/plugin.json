@@ -22,7 +22,7 @@
     }
   },
   "name": "arc42-mintlify-docs",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Question-driven arc42 documentation for the tqkng/docs Mintlify site, in the Report Tool format, with approved draw.io diagrams.",
   "author": {
     "name": "Khanh Nguyen",
