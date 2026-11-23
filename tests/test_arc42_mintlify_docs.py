@@ -62,6 +62,16 @@ class PluginPackageTests(unittest.TestCase):
         self.assertIn('arc42-gitbook-docs', entries)
         self.assertLessEqual(len(manifest['extensions']['com.openai']['interface']['shortDescription']), 30)
 
+    def test_claude_code_marketplace_lists_the_plugin(self):
+        market = json.loads((ROOT / '.claude-plugin/marketplace.json').read_text(encoding='utf-8'))
+        entry = next(e for e in market['plugins'] if e['name'] == 'arc42-mintlify-docs')
+        plugin = ROOT / entry['source']
+        manifest = json.loads((plugin / '.claude-plugin/plugin.json').read_text(encoding='utf-8'))
+        self.assertEqual(manifest['name'], entry['name'])
+        self.assertTrue(entry['source'].startswith('./') and '..' not in entry['source'])
+        self.assertTrue((plugin / 'skills/setup/SKILL.md').is_file())
+        self.assertTrue(market['owner']['name'])
+
     def test_each_skill_has_frontmatter_and_existing_references(self):
         for name in ('setup', 'generate-arc42-docs', 'refresh-format-profile'):
             source = (PLUGIN / 'skills' / name / 'SKILL.md').read_text(encoding='utf-8')

@@ -1,0 +1,14 @@
+{
+  "name": "khanh-plugins",
+  "description": "Khanh's reusable agent plugins",
+  "owner": {
+    "name": "Khanh Nguyen"
+  },
+  "plugins": [
+    {
+      "name": "arc42-mintlify-docs",
+      "source": "./plugins/arc42-mintlify-docs",
+      "description": "Question-driven arc42 documentation for the tqkng/docs Mintlify site, in the Report Tool format, with approved draw.io diagrams."
+    }
+  ]
+}
