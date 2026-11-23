@@ -11,7 +11,7 @@ They help with writing GitBook and arc42 documentation, auditing Codex session t
 - `.github/`: issue and pull request templates, Copilot instructions and the CI workflows.
 - `docs/`: the reference site analysis and the verification report for the `arc42-gitbook-docs` plugin.
 - `herdr-layouts/`: the Herdr layout package `khanh-personal`, with its layout, mods, local hub and installer.
-- `plugins/`: the Codex plugins `arc42-gitbook-docs` (GitBook and arc42 documentation) and `session-token-audit` (Codex session token audit).
+- `plugins/`: the plugins `arc42-gitbook-docs` (GitBook and arc42 documentation), `arc42-mintlify-docs` (Mintlify arc42 documentation), `diagram-standards` (approved draw.io diagram templates) and `session-token-audit` (Codex session token audit).
 - `skills/`: the standalone skills `graphify`, `repo-scaffold` and `technical-blog-writing`.
 - `tests/`: the repository's Python tests, run with `python -m unittest discover -s tests -v`.
 
@@ -25,6 +25,7 @@ Repository: <https://github.com/TQKNG/khanh-agent-workspace>
 
 - `arc42-gitbook-docs` version `0.3.0`
 - `session-token-audit` version `0.1.0`
+- `diagram-standards` version `0.2.0`
 
 ## Requirements
 
@@ -62,7 +63,7 @@ Its pricing reference is an estimate that must be refreshed against official rat
 
 ## Install the Claude Code plugin
 
-The `arc42-mintlify-docs` plugin is also listed in `.claude-plugin/marketplace.json` for Claude Code.
+The `arc42-mintlify-docs` and `diagram-standards` plugins are also listed in `.claude-plugin/marketplace.json` for Claude Code.
 
 Add this marketplace and install the plugin:
 
@@ -73,7 +74,14 @@ claude plugin install arc42-mintlify-docs@khanh-plugins
 
 In a Claude Code session, run `/reload-plugins` or start a new session to load it.
 
-The plugin uses the `diagram-standards` plugin for architecture diagrams, so install that one too.
+The plugin uses the `diagram-standards` plugin for architecture diagrams, so install that one too:
+
+```bash
+claude plugin install diagram-standards@khanh-plugins
+```
+
+The `diagram-standards` plugin needs Python 3.
+PNG export needs the draw.io desktop CLI, or the bundled `export-diagrams.yml` GitHub Action in the documentation repository.
 
 ## Use the standalone skills
 

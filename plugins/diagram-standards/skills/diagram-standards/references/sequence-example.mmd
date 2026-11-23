@@ -1,0 +1,20 @@
+sequenceDiagram
+    autonumber
+    %% kind User=person Api=container Worker=component Store=container Mail=system
+    actor User
+    participant Api as Web API
+    participant Worker
+    participant Store as Data store
+    participant Mail as Email service
+    User->>Api: Request action
+    Api->>Worker: Start job
+    loop Each item
+        Worker->>Store: Read item
+        Store-->>Worker: Item data
+    end
+    alt Success
+        Worker->>Mail: Send result
+    else Failure
+        Worker->>Api: Report failure
+    end
+    Api-->>User: Accepted

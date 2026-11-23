@@ -9,6 +9,11 @@
       "name": "arc42-mintlify-docs",
       "source": "./plugins/arc42-mintlify-docs",
       "description": "Question-driven arc42 documentation for the tqkng/docs Mintlify site, in the Report Tool format, with approved draw.io diagrams."
+    },
+    {
+      "name": "diagram-standards",
+      "source": "./plugins/diagram-standards",
+      "description": "Approved draw.io C4 and sequence diagram templates for architecture documentation, with a Mermaid sequence converter and a GitHub Action that exports PNGs for Mintlify."
     }
   ]
 }
