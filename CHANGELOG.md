@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.7.0](https://github.com/TQKNG/khanh-agent-workspace/compare/v0.6.1...v0.7.0) (2026-11-23)
+
+
+### Features
+
+* **arc42-mintlify-docs:** add Mintlify arc42 documentation plugin ([#31](https://github.com/TQKNG/khanh-agent-workspace/issues/31)) ([34f45c1](https://github.com/TQKNG/khanh-agent-workspace/commit/34f45c162c649ebe0fb75627cb8c7baa27488e74))
+* **herdr-layout:** enforce issue template flow ([#30](https://github.com/TQKNG/khanh-agent-workspace/issues/30)) ([6ec8899](https://github.com/TQKNG/khanh-agent-workspace/commit/6ec8899ce1276e5a408fa0e4922b616ebb811eb8))
+* **herdr-layout:** redesign agent cards and add usage readers ([11d800e](https://github.com/TQKNG/khanh-agent-workspace/commit/11d800e12111a6de6ed76baca8ea46bdb8015319))
+* improve Herdr agent usage cards ([3464473](https://github.com/TQKNG/khanh-agent-workspace/commit/346447396eed04db9139ba6e89b47d05013f99d3))
+
+
+### Bug Fixes
+
+* **herdr-layout:** explain self review failures ([#29](https://github.com/TQKNG/khanh-agent-workspace/issues/29)) ([5a0fd42](https://github.com/TQKNG/khanh-agent-workspace/commit/5a0fd42c64514f47bf837227aa7ed349d5312b4d))
+
 ## [0.6.1](https://github.com/TQKNG/khanh-agent-workspace/compare/v0.6.0...v0.6.1) (2026-11-20)
 
 
