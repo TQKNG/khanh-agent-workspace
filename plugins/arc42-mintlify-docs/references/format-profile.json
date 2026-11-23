@@ -1,0 +1,832 @@
+{
+  "version": "1.0.0",
+  "reference_product": "Report Tool (Report Automation Tool)",
+  "reference_notes": "Structure follows the Report Tool product in tqkng/docs. Path convention follows the newer products: <slug>/<section>/...",
+  "frontmatter": {
+    "required": [
+      "title",
+      "description",
+      "keywords"
+    ],
+    "keywords": [
+      "{product_name}",
+      "<one domain keyword>"
+    ],
+    "extra": {
+      "quickstart": [
+        "sidebarTitle"
+      ]
+    }
+  },
+  "navigation": {
+    "container": "docs.json navigation.products[] entry with product = {product_name} and pages = six groups",
+    "groups": [
+      "Overview",
+      "Solution architecture and design",
+      "Getting started",
+      "API reference",
+      "Security and privacy",
+      "Release notes"
+    ],
+    "nested_groups": {
+      "Solution architecture and design": [
+        "Decision records"
+      ]
+    },
+    "numbering": "Titles carry section numbers 1.1 to 6.6. Overview and architecture file names carry the arc42 prefix 01 to 12."
+  },
+  "diagram_types": {
+    "bc": "BC",
+    "sc": "SC",
+    "l1-whitebox": "LVL1_Whitebox",
+    "l1-deployment": "LVL1-DeploymentView",
+    "l2-component": "LVL2_ComponentView"
+  },
+  "spaces": [
+    {
+      "key": "overview",
+      "group": "Overview",
+      "dir": "overview",
+      "number": 1,
+      "pages": [
+        {
+          "key": "landing",
+          "file": "{slug}/overview/{slug}",
+          "title": "1.1 {product_name}",
+          "description": "Overview of {product_name}, its purpose, source repository and the documentation sections.",
+          "sections": [
+            "Opening paragraphs: what the product is, who it serves, current implementation limits",
+            "1.1.1 Product visuals (optional figures with bold figure captions)",
+            "<Info> block with repository link and source commit",
+            "1.1.2 Scope: framework used (arc42, C4) and intended audience",
+            "1.1.3 Navigation: three-column table 'I want to... | Start here | What I will find' with six rows, one per section",
+            "### Overview shortcuts: dot-separated links to the four overview pages"
+          ],
+          "blocks": [
+            "paragraph",
+            "Info",
+            "table"
+          ],
+          "match": [
+            "{slug}",
+            "overview"
+          ]
+        },
+        {
+          "key": "goals",
+          "file": "{slug}/overview/01-introduction-and-goals",
+          "title": "1.2 Introduction and Goals",
+          "description": "Understand {product_name}'s current behavior, intended goals, requirements, quality targets and stakeholders.",
+          "sections": [
+            "Summary table: Main Goal, Business Domain, Size, Strategic Decision, Technologies",
+            "1.2.1 Introduction",
+            "1.2.2 Requirements: ID | Requirement | Explanation, F-prefixed IDs with sub-IDs",
+            "1.2.3 Architecture quality goals: ID (QG-n) | Priority | Quality Goal | Description, three to five goals",
+            "1.2.4 Stakeholders: Role | Responsibility | Expectation"
+          ],
+          "blocks": [
+            "paragraph",
+            "table"
+          ],
+          "match": [
+            "introduction-and-goals"
+          ]
+        },
+        {
+          "key": "constraints",
+          "file": "{slug}/overview/02-architecture-constraints",
+          "title": "1.3 Constraints",
+          "description": "Constraints for {product_name}.",
+          "sections": [
+            "1.3.1 Technical Constraints: ID (TC) | Constraint | Explanation",
+            "1.3.2 Organizational Constraints: ID (OC) | Constraint | Explanation",
+            "1.3.3 Conventions: ID (C) | Convention | Explanation"
+          ],
+          "blocks": [
+            "table"
+          ],
+          "match": [
+            "architecture-constraints",
+            "constraints"
+          ]
+        },
+        {
+          "key": "context",
+          "file": "{slug}/overview/03-context-and-scope",
+          "title": "1.4 Context and Scope",
+          "description": "Context and Scope for {product_name}.",
+          "sections": [
+            "1.4.1 Business Context: business context diagram, then one bold-titled paragraph per user or external system",
+            "1.4.2 System Context: system context diagram",
+            "1.4.3 External interfaces: Communication partner | Input | Output | Interface or channel"
+          ],
+          "blocks": [
+            "paragraph",
+            "diagram",
+            "table"
+          ],
+          "match": [
+            "context-and-scope"
+          ],
+          "diagrams": [
+            {
+              "type": "bc",
+              "role": "business context"
+            },
+            {
+              "type": "sc",
+              "role": "system context"
+            }
+          ]
+        },
+        {
+          "key": "strategy",
+          "file": "{slug}/overview/04-solution-strategy",
+          "title": "1.5 Solution Strategy",
+          "description": "Solution Strategy for {product_name}.",
+          "sections": [
+            "1.5.1 Strategy summary: Solution Strategy | Quality Goal (QG-n references)"
+          ],
+          "blocks": [
+            "table"
+          ],
+          "match": [
+            "solution-strategy"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "architecture",
+      "group": "Solution architecture and design",
+      "dir": "architecture",
+      "number": 2,
+      "pages": [
+        {
+          "key": "building-blocks",
+          "file": "{slug}/architecture/05-building-block-view",
+          "title": "2.1 Building Block View",
+          "description": "Building Block View for {product_name}.",
+          "sections": [
+            "2.1.1 Level 1 - System Whitebox: whitebox diagram, then 'Container responsibilities' table (Container | Responsibility | Technology | Owned data | Inbound | Outbound)",
+            "2.1.2 Level 2 - Component view: only when justified in one sentence, one component diagram per container",
+            "2.1.3 Level 3 - Code view: optional Mermaid classDiagram"
+          ],
+          "blocks": [
+            "paragraph",
+            "diagram",
+            "table",
+            "mermaid-class"
+          ],
+          "match": [
+            "building-block-view"
+          ],
+          "diagrams": [
+            {
+              "type": "l1-whitebox",
+              "role": "level 1 whitebox"
+            },
+            {
+              "type": "l2-component",
+              "role": "level 2 component",
+              "optional": true
+            }
+          ]
+        },
+        {
+          "key": "runtime",
+          "file": "{slug}/architecture/06-runtime-view",
+          "title": "2.2 Runtime View",
+          "description": "Runtime View for {product_name}.",
+          "sections": [
+            "2.2.n SD-RT-nn: <scenario>, one Mermaid sequenceDiagram with autonumber per scenario",
+            "Use alt blocks for failure and recovery paths, one sentence of lead-in per scenario"
+          ],
+          "blocks": [
+            "mermaid-sequence"
+          ],
+          "match": [
+            "runtime-view"
+          ],
+          "notes": "Runtime scenarios stay in Mermaid by decision. No draw.io template."
+        },
+        {
+          "key": "deployment",
+          "file": "{slug}/architecture/07-deployment-view",
+          "title": "2.3 Deployment View",
+          "description": "Deployment View for {product_name}.",
+          "sections": [
+            "2.3.1 Deployment view: deployment diagram of the confirmed environments only",
+            "Optional tables for runtime modes, configuration and pipelines when evidence exists"
+          ],
+          "blocks": [
+            "paragraph",
+            "diagram",
+            "table"
+          ],
+          "match": [
+            "deployment-view"
+          ],
+          "diagrams": [
+            {
+              "type": "l1-deployment",
+              "role": "level 1 deployment"
+            }
+          ]
+        },
+        {
+          "key": "crosscutting",
+          "file": "{slug}/architecture/08-crosscutting-concepts",
+          "title": "2.4 Crosscutting Concepts",
+          "description": "Crosscutting Concepts for {product_name}.",
+          "sections": [
+            "2.4.1 Domain Entity Model: Mermaid classDiagram followed by a Term | Definition table",
+            "2.4.n further concepts (validation, errors, configuration, observability, resilience) with links to canonical security and API pages"
+          ],
+          "blocks": [
+            "mermaid-class",
+            "table"
+          ],
+          "match": [
+            "crosscutting-concepts"
+          ]
+        },
+        {
+          "key": "decisions",
+          "file": "{slug}/architecture/09-architecture-decisions",
+          "title": "2.5 Architecture Decisions",
+          "description": "Architecture Decisions for {product_name}.",
+          "sections": [
+            "Lead paragraph: what the decision set covers and where the evidence comes from",
+            "Index table: ID | Decision | Status | Decision date, IDs link to child pages",
+            "Consolidated or superseded decisions stay in the index with a short explanatory H2",
+            "Scope of this decision set: topics not yet decided, linked to Risks and Technical Debt"
+          ],
+          "blocks": [
+            "paragraph",
+            "table"
+          ],
+          "match": [
+            "architecture-decisions"
+          ]
+        },
+        {
+          "key": "decision-detail",
+          "file": "{slug}/architecture/09-architecture-decisions/ad-{number}-{decision_slug}",
+          "title": "AD-{number} {decision}",
+          "description": "AD-{number} {decision} for {product_name}.",
+          "sections": [
+            "Status line: **Status:** ... **Decision date:** ... **Implementation:** ...",
+            "Context and decision drivers",
+            "Options considered: Option | Assessment at decision time",
+            "Decision and rationale",
+            "Consequences: bullet list",
+            "Implementation evidence: permalinks at the pinned commit",
+            "Revisit when"
+          ],
+          "blocks": [
+            "paragraph",
+            "table",
+            "list"
+          ],
+          "match": [
+            "ad-"
+          ],
+          "conditional": true,
+          "repeatable": true,
+          "notes": "One page per material decision, nested in the 'Decision records' group. Never invent options, dates or rationale."
+        },
+        {
+          "key": "quality",
+          "file": "{slug}/architecture/10-quality-requirements",
+          "title": "2.6 Quality Requirements",
+          "description": "Quality Requirements for {product_name}.",
+          "sections": [
+            "Pointer to the quality goals in 1.2.3",
+            "2.6.1 Verified mechanisms: Quality Goal | Quality concern | Verified implementation"
+          ],
+          "blocks": [
+            "paragraph",
+            "table"
+          ],
+          "match": [
+            "quality-requirements"
+          ]
+        },
+        {
+          "key": "risks",
+          "file": "{slug}/architecture/11-risks-and-technical-debt",
+          "title": "2.7 Risks and Technical Debt",
+          "description": "Risks and Technical Debt for {product_name}.",
+          "sections": [
+            "2.7.1 Risks: ID (R-nnn) | Risk | Probability | Potential impact | Priority | Mitigation",
+            "2.7.2 Technical Debt: ID (TD-nnn) | Technical debt | Affected building block in Section 2.1 | Evidence and consequence",
+            "2.7.3 Remediation order: numbered list",
+            "Evidence links after each table; never reproduce credential values"
+          ],
+          "blocks": [
+            "table",
+            "list"
+          ],
+          "match": [
+            "risks-and-technical-debt"
+          ]
+        },
+        {
+          "key": "glossary",
+          "file": "{slug}/architecture/12-glossary",
+          "title": "2.8 Glossary",
+          "description": "Glossary for {product_name}.",
+          "sections": [
+            "Lead sentence naming the pinned commit",
+            "Term | Definition table, alphabetical, terms taken only from this project"
+          ],
+          "blocks": [
+            "table"
+          ],
+          "match": [
+            "glossary"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "getting-started",
+      "group": "Getting started",
+      "dir": "getting-started",
+      "number": 3,
+      "pages": [
+        {
+          "key": "start",
+          "file": "{slug}/quickstart",
+          "title": "3. Getting started",
+          "description": "Set up and verify {product_name} with the documented limits of the current repository.",
+          "sections": [
+            "Lead paragraph: audience and pinned commit, repository-backed steps versus work still to do",
+            "Choose your path: Path | Read in order | Outcome",
+            "Current setup limits: honest list of missing provisioning, committed secrets, absent tests"
+          ],
+          "blocks": [
+            "paragraph",
+            "table"
+          ],
+          "match": [
+            "quickstart",
+            "getting-started"
+          ],
+          "notes": "Frontmatter also sets sidebarTitle."
+        },
+        {
+          "key": "prerequisites",
+          "file": "{slug}/getting-started/prerequisites-and-configuration",
+          "title": "3.1 Prerequisites and configuration",
+          "description": "Prerequisites and configuration for {product_name}.",
+          "sections": [
+            "Lead paragraph with commit and safe-account advice",
+            "Choose a path (bullets)",
+            "Required settings: Setting | Used for | Where to set it",
+            "Keep settings out of the repository"
+          ],
+          "blocks": [
+            "paragraph",
+            "list",
+            "table"
+          ],
+          "match": [
+            "prerequisites-and-configuration"
+          ]
+        },
+        {
+          "key": "local",
+          "file": "{slug}/getting-started/run-locally",
+          "title": "3.2 Run locally",
+          "description": "Run locally for {product_name}.",
+          "sections": [
+            "Numbered steps taken only from repository evidence",
+            "Expected result of each step"
+          ],
+          "blocks": [
+            "list",
+            "code"
+          ],
+          "match": [
+            "run-locally"
+          ]
+        },
+        {
+          "key": "container",
+          "file": "{slug}/getting-started/run-with-containers",
+          "title": "3.3 Run with containers",
+          "description": "Run with containers for {product_name}.",
+          "sections": [
+            "Container build and run steps from committed files"
+          ],
+          "blocks": [
+            "list",
+            "code"
+          ],
+          "match": [
+            "container",
+            "docker"
+          ],
+          "conditional": true
+        },
+        {
+          "key": "verify",
+          "file": "{slug}/getting-started/verify-first-run",
+          "title": "3.4 Verify the first result",
+          "description": "Verify the first result for {product_name}.",
+          "sections": [
+            "A controlled first run with an observable pass or fail result"
+          ],
+          "blocks": [
+            "list",
+            "table"
+          ],
+          "match": [
+            "verify"
+          ]
+        },
+        {
+          "key": "deploy",
+          "file": "{slug}/getting-started/deploy",
+          "title": "3.5 Deploy",
+          "description": "Deploy for {product_name}.",
+          "sections": [
+            "Only the deployment path the repository establishes"
+          ],
+          "blocks": [
+            "list",
+            "code"
+          ],
+          "match": [
+            "deploy"
+          ],
+          "conditional": true
+        },
+        {
+          "key": "troubleshoot",
+          "file": "{slug}/getting-started/troubleshoot-setup",
+          "title": "3.6 Troubleshoot setup and first runs",
+          "description": "Troubleshoot setup for {product_name}.",
+          "sections": [
+            "Symptom | Likely cause | Action table"
+          ],
+          "blocks": [
+            "table"
+          ],
+          "match": [
+            "troubleshoot"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "api",
+      "group": "API reference",
+      "dir": "api-reference",
+      "number": 4,
+      "conditional": true,
+      "pages": [
+        {
+          "key": "api-welcome",
+          "file": "{slug}/api-reference/welcome-to-the-{slug}-api",
+          "title": "4.1 {product_name} API",
+          "description": "Explore the {product_name} API contract and how it relates to what is implemented.",
+          "sections": [
+            "What the API covers and whether it is implemented or proposed",
+            "Link to the OpenAPI download when a spec exists"
+          ],
+          "blocks": [
+            "paragraph"
+          ],
+          "match": [
+            "welcome-to"
+          ],
+          "conditional": true
+        },
+        {
+          "key": "servers",
+          "file": "{slug}/api-reference/servers-and-authentication",
+          "title": "4.2 Servers and authentication",
+          "description": "Servers and authentication for {product_name}.",
+          "sections": [
+            "Placeholder statement when hosts are examples",
+            "Tabs: one tab per example or real server",
+            "Authentication: scheme, header, scoping and error codes"
+          ],
+          "blocks": [
+            "Tabs",
+            "paragraph"
+          ],
+          "match": [
+            "servers-and-authentication"
+          ],
+          "conditional": true
+        },
+        {
+          "key": "api-start",
+          "file": "{slug}/api-reference/getting-started",
+          "title": "4.3 Getting started",
+          "description": "API getting started for {product_name}.",
+          "sections": [
+            "First request and response",
+            "Confirm hosts, auth and schema before drafting"
+          ],
+          "blocks": [
+            "code"
+          ],
+          "match": [
+            "api-reference/getting-started"
+          ],
+          "conditional": true
+        },
+        {
+          "key": "lifecycle",
+          "file": "{slug}/api-reference/requests-and-lifecycle",
+          "title": "4.4 Requests and lifecycle",
+          "description": "Requests and lifecycle for {product_name}.",
+          "sections": [
+            "Request rules, limits, idempotency, pagination, states and lifecycle"
+          ],
+          "blocks": [
+            "paragraph",
+            "table"
+          ],
+          "match": [
+            "requests-and-lifecycle"
+          ],
+          "conditional": true
+        },
+        {
+          "key": "errors",
+          "file": "{slug}/api-reference/error-responses",
+          "title": "4.5 Error responses",
+          "description": "Error responses for {product_name}.",
+          "sections": [
+            "Error envelope and code table"
+          ],
+          "blocks": [
+            "table",
+            "code"
+          ],
+          "match": [
+            "error-responses"
+          ],
+          "conditional": true
+        },
+        {
+          "key": "operations",
+          "file": "{slug}/api-reference/{resource_slug}",
+          "title": "4.6 {resource}",
+          "description": "{resource} operations for {product_name}.",
+          "sections": [
+            "One page or generated group per resource from a reviewed OpenAPI file",
+            "Never hand-invent routes, schemas or examples"
+          ],
+          "blocks": [
+            "openapi"
+          ],
+          "match": [
+            "api-reference/"
+          ],
+          "conditional": true,
+          "repeatable": true
+        },
+        {
+          "key": "models",
+          "file": "{slug}/api-reference/models",
+          "title": "Models",
+          "description": "Models for {product_name}.",
+          "sections": [
+            "Schemas from the reviewed OpenAPI file"
+          ],
+          "blocks": [
+            "openapi"
+          ],
+          "match": [
+            "models"
+          ],
+          "conditional": true
+        }
+      ]
+    },
+    {
+      "key": "security",
+      "group": "Security and privacy",
+      "dir": "security",
+      "number": 5,
+      "pages": [
+        {
+          "key": "security-overview",
+          "file": "{slug}/security/security-and-privacy-overview",
+          "title": "5.1 Security and Privacy Overview",
+          "description": "Security and Privacy Overview for {product_name}.",
+          "sections": [
+            "Lead paragraph: what is handled, what the section defines",
+            "Security boundaries: Boundary | Required control",
+            "Protected information",
+            "Responsibilities",
+            "Operating principles",
+            "Read next: links to the other four pages"
+          ],
+          "blocks": [
+            "paragraph",
+            "table",
+            "list"
+          ],
+          "match": [
+            "security-and-privacy-overview"
+          ]
+        },
+        {
+          "key": "access",
+          "file": "{slug}/security/credentials-and-access-control",
+          "title": "5.2 Credentials and Access Control",
+          "description": "Credentials and Access Control for {product_name}.",
+          "sections": [
+            "Identity, roles, secret handling and rotation from evidence"
+          ],
+          "blocks": [
+            "paragraph",
+            "table"
+          ],
+          "match": [
+            "credentials-and-access-control"
+          ]
+        },
+        {
+          "key": "privacy",
+          "file": "{slug}/security/data-handling-and-privacy",
+          "title": "5.3 Data Handling and Privacy",
+          "description": "Data Handling and Privacy for {product_name}.",
+          "sections": [
+            "Data classes, retention, jurisdictions only when confirmed"
+          ],
+          "blocks": [
+            "paragraph",
+            "table"
+          ],
+          "match": [
+            "data-handling-and-privacy"
+          ]
+        },
+        {
+          "key": "controls",
+          "file": "{slug}/security/security-risks-and-required-actions",
+          "title": "5.4 Security Risks and Required Actions",
+          "description": "Security Risks and Required Actions for {product_name}.",
+          "sections": [
+            "Release-blocking controls: ID (SEC-nn) | Finding | Required outcome | Owner role",
+            "Control groups as H2 sections",
+            "Required verification: bullet list",
+            "Source evidence links"
+          ],
+          "blocks": [
+            "table",
+            "list"
+          ],
+          "match": [
+            "security-risks-and-required-actions"
+          ]
+        },
+        {
+          "key": "incident",
+          "file": "{slug}/security/incident-response",
+          "title": "5.5 Incident Response",
+          "description": "Incident Response for {product_name}.",
+          "sections": [
+            "Ownership, triage, containment, communication and review from confirmed answers"
+          ],
+          "blocks": [
+            "paragraph",
+            "list"
+          ],
+          "match": [
+            "incident-response"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "releases",
+      "group": "Release notes",
+      "dir": "release-notes",
+      "number": 6,
+      "pages": [
+        {
+          "key": "release-index",
+          "file": "{slug}/release-notes/release-notes-status",
+          "title": "6.1 Release Notes",
+          "description": "Release Notes for {product_name}.",
+          "sections": [
+            "Lead paragraph",
+            "Release index: Entry | Status | Date | Read more",
+            "How to use these notes",
+            "Entry format (Keep a Changelog)",
+            "Source baseline links",
+            "Last documentation review: date"
+          ],
+          "blocks": [
+            "paragraph",
+            "table"
+          ],
+          "match": [
+            "release-notes-status",
+            "release-notes",
+            "changelog"
+          ]
+        },
+        {
+          "key": "unreleased",
+          "file": "{slug}/release-notes/unreleased",
+          "title": "6.2 Unreleased",
+          "description": "Unreleased for {product_name}.",
+          "sections": [
+            "Added, Changed, Fixed, Security as H2 sections, empty ones omitted",
+            "Compatibility and migration",
+            "Release completion criteria"
+          ],
+          "blocks": [
+            "list",
+            "paragraph"
+          ],
+          "match": [
+            "unreleased"
+          ]
+        },
+        {
+          "key": "release",
+          "file": "{slug}/release-notes/v{major}-{minor}-{patch}",
+          "title": "6.3 v{major}.{minor}.{patch}",
+          "description": "Release v{major}.{minor}.{patch} of {product_name}.",
+          "sections": [
+            "Version, date, user impact, notable changes, required actions, evidence links"
+          ],
+          "blocks": [
+            "list"
+          ],
+          "match": [
+            "release-v",
+            "/v0-",
+            "/v1-"
+          ],
+          "conditional": true,
+          "repeatable": true,
+          "notes": "Only for a published GitHub release or tag. A package version is not a release."
+        },
+        {
+          "key": "milestones",
+          "file": "{slug}/release-notes/repository-milestones",
+          "title": "6.4 Repository Milestones",
+          "description": "Repository Milestones for {product_name}.",
+          "sections": [
+            "Changes in the main branch after the last release, with commit links"
+          ],
+          "blocks": [
+            "list",
+            "table"
+          ],
+          "match": [
+            "repository-milestones"
+          ]
+        },
+        {
+          "key": "issues",
+          "file": "{slug}/release-notes/known-issues",
+          "title": "6.5 Known Issues",
+          "description": "Known Issues for {product_name}.",
+          "sections": [
+            "Issue | Impact | Workaround table"
+          ],
+          "blocks": [
+            "table"
+          ],
+          "match": [
+            "known-issues"
+          ]
+        },
+        {
+          "key": "upgrade",
+          "file": "{slug}/release-notes/upgrade-and-rollback",
+          "title": "6.6 Upgrade and Rollback",
+          "description": "Upgrade and Rollback for {product_name}.",
+          "sections": [
+            "Before upgrading",
+            "Staging verification",
+            "Production promotion (numbered)",
+            "Rollback triggers and procedure",
+            "Versioning and release evidence"
+          ],
+          "blocks": [
+            "paragraph",
+            "list"
+          ],
+          "match": [
+            "upgrade-and-rollback"
+          ]
+        }
+      ]
+    }
+  ]
+}

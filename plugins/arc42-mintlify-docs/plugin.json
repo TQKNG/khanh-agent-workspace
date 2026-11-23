@@ -1,0 +1,39 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "arc42-mintlify-docs",
+  "version": "0.1.0",
+  "description": "Question-driven arc42 documentation for the tqkng/docs Mintlify site, in the Report Tool format, with approved draw.io diagrams.",
+  "author": {
+    "name": "Khanh Nguyen",
+    "email": "khanhnguyen.trq@gmail.com"
+  },
+  "keywords": [
+    "arc42",
+    "architecture",
+    "c4-model",
+    "documentation",
+    "mintlify",
+    "github"
+  ],
+  "extensions": {
+    "com.openai": {
+      "onboardingSkill": "./skills/setup/SKILL.md",
+      "interface": {
+        "displayName": "arc42 Mintlify Docs",
+        "shortDescription": "arc42 docs for Mintlify",
+        "longDescription": "Detect whether a project already has documentation in the Mintlify site, then create it in the Report Tool format or summarize what to update. Diagrams follow the approved draw.io templates and delivery goes through a reviewable branch.",
+        "category": "Productivity",
+        "capabilities": [
+          "Read",
+          "Write"
+        ],
+        "defaultPrompt": [
+          "Create arc42 documentation for this GitHub repository in the Mintlify docs.",
+          "Check whether this project is already documented in Mintlify and summarize what to update.",
+          "Refresh the format profile from the existing Mintlify products."
+        ],
+        "brandColor": "#16A34A"
+      }
+    }
+  }
+}
