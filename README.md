@@ -6,6 +6,7 @@ They help with writing GitBook and arc42 documentation, auditing Codex session t
 ## What is in each folder
 
 - `.agents/`: the Codex plugin marketplace file, `.agents/plugins/marketplace.json`.
+- `.claude-plugin/`: the Claude Code plugin marketplace file, `.claude-plugin/marketplace.json`.
 - `.claude/skills/`: the `ticket` skill, which takes a GitHub issue through an isolated implementation and pull request in its own Herdr tab.
 - `.github/`: issue and pull request templates, Copilot instructions and the CI workflows.
 - `docs/`: the reference site analysis and the verification report for the `arc42-gitbook-docs` plugin.
@@ -58,6 +59,21 @@ Installing the Codex plugin also makes its bundled skills, instructions, referen
 
 The `session-token-audit` plugin reads local Codex session logs and needs access to the configured Notion workspace before it can record results.
 Its pricing reference is an estimate that must be refreshed against official rates before use.
+
+## Install the Claude Code plugin
+
+The `arc42-mintlify-docs` plugin is also listed in `.claude-plugin/marketplace.json` for Claude Code.
+
+Add this marketplace and install the plugin:
+
+```bash
+claude plugin marketplace add TQKNG/khanh-agent-workspace
+claude plugin install arc42-mintlify-docs@khanh-plugins
+```
+
+In a Claude Code session, run `/reload-plugins` or start a new session to load it.
+
+The plugin uses the `diagram-standards` plugin for architecture diagrams, so install that one too.
 
 ## Use the standalone skills
 
