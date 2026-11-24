@@ -3,9 +3,9 @@ name: new-diagram
 description: >
   This skill should be used when the user runs "/new-diagram" or asks to "create a new
   diagram from the template", "start a system context diagram", "new whitebox/deployment/
-  component diagram". Creates the working .drawio file from the approved template with the
+  component/class/state diagram". Creates the working .drawio file from the approved template with the
   title block filled in.
-argument-hint: "<sc|bc|l1-whitebox|l1-deployment|l2-component|seq> <doc-number> [title]"
+argument-hint: "<sc|bc|l1-whitebox|l1-deployment|l2-component|seq|class|state> <doc-number> [title]"
 metadata:
   version: "0.2.0"
 ---
@@ -15,9 +15,9 @@ metadata:
 Arguments: `<type> <doc-number> [title]`.
 
 1. Load the `diagram-standards` skill and follow its rules.
-2. Validate `<type>` against `sc`, `bc`, `l1-whitebox`, `l1-deployment`, `l2-component`, `seq`.
+2. Validate `<type>` against `sc`, `bc`, `l1-whitebox`, `l1-deployment`, `l2-component`, `seq`, `class`, `state`.
    For `seq`, do not run `new_diagram.py`: follow the skill's "Sequence diagrams" section (write the `.mmd`, then run the converter).
-   When missing or invalid, show the five options with one-line descriptions from the skill's template table and wait for a choice.
+   When missing or invalid, show the options with one-line descriptions from the skill's template table and wait for a choice.
 3. When `<doc-number>` is missing, build it as `<prefix>-<ProductName>-001` from the skill's table, using the product name found in the repository (docs.json name or the existing diagrams), and state the number chosen.
 4. Take the author from the user's request or from existing diagrams in `diagrams/src`; ask when neither exists.
    Default title: `<Product> – <diagram type name>`.

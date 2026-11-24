@@ -4,10 +4,10 @@ Makes Claude start every architecture diagram in your Mintlify docs from the app
 
 ## What is included
 - **diagram-standards skill**: picks the right template, fills the title block, exports a PNG, embeds it with alt text.
-- **/new-diagram skill**: `/new-diagram <sc|bc|l1-whitebox|l1-deployment|l2-component> <doc-number> [title]` creates the working file.
+- **/new-diagram skill**: `/new-diagram <sc|bc|l1-whitebox|l1-deployment|l2-component|class|state> <doc-number> [title]` creates the working file.
 - **Check hook** (after file writes): flags `.mdx` pages that embed a diagram without a `.drawio` source or PNG, and `.drawio` files that lost the title block or legend.
   Remove `hooks/` to turn it off.
-- **Templates**: system context, business context, level 1 whitebox, level 1 deployment, level 2 component, sequence (runtime view).
+- **Templates**: system context, business context, level 1 whitebox, level 1 deployment, level 2 component, sequence (runtime view), class (domain model) and state (lifecycle).
   Sequence diagrams are written in Mermaid and converted to draw.io by `scripts/mermaid_seq_to_drawio.py`.
 
 ## Requirements

@@ -15,6 +15,7 @@ SCRIPTS = SKILL / 'scripts'
 TYPES = {
     'sc': 'system-context', 'bc': 'business-context', 'l1-whitebox': 'l1-whitebox',
     'l1-deployment': 'l1-deployment', 'l2-component': 'l2-component', 'seq': 'sequence',
+    'class': 'class', 'state': 'state',
 }
 
 
@@ -54,8 +55,8 @@ class TemplateTests(unittest.TestCase):
             for needle in ('Document Title', 'Document Number', 'Version Number', 'Prepared By', 'Legend'):
                 self.assertIn(needle, text, (key, needle))
 
-    def test_new_diagram_fills_the_title_block_for_each_c4_template(self):
-        for key in ('sc', 'bc', 'l1-whitebox', 'l1-deployment', 'l2-component'):
+    def test_new_diagram_fills_the_title_block_for_each_template(self):
+        for key in ('sc', 'bc', 'l1-whitebox', 'l1-deployment', 'l2-component', 'class', 'state'):
             with tempfile.TemporaryDirectory() as directory:
                 result = run(SCRIPTS / 'new_diagram.py', key, 'X-Test-001', '--title', 'Test Title',
                              '--author', 'Jane Doe', '--date', '2027.01.05', '--out-dir', directory)
@@ -64,6 +65,26 @@ class TemplateTests(unittest.TestCase):
                 plain = ' '.join(re.sub(r'<[^>]+>', '', cell.get('value') or '') for cell in tree.iter('mxCell'))
                 for value in ('Test Title', 'X-Test-001', 'Prepared By: Jane Doe', 'Date: 2027.01.05'):
                     self.assertIn(value, plain, (key, value))
+
+    def test_uml_templates_share_the_sequence_frame_and_footer(self):
+        def footer(stem):
+            tree = ET.parse(SKILL / 'templates' / f'{stem}.drawio')
+            cells = {c.get('id'): c for c in tree.iter('mxCell')}
+            return {i: (cells[i].get('style'), cells[i].find('mxGeometry').attrib)
+                    for i in ('frame', 'hdr', 'legbox', 't1', 't2', 't3', 't4', 't5')}
+        reference = footer('sequence')
+        for stem in ('class', 'state'):
+            self.assertEqual(footer(stem), reference, stem)
+
+    def test_class_template_has_uml_classes_and_relationships(self):
+        text = (SKILL / 'templates/class.drawio').read_text(encoding='utf-8')
+        for needle in ('swimlane', 'interface', 'enumeration', 'diamondThin', 'endArrow=block;endFill=0'):
+            self.assertIn(needle, text, needle)
+
+    def test_state_template_has_pseudostates_and_transitions(self):
+        text = (SKILL / 'templates/state.drawio').read_text(encoding='utf-8')
+        for needle in ('shape=endState', 'rhombus', 'Composite state', 'event [guard] / action'):
+            self.assertIn(needle, text, needle)
 
     def test_new_diagram_refuses_to_overwrite(self):
         with tempfile.TemporaryDirectory() as directory:

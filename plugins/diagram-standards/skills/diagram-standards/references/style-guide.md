@@ -44,3 +44,18 @@
 - `loop`, `alt`, `opt`: UML frame with the keyword in the tab and the condition in square brackets; `else` branches are separated by a dashed line.
 - Lifelines are dashed grey.
   The legend lists the kinds, call, return and frame notation.
+
+## Class diagrams
+- A class is a three-compartment box: name, attributes, operations.
+  An interface adds the `«interface»` stereotype above the name and an enumeration adds `«enumeration»` with its values as rows.
+- Header fill: class `#438dd5`, interface `#85bbf0`, enumeration `#1168bd`, white bold name.
+  Body rows are black on white, 13 px, `+` public and `-` private.
+- Relationships use solid 2 px black lines, except realization and dependency, which are dashed.
+  Composition has a filled diamond at the whole, association an open arrow, realization a hollow triangle at the interface.
+- Put multiplicities (`1`, `0..*`) next to the line ends and a short verb label on the line.
+
+## State diagrams
+- State: rounded box in `#438dd5`, white bold name.
+  Composite state: rounded outline in `#3d81c3` with its name top-left and the inner states drawn inside.
+- Initial state is a filled black circle, final state a bullseye, choice a white diamond.
+- Transitions are solid 2 px black arrows labelled `event [guard] / action` on a white background.
