@@ -26,7 +26,7 @@ const GROUPS = ["Recent", "Session", "Here", "Cockpit", "Places", "Tab", "Pane",
 
 // [child of the center stack, label, icon, the command its key is bound to].
 const APPS = [
-  ["home", "Home", "layout-dashboard", "personal.home"],
+  ["home", "Home", "layout-dashboard", "khanh-personal.home"],
   ["work", "Work", "terminal"],
   ["inbox", "Inbox", "inbox"],
   ["agents", "Agents", "bot"],
@@ -37,20 +37,20 @@ const APPS = [
 
 // cockpit's window keys (keys.json's layout:cockpit), by name: [command, title, icon, keywords].
 const COCKPIT_COMMANDS = [
-  ["personal.recap", "Recap the agents", "sparkles", "whose move stages summary"],
-  ["personal.next-waiting", "Next agent waiting for you", "bell", "needs you question jump"],
-  ["personal.next:blocked", "Next blocked agent", "circle-dot", "needs you"],
-  ["personal.next:done", "Next finished agent", "circle-check", "done"],
-  ["personal.agent-view", "Agent view", "bot", "focus lone terminal tab toggle"],
-  ["personal.panel", "Side panel", "panel-right", "show review files changes toggle"],
-  ["personal.panel:show", "Side panel: Show", "layout", "charts tables diagrams"],
-  ["personal.panel:review", "Side panel: Review", "git-pull-request", "diff comments"],
-  ["personal.panel:files", "Side panel: Files", "folder", "tree"],
-  ["personal.panel:changes", "Side panel: Changes", "git-fork", "git diff"],
-  ["personal.queue", "Prompt queue", "list", "follow-ups send later"],
-  ["personal.resume", "Resume stopped agents", "play", "restart reboot resume session"],
-  ["personal.pr", "This branch's PR", "git-pull-request", "pull request github"],
-  ["personal.ticket", "This branch's ticket", "ticket", "linear jira issue"],
+  ["khanh-personal.recap", "Recap the agents", "sparkles", "whose move stages summary"],
+  ["khanh-personal.next-waiting", "Next agent waiting for you", "bell", "needs you question jump"],
+  ["khanh-personal.next:blocked", "Next blocked agent", "circle-dot", "needs you"],
+  ["khanh-personal.next:done", "Next finished agent", "circle-check", "done"],
+  ["khanh-personal.agent-view", "Agent view", "bot", "focus lone terminal tab toggle"],
+  ["khanh-personal.panel", "Side panel", "panel-right", "show review files changes toggle"],
+  ["khanh-personal.panel:show", "Side panel: Show", "layout", "charts tables diagrams"],
+  ["khanh-personal.panel:review", "Side panel: Review", "git-pull-request", "diff comments"],
+  ["khanh-personal.panel:files", "Side panel: Files", "folder", "tree"],
+  ["khanh-personal.panel:changes", "Side panel: Changes", "git-fork", "git diff"],
+  ["khanh-personal.queue", "Prompt queue", "list", "follow-ups send later"],
+  ["khanh-personal.resume", "Resume stopped agents", "play", "restart reboot resume session"],
+  ["khanh-personal.pr", "This branch's PR", "git-pull-request", "pull request github"],
+  ["khanh-personal.ticket", "This branch's ticket", "ticket", "linear jira issue"],
 ];
 
 // Herdr's own names for its commands: [command, args, group, title, keywords].
@@ -113,8 +113,8 @@ const FOUND = {
 
 const STATUS = new Set(["working", "blocked", "done", "idle"]);
 
-// The sidebar copy shows a block of the cockpit layout on `personal.go:<child>`.
-const show = (child) => run(`personal.go:${child}`);
+// The sidebar copy shows a block of the cockpit layout on `khanh-personal.go:<child>`.
+const show = (child) => run(`khanh-personal.go:${child}`);
 
 const titleOf = (name) => {
   const [noun, verb] = name.split(".");
@@ -148,17 +148,17 @@ export function fuzzy(q, text) {
   return { score: score - text.length * 0.02, hits };
 }
 
-const OPEN = { mod: "personal", props: { app: "palette" }, kind: "popup", frame: "none", width: 1, height: 1, at: { x: 0, y: 0 } };
+const OPEN = { mod: "khanh-personal", props: { app: "palette" }, kind: "popup", frame: "none", width: 1, height: 1, at: { x: 0, y: 0 } };
 
 /**
- * Opens the palette over the window, or closes it when it is open: `personal.palette` reaches the open palette too,
+ * Opens the palette over the window, or closes it when it is open: `khanh-personal.palette` reaches the open palette too,
  * which closes itself and says so, so the sidebar opens one only when none answered.
  */
 export function togglePalette(cx) {
   if (!cx) return openOverlay(OPEN);
   const asked = Date.now();
   cx.timer.after(80, () => {
-    if ((shared("cockpit.palette.closed") ?? 0) < asked) openOverlay(OPEN);
+    if ((shared("khanh-personal.palette.closed") ?? 0) < asked) openOverlay(OPEN);
   });
 }
 
@@ -173,7 +173,7 @@ export default class Palette {
     this.busy = null;
     this.error = null;
     this.editor = "VS Code";
-    this.recent = Array.isArray(shared("cockpit.palette.recent")) ? shared("cockpit.palette.recent") : [];
+    this.recent = Array.isArray(shared("khanh-personal.palette.recent")) ? shared("khanh-personal.palette.recent") : [];
     this.over = this.agentBelow();
     this.place = this.placeBelow();
     this.handle = cx.focus_handle();
@@ -261,13 +261,13 @@ export default class Palette {
       add({ id: "editor", group: this.over ? "Session" : "Here", icon: "code", title: `Open ${p.name} in ${this.editor}`, words: `editor vscode code cursor ${p.folder}`, act: () => this.editorOpen() });
     }
     for (const [child, label, icon, bound] of APPS) {
-      add({ id: `app:${child}`, group: "Cockpit", icon, title: label, name: bound ?? `personal.go:${child}`, words: "cockpit app go", act: () => (show(child), null) });
+      add({ id: `app:${child}`, group: "Cockpit", icon, title: label, name: bound ?? `khanh-personal.go:${child}`, words: "cockpit app go", act: () => (show(child), null) });
     }
     for (const [name, title, icon, words] of COCKPIT_COMMANDS) add({ id: name, group: "Cockpit", icon, title, name, words, act: () => (run(name), null) });
     add({ id: "refresh", group: "Cockpit", icon: "refresh", title: "Refresh the inbox", words: "fetch PRs reviews tickets CI now", act: () => hub.act("inbox", "request_refresh") });
     add({ id: "doctor", group: "Cockpit", icon: "shield-check", title: "Check cockpit", words: "doctor health report", page: "doctor" });
     add({ id: "brief", group: "Cockpit", icon: "newspaper", title: "Today's brief", words: "morning reviews CI tickets", page: "brief" });
-    add({ id: "kit", group: "Cockpit", icon: "palette", title: "Design kit", words: "components gallery ui", name: "personal.kit", act: () => (run("personal.kit"), null) });
+    add({ id: "kit", group: "Cockpit", icon: "palette", title: "Design kit", words: "components gallery ui", name: "khanh-personal.kit", act: () => (run("khanh-personal.kit"), null) });
 
     for (const s of spaces()) {
       add({ id: `space:${s.id}`, group: "Places", icon: "folder", title: s.name, hint: s.branch ?? "", status: s.status, words: `space ${s.branch ?? ""}`, act: () => (run("space.select", { id: s.id }), show("work"), null) });
@@ -340,7 +340,7 @@ export default class Palette {
   remember(e) {
     if (e.found) return;
     this.recent = [e.id, ...this.recent.filter((r) => r !== e.id)].slice(0, 20);
-    setShared("cockpit.palette.recent", this.recent);
+    setShared("khanh-personal.palette.recent", this.recent);
   }
 
   /** Runs an entry; one that waits on the hub keeps the palette open until it answers, with its error in place. */
@@ -406,7 +406,7 @@ export default class Palette {
     });
   }
 
-  /** A key, from the window or `personal.key:` (tests): true when the palette used it. */
+  /** A key, from the window or `khanh-personal.key:` (tests): true when the palette used it. */
   key(e, cx, typed = false) {
     const key = e.keystroke;
     if (this.page) {
@@ -433,10 +433,10 @@ export default class Palette {
     return true;
   }
 
-  /** `personal.palette` again closes it; `personal.palette:type:<text>` types into the search (tests drive it this way). */
+  /** `khanh-personal.palette` again closes it; `khanh-personal.palette:type:<text>` types into the search (tests drive it this way). */
   command(c, cx) {
     if (c === "palette") {
-      setShared("cockpit.palette.closed", Date.now());
+      setShared("khanh-personal.palette.closed", Date.now());
       this.dismiss();
     } else if (c.startsWith("palette:type:")) {
       this.input.set_value(c.slice(13));

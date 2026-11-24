@@ -1,8 +1,8 @@
-// Tests for mods/personal/radar.js: node --test tests/*.test.mjs
+// Tests for mods/khanh-personal/radar.js: node --test tests/*.test.mjs
 
 import assert from "node:assert/strict";
 import test from "node:test";
-import { CENTRE, RIM, polygon, radarTip, radarView, shares, spokePoint } from "../mods/personal/radar.js";
+import { CENTRE, RIM, polygon, radarTip, radarView, shares, spokePoint } from "../mods/khanh-personal/radar.js";
 
 const near = (a, b) => assert.ok(Math.abs(a - b) < 1e-9, `${a} is not ${b}`);
 

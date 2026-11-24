@@ -1,5 +1,5 @@
 // A right-click menu (shadcn's <ContextMenu>), opened by ui.js's openMenu() at the pointer: each item runs
-// `personal.<command>`, which reaches the shown views' command(). An item shows an `icon`, or an `image` in its own
+// `khanh-personal.<command>`, which reaches the shown views' command(). An item shows an `icon`, or an `image` in its own
 // colours (an agent's mark), and a check when `checked`. ↑/↓ and Enter work, Esc closes.
 
 import { div, image } from "gpui-kit";
@@ -16,7 +16,7 @@ export default class Menu {
 
   choose(item) {
     closeOverlay(props().overlay);
-    if (item?.command) run(`personal.${item.command}`);
+    if (item?.command) run(`khanh-personal.${item.command}`);
   }
 
   render() {

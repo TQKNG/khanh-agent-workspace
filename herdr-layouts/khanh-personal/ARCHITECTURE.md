@@ -25,7 +25,7 @@ flowchart TB
         HJ["personal/hub.js<br/>hub client"]
         PG["personal (other apps)<br/>pages: inbox, agents, home, work ..."]
         SB["personal (app: sidebar)<br/>sidebar page"]
-        WC["workspace-chrome-swiss<br/>header, shortcuts button, footer"]
+        WC["khanh-workspace-chrome<br/>header, shortcuts button, footer"]
         PG --> HJ
         SB --> HJ
     end
@@ -33,7 +33,7 @@ flowchart TB
     subgraph Herdr["Herdr app (~/.config/herdr-app)"]
         LY["layouts/personal.json<br/>window tree"]
         AG["agents() and terminals"]
-        CFG["cockpit.json, brand.json,<br/>keys.json, settings.json"]
+        CFG["khanh-personal.json, brand.json,<br/>keys.json, settings.json"]
     end
 
     GH --> GI
@@ -53,9 +53,9 @@ flowchart TB
 flowchart LR
     ROOT["root row"] --> SIDEBAR["sidebar column<br/>268 px"]
     ROOT --> MAIN["main-area column"]
-    SIDEBAR --> BRAND["brand block<br/>workspace-chrome-swiss"]
+    SIDEBAR --> BRAND["brand block<br/>khanh-workspace-chrome"]
     SIDEBAR --> SPAGE["sidebar page<br/>personal, app sidebar"]
-    SIDEBAR --> FOOT["footer<br/>workspace-chrome-swiss"]
+    SIDEBAR --> FOOT["footer<br/>khanh-workspace-chrome"]
     MAIN --> TOP["topbar row<br/>tabs, bell, shortcuts button"]
     MAIN --> CENTER["center stack"]
     MAIN --> STATUS["status bar"]
@@ -72,7 +72,7 @@ flowchart LR
 ```mermaid
 sequenceDiagram
     participant M as Mod (hub.js)
-    participant C as cockpit.json / cache/hub.json
+    participant C as khanh-personal.json / cache/hub.json
     participant L as Launcher (cockpit-hub)
     participant H as Hub process
 
@@ -201,7 +201,7 @@ flowchart LR
     INST["install.py --brand-name --brand-logo"] --> BJ["brand.json"]
     INST --> BD["brand/logo-hash.png"]
     HAND["manual edit"] --> BJ
-    BJ -->|"read every 4 s"| WC["workspace-chrome-swiss"]
+    BJ -->|"read every 4 s"| WC["khanh-workspace-chrome"]
     BD --> WC
     WC --> HDR["header: logo and name"]
     WC --> BTN["top-right shortcuts button"]
@@ -217,8 +217,8 @@ flowchart TD
     S["python install.py"] --> P["check Python 3.9+, gh signed in"]
     P --> LM["copy layout and 3 mods<br/>(skip identical, back up replaced)"]
     LM --> HUBI["copy hub into cockpit-hub/"]
-    HUBI --> CJ{"cockpit.json exists and<br/>points elsewhere?"}
-    CJ -->|"no or --force-hub"| W["write cockpit.json"]
+    HUBI --> CJ{"khanh-personal.json exists and<br/>points elsewhere?"}
+    CJ -->|"no or --force-hub"| W["write khanh-personal.json"]
     CJ -->|yes| K1["leave alone, print note"]
     W --> K["merge layout:personal into keys.json"]
     K1 --> K
@@ -232,7 +232,7 @@ Replaced files go to `<home>/.install-backups/<time>/`.
 
 ```mermaid
 flowchart LR
-    R["repo"] --> L["layouts/<br/>personal.json, .svg"]
+    R["repo"] --> L["layouts/<br/>personal.json, personal.svg"]
     R --> MD["mods/"]
     R --> HB["hub/"]
     R --> TS["tests/"]
@@ -240,7 +240,7 @@ flowchart LR
     R --> IN["install.py"]
     R --> DOCS["README.md, RECIPE.md, ARCHITECTURE.md"]
     MD --> M1["personal<br/>+ critters/art"]
-    MD --> M3["workspace-chrome-swiss"]
+    MD --> M3["khanh-workspace-chrome"]
     HB --> H1["cockpit_hub.py, github_inbox.py,<br/>github_pulls.py, github_checks.py,<br/>github_start.py, agent_profiles.py"]
     HB --> H2["cockpit-hub, cockpit-hub.cmd"]
     HB --> H3["worker-prompt.md"]

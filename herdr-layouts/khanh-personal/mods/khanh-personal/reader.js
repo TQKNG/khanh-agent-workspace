@@ -9,7 +9,7 @@ import { tokens, TEXT, RADIUS, Icon, Button, Toaster, Skeleton } from "./ui.js";
 
 /** Opens the reader window on a file or a text. */
 export function openReader({ path, text, title, meta }) {
-  openOverlay({ mod: "personal", kind: "window", key: `reader:${path ?? title}`, width: 760, height: 0.8, props: { app: "reader", path, text, title, meta } });
+  openOverlay({ mod: "khanh-personal", kind: "window", key: `reader:${path ?? title}`, width: 760, height: 0.8, props: { app: "reader", path, text, title, meta } });
 }
 
 /** Markdown as cockpit draws it in a panel: selectable, links to the browser. */

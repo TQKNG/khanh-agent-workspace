@@ -38,7 +38,8 @@ class Home(unittest.TestCase):
         write(self.home / ".codex" / "AGENTS.md", "line one\nline two\n")
         write(self.home / ".codex" / "skills" / "audit" / "SKILL.md", skill_md("audit", "Audit a session."))
         self.off = write(self.home / ".agents" / "skills" / "herdr" / "SKILL.md", skill_md("herdr", "Control Herdr."))
-        write(self.home / ".codex" / "config.toml", f'model = "gpt-5"\n\n[[skills.config]]\npath = "{self.off}"\nenabled = false\n\n[mcp_servers.repl]\ncommand = "node"\nenabled = false\n\n[mcp_servers.repl.env]\nAPI_KEY = "{SECRET}"\n')
+        toml_path = json.dumps(str(self.off))
+        write(self.home / ".codex" / "config.toml", f'model = "gpt-5"\n\n[[skills.config]]\npath = {toml_path}\nenabled = false\n\n[mcp_servers.repl]\ncommand = "node"\nenabled = false\n\n[mcp_servers.repl.env]\nAPI_KEY = "{SECRET}"\n')
         write(self.home / ".copilot" / "settings.json", '// managed\n{ "disabledMcpServers": ["off-server"] }\n')
         write(self.home / ".copilot" / "copilot-instructions.md", "Be brief.\n")
         self.answers = {
@@ -105,7 +106,7 @@ class TestProfiles(Home):
         self.assertTrue(claude["installed"])
         self.assertEqual(claude["version"], "1.2.3")
         self.assertEqual(claude["instructions"]["imports"], ["~/.codex/AGENTS.md"])
-        self.assertEqual(sorted((s["name"], s["source"]) for s in claude["skills"]), [("critique", "plugin design"), ("pdf", "claude.ai"), ("ticket", "personal")])
+        self.assertEqual(sorted((s["name"], s["source"]) for s in claude["skills"]), [("critique", "plugin design"), ("pdf", "claude.ai"), ("ticket", "khanh-personal")])
         self.assertEqual(claude["plugins"], [{"name": "design", "key": "design@synced", "version": "1.2.0", "enabled": True, "source": "synced", "toggle": True}])
         self.assertFalse(any(s["toggle"] for s in claude["skills"]), "Claude has no switch for a skill")
         mcp = {m["name"]: m for m in claude["mcp"]}
@@ -275,7 +276,7 @@ class TestToggle(Home):
         self.assertEqual(self.calls, [])
 
     def test_a_form_it_does_not_edit_is_refused_not_ignored(self):
-        inline = f'[skills]\nconfig = [{{ path = "{self.off}", enabled = false }}]\n'
+        inline = f'[skills]\nconfig = [{{ path = {json.dumps(str(self.off))}, enabled = false }}]\n'
         self.config.write_text(inline)
         with self.assertRaisesRegex(RuntimeError, "form the page does not edit"):
             ap.toggle({"agent": "codex", "kind": "skill", "key": str(self.off), "enabled": True})

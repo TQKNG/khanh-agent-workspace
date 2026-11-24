@@ -119,7 +119,7 @@ export function stageOf(a) {
 export function goToAgent(address) {
   run("agent.focus", { terminal: address });
   run("layout.select", { stack: "center", child: "work" });
-  setShared("cockpit.app", "work");
+  setShared("khanh-personal.app", "work");
 }
 
 /** The hub's agents actions, by the contract the agents view keeps: answer, recap, snooze, seen, fork. */

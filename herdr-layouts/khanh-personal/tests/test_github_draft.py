@@ -81,7 +81,7 @@ class IssueFlowTests(unittest.TestCase):
                 plan = github_start.make_plan({"url": "https://github.com/owner/repo/issues/23"})
             self.assertTrue(plan["ok"])
             self.assertEqual(plan["ctx"]["branch"], "feat/23-add-search")
-            self.assertTrue(plan["ctx"]["worktree"].endswith("/repo/issue-23-add-search"))
+            self.assertEqual(Path(plan["ctx"]["worktree"]), root / "worktrees" / "repo" / "issue-23-add-search")
 
     def test_file_issue_validates_markdown_and_posts_type_with_labels(self) -> None:
         spec = {

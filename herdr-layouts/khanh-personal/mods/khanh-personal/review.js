@@ -22,7 +22,7 @@ const NOTE = { choice: ["Decision", "flag"], upkeep: ["Upkeep", "wrench"], gap: 
 function shown() {
   const walk = (node, ok) => {
     if (!node || typeof node !== "object") return null;
-    if (node.content?.mod === "personal" && node.content?.props?.app === "review") return ok && !node.hidden;
+    if (node.content?.mod === "khanh-personal" && node.content?.props?.app === "review") return ok && !node.hidden;
     for (const child of node.children ?? []) {
       const visible = ok && !node.hidden && !child.hidden && (node.type !== "stack" || (node.active ?? node.children?.[0]?.id) === child.id);
       const found = walk(child, visible);
@@ -143,7 +143,7 @@ export default class Review {
   badge() {
     const n = this.diff.review().length;
     const value = n ? { count: n, tone: "info" } : null;
-    if (JSON.stringify(shared("badge.review") ?? null) !== JSON.stringify(value)) setShared("badge.review", value);
+    if (JSON.stringify(shared("khanh-personal.badge.review") ?? null) !== JSON.stringify(value)) setShared("khanh-personal.badge.review", value);
   }
 
   agentName() {

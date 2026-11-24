@@ -1,8 +1,8 @@
-// Tests for mods/personal/usage.js: node --test tests/*.test.mjs
+// Tests for mods/khanh-personal/usage.js: node --test tests/*.test.mjs
 
 import assert from "node:assert/strict";
 import test from "node:test";
-import { toneOf, untilText, usageView } from "../mods/personal/usage.js";
+import { toneOf, untilText, usageView } from "../mods/khanh-personal/usage.js";
 
 const NOW = 1795000000000; // ms
 const sec = (ms) => ms / 1000;

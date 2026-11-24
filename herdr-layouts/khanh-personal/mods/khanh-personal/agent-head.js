@@ -48,7 +48,7 @@ export default class AgentHead {
             tooltip: "Back to the whole tab",
             onClick: () => {
               run("layout.select", { stack: "view", child: "main" });
-              setShared("cockpit.view", "main");
+              setShared("khanh-personal.view", "main");
             },
           });
     if (!a)
@@ -90,8 +90,8 @@ export default class AgentHead {
           size: "icon-sm",
           tooltip: "Queue a prompt for it  ⌘⌥Q",
           onClick: () => {
-            setShared("cockpit.queue.for", a.address);
-            run("personal.queue", {});
+            setShared("khanh-personal.queue.for", a.address);
+            run("khanh-personal.queue", {});
           },
         }),
       )

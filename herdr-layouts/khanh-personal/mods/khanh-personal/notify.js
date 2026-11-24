@@ -26,9 +26,9 @@ export function deliver(n, install, cx) {
     title: n.title ?? "",
     body: `${n.body ?? ""}${more}`,
     level,
-    icon: "mods/personal/cockpit.svg",
+    icon: "mods/khanh-personal/cockpit.svg",
     timeout: level === "error" ? 12000 : 6000,
-    ...(target ? { action: { name: `personal.target:${target}` } } : {}),
+    ...(target ? { action: { name: `khanh-personal.target:${target}` } } : {}),
   });
 }
 

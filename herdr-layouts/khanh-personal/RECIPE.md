@@ -38,9 +38,9 @@ A status bar at the bottom counts agents by state.
 ## Built from
 
 - `layouts/personal.json`: a root row with a `sidebar` column, then a `main-area` column holding the `topbar` row, the `center` stack and the `status` block.
-- Mods of its own: `personal` (the pages and the sidebar, selected with `props.app`) and `workspace-chrome-swiss` (the brand block and footer).
+- Mods of its own: `khanh-personal` (the pages and the sidebar, selected with `props.app`) and `khanh-workspace-chrome` (the brand block and footer).
 - Herdr's shipped mods: `tabs`, `files`, `changes`, `menu`, `prompt` and `help`.
-- A local hub, started by the mods with `<cockpit.json bin> hub start`, which prints `{port, token}` as JSON and keeps running.
+- A local hub, started by the mods with the `bin` in `<herdr home>/khanh-personal.json`, which prints `{port, token}` as JSON and keeps running.
   The mods talk to it over TCP on `127.0.0.1` with one JSON message per line.
 - The hub serves the view `inbox`, answers `fetch` for `pr_merge`, `review_threads`, `ticket_card`, `pr_diff`, `pr_checks`, `check_log`, `start_plan`, `issue_draft` and `agent_profiles`, and handles the actions `request_refresh`, `file_issue`, `submit_review`, `merge`, `rerun_failed`, `start` and `open_url`.
   The inbox reads GitHub through `gh api graphql`.
@@ -62,11 +62,11 @@ A status bar at the bottom counts agents by state.
 - The diff view takes lines as `[kind, old number, new number, [[text]]]` with kind `" "`, `+`, `-`, `@` (hunk header) or `!` (a note), and a comment on a removed line is sent with side LEFT.
 - The hub must print exactly one JSON line from `hub start` and then exit, leaving the server detached.
 - On macOS and Linux the mods start the hub with `HOME` set to its own folder, so the hub must put back the account's home (from the password database) before running `gh` or `git`, or `gh` reports it is not signed in.
-- Commands a mod sends to itself start with its own name (`personal.go:inbox`): Herdr delivers `<mod>.<command>` only to a mod of that name.
+- Commands a mod sends to itself start with its own name (`khanh-personal.go:inbox`): Herdr delivers `<mod>.<command>` only to a mod of that name.
 - `start` takes only an agent's id from the mod; the command is the hub's own, and the agent's task names the issue but never carries its text.
 - `agent_profiles` keeps only an MCP server's name, transport, state and URL host: its environment, headers and arguments can hold keys.
 - Pages for mail, monitor, routines, queue and home need hub views this hub does not serve.
-- The sidebar's critter pictures are files named `sprite-<critter>-<status>.svg` in `mods/personal/critters/art`, and the folder must ship with the layout.
+- The sidebar's critter pictures are files named `sprite-<critter>-<status>.svg` in `mods/khanh-personal/critters/art`, and the folder must ship with the layout.
 - The brand is read from `<herdr home>/brand.json` (`name`, `logo`, `shortcut_logo`) every four seconds, and logo paths must stay inside the Herdr home.
 - Logo files carry a content hash in their name, because Herdr caches images by path and a replaced logo would otherwise not show.
 - Without `brand.json` the header shows "Workspace" with an initial tile, and the shortcuts button shows a "?".
@@ -76,7 +76,7 @@ A status bar at the bottom counts agents by state.
 
 ## Done when
 
-- `herdr-app check` passes for `personal` and `workspace-chrome-swiss`.
+- `herdr-app check` passes for `khanh-personal` and `khanh-workspace-chrome`.
 - `herdr-app status` reports no errors with the layout active.
 - `cockpit-hub hub start` prints a JSON line with a port and exits, and a process stays running.
 - The Inbox page shows your open PRs and issues within a few seconds, with no error text.

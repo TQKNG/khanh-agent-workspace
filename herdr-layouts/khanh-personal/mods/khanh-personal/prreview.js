@@ -18,7 +18,7 @@ import { tokens, alpha, TEXT, RADIUS, Icon, Badge, Button, ToneButton, Kbd, Tabs
 
 /** Opens the review window on a pull request: `item` is an inbox row's item ({ repo, number }). */
 export function openPrReview(item) {
-  openOverlay({ mod: "personal", kind: "window", key: `prreview:${item.repo}#${item.number}`, width: 0.92, height: 0.92, props: { app: "prreview", repo: item.repo, number: item.number } });
+  openOverlay({ mod: "khanh-personal", kind: "window", key: `prreview:${item.repo}#${item.number}`, width: 0.92, height: 0.92, props: { app: "prreview", repo: item.repo, number: item.number } });
 }
 
 const VERDICTS = {

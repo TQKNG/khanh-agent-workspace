@@ -2,6 +2,7 @@
 is in the layout, every hub module is installed, and a fresh install is complete. python -m unittest discover -s tests"""
 
 import json
+import fnmatch
 import re
 import shutil
 import sys
@@ -15,7 +16,7 @@ sys.path.insert(0, str(ROOT))
 import install  # noqa: E402
 
 MODS = ROOT / "mods"
-PERSONAL = MODS / "personal"
+PERSONAL = MODS / "khanh-personal"
 ICONS = {p.stem for p in (PERSONAL / "icons").glob("*.svg")}
 JS = {p: p.read_text(encoding="utf-8") for p in MODS.rglob("*.js")}
 HUB_PY = {p: p.read_text(encoding="utf-8") for p in (ROOT / "hub").glob("*.py")}
@@ -54,7 +55,7 @@ class TestAssets(unittest.TestCase):
                     named.setdefault(name, set()).add(path.name)
         self.assertGreater(len(named), 50, "the scan found the icon names")
         missing = {name: sorted(files) for name, files in named.items() if name not in ICONS}
-        self.assertEqual(missing, {}, "an icon that is not in mods/personal/icons draws nothing")
+        self.assertEqual(missing, {}, "an icon that is not in mods/khanh-personal/icons draws nothing")
 
     def test_every_fixed_image_path_is_in_the_package(self):
         for path, text in JS.items():
@@ -65,9 +66,9 @@ class TestAssets(unittest.TestCase):
                 self.assertTrue((ROOT / target).is_file(), f"{target} (named in {path.name})")
 
     def test_the_header_and_footer_icons(self):
-        text = JS[MODS / "workspace-chrome-swiss" / "main.js"]
+        text = JS[MODS / "khanh-workspace-chrome" / "main.js"]
         for name in re.findall(r'row\("[\w-]+", "([\w-]+)"', text):
-            self.assertTrue((MODS / "workspace-chrome-swiss" / f"{name}.svg").is_file(), name)
+            self.assertTrue((MODS / "khanh-workspace-chrome" / f"{name}.svg").is_file(), name)
 
     def test_every_critter_has_its_four_pictures(self):
         text = JS[PERSONAL / "sidebar.js"]
@@ -91,6 +92,34 @@ class TestWiring(unittest.TestCase):
         known = {a or b for a, b in known}
         self.assertEqual(sorted(apps - known), [])
 
+    def test_layout_references_the_namespaced_package_mods(self):
+        layout = json.loads((ROOT / "layouts" / "personal.json").read_text(encoding="utf-8"))
+        mods = set()
+        def collect(node):
+            if isinstance(node, dict):
+                if isinstance(node.get("mod"), str):
+                    mods.add(node["mod"])
+                for value in node.values():
+                    collect(value)
+            elif isinstance(node, list):
+                for value in node:
+                    collect(value)
+        collect(layout)
+        self.assertIn("khanh-personal", mods)
+        self.assertIn("khanh-workspace-chrome", mods)
+        self.assertNotIn("personal", mods)
+        self.assertNotIn("workspace-chrome-swiss", mods)
+
+    def test_package_commands_and_persisted_state_use_the_package_namespace(self):
+        joined = "\n".join(JS.values())
+        self.assertNotIn('run("personal.', joined)
+        self.assertNotIn('run(`personal.', joined)
+        self.assertNotIn('shared("cockpit.', joined)
+        self.assertNotIn('setShared("cockpit.', joined)
+        self.assertNotIn('localStorage.getItem("agents.', joined)
+        self.assertNotIn('localStorage.setItem("agents.', joined)
+        self.assertIn('shared("workspace.panels")', joined, "Herdr-owned shared panel state stays global")
+
     def test_sidebar_palette_panels_and_shortcuts_reach_real_pages(self):
         sidebar = JS[PERSONAL / "sidebar.js"].split("const APPS = {")[1].split("};")[0]
         for key, child in re.findall(r'^\s+"?([\w-]+)"?: \{ (?:child: "([\w-]+)", )?label', sidebar, re.M):
@@ -103,11 +132,37 @@ class TestWiring(unittest.TestCase):
             self.assertIn(child, self.ids, "side panel")
         keys = json.loads((ROOT / "keys.layout-personal.json").read_text(encoding="utf-8"))["layout:personal"]
         for command in keys.values():
-            if command.startswith("personal.go:"):
+            if command.startswith("khanh-personal.go:"):
                 self.assertIn(command.split(":", 1)[1], self.ids, "shortcut")
 
 
 class TestInstall(unittest.TestCase):
+    def test_dependency_manifest_files_exist(self):
+        manifest = json.loads((ROOT / "dependencies.json").read_text(encoding="utf-8"))
+        self.assertEqual(manifest["schema_version"], 1)
+        self.assertEqual(manifest["package"], "khanh-personal")
+        for pattern in manifest["package_files"]:
+            if pattern.endswith("/**") or pattern.endswith("/*.py") or pattern.endswith("/*.md"):
+                parent = ROOT / pattern.split("*", 1)[0].rstrip("/")
+                self.assertTrue(parent.exists(), pattern)
+                continue
+            self.assertTrue((ROOT / pattern).is_file(), pattern)
+        repository_root = ROOT.parents[1]
+        for path in manifest["repository_resources"]:
+            self.assertTrue((repository_root / path).is_file(), path)
+        for dependency in manifest["external_dependencies"]:
+            self.assertIn("name", dependency)
+            self.assertIn("required", dependency)
+            self.assertIn("features", dependency)
+
+    def test_package_has_no_declared_machine_secrets_or_runtime_state(self):
+        manifest = json.loads((ROOT / "dependencies.json").read_text(encoding="utf-8"))
+        files = [p.relative_to(ROOT).as_posix() for p in ROOT.rglob("*") if p.is_file()]
+        generated = manifest["generated_runtime_paths"]
+        files = [path for path in files if not any(fnmatch.fnmatch(path, pattern) for pattern in generated)]
+        forbidden = [pattern for pattern in manifest["never_package"] for path in files if fnmatch.fnmatch(path, pattern)]
+        self.assertEqual(forbidden, [], "machine credentials and runtime state must remain local")
+
     def test_every_hub_module_is_installed(self):
         modules = {f"{m}.py" for text in HUB_PY.values() for m in re.findall(r"^import (\w+)$", text, re.M) if (ROOT / "hub" / f"{m}.py").exists()}
         self.assertTrue(modules, "the hub imports its modules")
@@ -136,12 +191,12 @@ class TestInstall(unittest.TestCase):
                 copied = {p.relative_to(home / "mods" / mod) for p in (home / "mods" / mod).rglob("*") if p.is_file()}
                 self.assertEqual(sorted(map(str, source - copied)), [], f"mods/{mod} is copied whole")
             for name in install.HUB_FILES:
-                self.assertTrue((home / "cockpit-hub" / name).is_file(), name)
+                self.assertTrue((home / "khanh-personal-hub" / name).is_file(), name)
             for name in install.SCAFFOLD_FILES:
-                installed = home / "cockpit-hub" / "repo-scaffold" / name
+                installed = home / "khanh-personal-hub" / "repo-scaffold" / name
                 source = ROOT.parents[1] / "skills" / "repo-scaffold" / name
                 self.assertEqual(installed.read_bytes(), source.read_bytes(), name)
-            config = json.loads((home / "cockpit.json").read_text())
+            config = json.loads((home / "khanh-personal.json").read_text())
             self.assertTrue(Path(config["bin"]).is_file())
             self.assertIn("layout:personal", json.loads((home / "keys.json").read_text()))
             self.assertEqual(json.loads((home / "settings.json").read_text())["worktrees"]["directory"], (home / "worktrees").as_posix())

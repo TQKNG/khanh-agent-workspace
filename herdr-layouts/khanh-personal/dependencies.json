@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "package": "khanh-personal",
+  "platforms": ["windows", "macos"],
+  "package_files": [
+    "layouts/personal.json",
+    "layouts/personal.svg",
+    "keys.layout-personal.json",
+    "mods/khanh-personal/**",
+    "mods/khanh-workspace-chrome/**",
+    "hub/*.py",
+    "hub/cockpit-hub",
+    "hub/cockpit-hub.cmd",
+    "hub/*.md"
+  ],
+  "repository_resources": [
+    "skills/repo-scaffold/SKILL.md",
+    "skills/repo-scaffold/assets/starter/.github/ISSUE_TEMPLATE/bug_report.md",
+    "skills/repo-scaffold/assets/starter/.github/ISSUE_TEMPLATE/feature_request.md",
+    "skills/repo-scaffold/assets/starter/.github/pull_request_template.md"
+  ],
+  "herdr_dependencies": {
+    "herdr_app": {
+      "required": true,
+      "tested_version": "0.1.16",
+      "components": ["tabs", "files", "changes", "menu", "prompt", "help", "picker", "paper", "graphite", "Geist"]
+    }
+  },
+  "external_dependencies": [
+    { "name": "Python", "required": true, "version": ">=3.9", "features": ["installer", "local hub"] },
+    { "name": "Git", "required": true, "features": ["repository discovery", "worktrees", "agent assignment"] },
+    { "name": "GitHub CLI", "executable": "gh", "required": false, "features": ["GitHub Inbox", "GitHub write actions"], "setup": "Install gh and authenticate with gh auth login." },
+    { "name": "Claude Code", "required": false, "features": ["Claude agent profile", "issue drafting", "agent assignment"] },
+    { "name": "Codex CLI", "required": false, "features": ["Codex agent profile", "issue drafting", "agent assignment"] },
+    { "name": "GitHub Copilot CLI", "required": false, "features": ["Copilot agent profile", "agent assignment"] },
+    { "name": "tomli", "required": false, "version": "only required on Python 3.9 and 3.10 for Codex profile switches", "features": ["Codex profile switches"] },
+    { "name": "GitHub Copilot SDK", "required": false, "features": ["Copilot usage quota"], "install_location": "<herdr home>/khanh-personal-hub/.venv" },
+    { "name": "Claude status line", "required": false, "features": ["Claude usage quota"], "setup": "Configure the capture command in ~/.claude/settings.json." },
+    { "name": "Node.js", "required": false, "version": "22 for the package JavaScript test suite", "features": ["package validation"] }
+  ],
+  "local_only": [
+    "Herdr home khanh-personal.json hub configuration",
+    "Herdr user settings, shortcuts, brand and logos",
+    "GitHub CLI authentication and credentials",
+    "Agent credentials and provider configuration",
+    "Hub cache, generated token, logs and runtime state",
+    "Repositories and worktrees"
+  ],
+  "generated_runtime_paths": [
+    "hub/cache/marks/**"
+  ],
+  "never_package": [
+    "hub/credentials.json",
+    "hub/data/**",
+    "hub/cache/**",
+    "*.token",
+    "*.pem",
+    "*.key"
+  ]
+}

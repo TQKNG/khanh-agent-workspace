@@ -7,9 +7,9 @@ import { exec, appHome, readTextFile, window as win } from "herdr";
 /** Waits `ms` on the context's timer (mods have no setTimeout). */
 export const sleep = (cx, ms) => new Promise((resolve) => cx.timer.after(ms, () => resolve()));
 
-const NOT_INSTALLED = "cockpit is not installed in this Herdr home";
+const NOT_INSTALLED = "this layout hub is not installed in this Herdr home";
 
-/** Whether an error (or a subscription's "error: …" state) says this Herdr home has no cockpit.json. */
+/** Whether an error (or a subscription's "error: …" state) says this Herdr home has no khanh-personal.json. */
 export const isNotInstalled = (e) => String(e?.message ?? e ?? "").includes(NOT_INSTALLED);
 
 /** Opens a URL or file in the system's default app: `open` on macOS, `start` on Windows, `xdg-open` elsewhere. */
@@ -25,8 +25,8 @@ export function openUrl(url) {
 let installed = null;
 export async function install() {
   if (installed && Date.now() - installed.at < 3000) return installed.value;
-  const text = await readTextFile(`${appHome()}/cockpit.json`);
-  if (!text) throw new Error(`${NOT_INSTALLED}: run \`cockpit app install\`, or install cockpit first: github.com/quaresc/cockpit#install`);
+  const text = await readTextFile(`${appHome()}/khanh-personal.json`);
+  if (!text) throw new Error(`${NOT_INSTALLED}: run this package's installer first.`);
   installed = { at: Date.now(), value: installed?.text === text ? installed.value : JSON.parse(text), text };
   return installed.value;
 }

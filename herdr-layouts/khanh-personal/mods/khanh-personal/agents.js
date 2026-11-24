@@ -27,8 +27,8 @@ const CARD = { w: 304, h: 472, art: 112 };
 // The artwork's two halves: the logo's share, and the usage radar's panel. The panel is the card's own surface, so its
 // labels read on every frame colour, and it is wide enough for the labels outside the radar's rim (a 44px label at
 // 10px out from the rim) to stay inside it. The radar's square is 80px, so its rim is 24px from the centre.
-const PICK_KEY = "cockpit.agents.pick";
-const SECTION_KEY = "cockpit.agents.section";
+const PICK_KEY = "khanh-personal.agents.pick";
+const SECTION_KEY = "khanh-personal.agents.section";
 
 const needsSignIn = (m) => /auth/i.test(m.status ?? "") && !/signed in/i.test(m.status ?? "");
 const onFirst = (a, b) => b.enabled - a.enabled || a.name.localeCompare(b.name);

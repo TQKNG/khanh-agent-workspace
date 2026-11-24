@@ -1,5 +1,5 @@
 // The side panel's activity bar: one icon per panel (Documents, Review, Files, Changes), the shown one marked by
-// an accent edge, each with the badge its view publishes as shared `badge.<name>` = {count, tone}; a click switches the
+// an accent edge, each with the badge its view publishes as shared `khanh-personal.badge.<name>` = {count, tone}; a click switches the
 // panel, the last button closes it.
 
 import { div } from "gpui-kit";
@@ -37,7 +37,7 @@ export default class Activity {
     const button = (item) => {
       const child = PANELS[item.name];
       const on = active === child;
-      const badge = shared(`badge.${item.name}`);
+      const badge = shared(`khanh-personal.badge.${item.name}`);
       const tone = badge?.tone ? k[badge.tone] ?? badge.tone : k.ring;
       return h_flex()
         .id(`act-${item.name}`)

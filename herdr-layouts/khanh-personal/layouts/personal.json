@@ -17,7 +17,7 @@
   "divider": { "width": 1, "color": "border" },
   "preview": "layouts/personal.svg",
   "floating": [
-    { "id": "queue", "content": { "mod": "personal", "props": { "app": "queue" } }, "edge": "right", "align": "center", "peek": 44 }
+    { "id": "queue", "content": { "mod": "khanh-personal", "props": { "app": "queue" } }, "edge": "right", "align": "center", "peek": 44 }
   ],
   "children": [
     {
@@ -29,9 +29,9 @@
       "background": "chrome",
       "resizable": false,
       "children": [
-        { "id": "brand", "type": "block", "size": { "px": 46 }, "window_drag": true, "content": { "mod": "workspace-chrome-swiss" } },
-        { "id": "cockpit-sidebar", "type": "block", "size": { "weight": 1 }, "min": 120, "content": { "mod": "personal", "props": { "app": "sidebar" } } },
-        { "id": "sidebar-footer", "type": "block", "size": { "px": 69 }, "content": { "mod": "workspace-chrome-swiss", "props": { "footer": true } } }
+        { "id": "brand", "type": "block", "size": { "px": 46 }, "window_drag": true, "content": { "mod": "khanh-workspace-chrome" } },
+        { "id": "cockpit-sidebar", "type": "block", "size": { "weight": 1 }, "min": 120, "content": { "mod": "khanh-personal", "props": { "app": "sidebar" } } },
+        { "id": "sidebar-footer", "type": "block", "size": { "px": 69 }, "content": { "mod": "khanh-workspace-chrome", "props": { "footer": true } } }
       ]
     },
     {
@@ -46,8 +46,8 @@
           "resizable": false,
           "children": [
             { "id": "tabs", "type": "block", "window_drag": true, "content": { "mod": "tabs" } },
-            { "id": "bell", "type": "block", "size": { "px": 52 }, "window_drag": true, "content": { "mod": "personal", "props": { "app": "bell" } } },
-            { "id": "shortcuts", "type": "block", "size": { "px": 48 }, "window_drag": true, "content": { "mod": "workspace-chrome-swiss", "props": { "shortcut": true } } }
+            { "id": "bell", "type": "block", "size": { "px": 52 }, "window_drag": true, "content": { "mod": "khanh-personal", "props": { "app": "bell" } } },
+            { "id": "shortcuts", "type": "block", "size": { "px": 48 }, "window_drag": true, "content": { "mod": "khanh-workspace-chrome", "props": { "shortcut": true } } }
           ]
         },
         {
@@ -59,7 +59,7 @@
               "id": "home",
               "type": "row",
               "children": [
-                { "id": "home-board", "type": "block", "content": { "mod": "personal", "props": { "app": "home" } }, "radius": 6, "border": { "width": 1, "color": "border" }, "background": "background" },
+                { "id": "home-board", "type": "block", "content": { "mod": "khanh-personal", "props": { "app": "home" } }, "radius": 6, "border": { "width": 1, "color": "border" }, "background": "background" },
                 {
                   "id": "home-agent",
                   "type": "column",
@@ -77,7 +77,7 @@
                       "background": "background",
                       "resizable": false,
                       "children": [
-                        { "id": "home-agent-head", "type": "block", "size": { "px": 34 }, "content": { "mod": "personal", "props": { "app": "agent-head", "place": "home" } } },
+                        { "id": "home-agent-head", "type": "block", "size": { "px": 34 }, "content": { "mod": "khanh-personal", "props": { "app": "agent-head", "place": "home" } } },
                         { "id": "home-agent-term", "type": "block", "content": { "agent": "focused" } }
                       ]
                     }
@@ -97,7 +97,7 @@
                   "type": "stack",
                   "active": "main",
                   "children": [
-                    { "id": "main", "type": "block", "content": { "tab": "active", "pane": { "gap": 8, "radius": 6, "background": "background", "lone": true, "border": { "width": 1, "color": "border" }, "focus": { "width": 1, "color": "solid" }, "header": { "content": { "mod": "personal", "props": { "app": "pane" } }, "height": 30, "position": "top", "reveal": "always" } } } },
+                    { "id": "main", "type": "block", "content": { "tab": "active", "pane": { "gap": 8, "radius": 6, "background": "background", "lone": true, "border": { "width": 1, "color": "border" }, "focus": { "width": 1, "color": "solid" }, "header": { "content": { "mod": "khanh-personal", "props": { "app": "pane" } }, "height": 30, "position": "top", "reveal": "always" } } } },
                     {
                       "id": "agent",
                       "type": "column",
@@ -106,7 +106,7 @@
                       "background": "background",
                       "resizable": false,
                       "children": [
-                        { "id": "agent-head", "type": "block", "size": { "px": 34 }, "content": { "mod": "personal", "props": { "app": "agent-head", "place": "work" } } },
+                        { "id": "agent-head", "type": "block", "size": { "px": 34 }, "content": { "mod": "khanh-personal", "props": { "app": "agent-head", "place": "work" } } },
                         { "id": "agent-term", "type": "block", "content": { "agent": "focused" } }
                       ]
                     }
@@ -129,27 +129,27 @@
                       "type": "stack",
                       "active": "show",
                       "children": [
-                        { "id": "show", "type": "block", "content": { "mod": "personal", "props": { "app": "show" } } },
-                        { "id": "review", "type": "block", "content": { "mod": "personal", "props": { "app": "review" } } },
+                        { "id": "show", "type": "block", "content": { "mod": "khanh-personal", "props": { "app": "show" } } },
+                        { "id": "review", "type": "block", "content": { "mod": "khanh-personal", "props": { "app": "review" } } },
                         { "id": "files", "type": "block", "content": { "mod": "files" } },
                         { "id": "changes", "type": "block", "content": { "mod": "changes" } }
                       ]
                     },
-                    { "id": "activity", "type": "block", "size": { "px": 44 }, "content": { "mod": "personal", "props": { "app": "activity", "stack": "panel-body" } } }
+                    { "id": "activity", "type": "block", "size": { "px": 44 }, "content": { "mod": "khanh-personal", "props": { "app": "activity", "stack": "panel-body" } } }
                   ]
                 }
               ]
             },
-            { "id": "inbox", "type": "block", "content": { "mod": "personal", "props": { "app": "inbox" } }, "radius": 6, "border": { "width": 1, "color": "border" }, "background": "background" },
-            { "id": "agents", "type": "block", "content": { "mod": "personal", "props": { "app": "agents" } }, "radius": 6, "border": { "width": 1, "color": "border" }, "background": "background" },
-            { "id": "monitor", "type": "block", "content": { "mod": "personal", "props": { "app": "monitor" } }, "radius": 6, "border": { "width": 1, "color": "border" }, "background": "background" },
-            { "id": "routines", "type": "block", "content": { "mod": "personal", "props": { "app": "routines" } }, "radius": 6, "border": { "width": 1, "color": "border" }, "background": "background" },
-            { "id": "mail", "type": "block", "content": { "mod": "personal", "props": { "app": "mail" } }, "radius": 6, "border": { "width": 1, "color": "border" }, "background": "background" }
+            { "id": "inbox", "type": "block", "content": { "mod": "khanh-personal", "props": { "app": "inbox" } }, "radius": 6, "border": { "width": 1, "color": "border" }, "background": "background" },
+            { "id": "agents", "type": "block", "content": { "mod": "khanh-personal", "props": { "app": "agents" } }, "radius": 6, "border": { "width": 1, "color": "border" }, "background": "background" },
+            { "id": "monitor", "type": "block", "content": { "mod": "khanh-personal", "props": { "app": "monitor" } }, "radius": 6, "border": { "width": 1, "color": "border" }, "background": "background" },
+            { "id": "routines", "type": "block", "content": { "mod": "khanh-personal", "props": { "app": "routines" } }, "radius": 6, "border": { "width": 1, "color": "border" }, "background": "background" },
+            { "id": "mail", "type": "block", "content": { "mod": "khanh-personal", "props": { "app": "mail" } }, "radius": 6, "border": { "width": 1, "color": "border" }, "background": "background" }
           ],
           "padding": 10,
           "gap": 10
         },
-        { "id": "status", "type": "block", "size": { "px": 34 }, "content": { "mod": "personal", "props": { "app": "status" } } }
+        { "id": "status", "type": "block", "size": { "px": 34 }, "content": { "mod": "khanh-personal", "props": { "app": "status" } } }
       ]
     }
   ]

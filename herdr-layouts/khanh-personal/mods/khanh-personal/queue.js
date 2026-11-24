@@ -41,15 +41,15 @@ export default class Queue {
   command(c, cx) {
     if (c === "queue" && !this.dialog && placement()) {
       const f = focused();
-      if (!shared("cockpit.queue.for") && f?.terminal) setShared("cockpit.queue.for", f.terminal);
-      openOverlay({ mod: "personal", props: { app: "queue", mode: "dialog" }, kind: "dialog", width: 460, height: 440 });
+      if (!shared("khanh-personal.queue.for") && f?.terminal) setShared("khanh-personal.queue.for", f.terminal);
+      openOverlay({ mod: "khanh-personal", props: { app: "queue", mode: "dialog" }, kind: "dialog", width: 460, height: 440 });
     }
     cx.notify();
   }
 
   /** The agent whose queue shows: the one asked for, else the one in front, else the first with prompts queued. */
   target(list) {
-    const want = shared("cockpit.queue.for");
+    const want = shared("khanh-personal.queue.for");
     const f = focused();
     const queues = this.model?.queues ?? {};
     return (
@@ -145,7 +145,7 @@ export default class Queue {
         list.slice(0, 8).map((x) => {
           const n = queues[x.handle]?.length ?? 0;
           const on = x.address === a?.address;
-          return Chip(`${x.title}${n ? ` · ${n}` : ""}`, { id: `q-pick-${x.address}`, color: on ? k.ring : undefined, onClick: () => setShared("cockpit.queue.for", x.address) });
+          return Chip(`${x.title}${n ? ` · ${n}` : ""}`, { id: `q-pick-${x.address}`, color: on ? k.ring : undefined, onClick: () => setShared("khanh-personal.queue.for", x.address) });
         }),
       );
 
@@ -192,7 +192,7 @@ export default class Queue {
     if (this.dialog) return v_flex().id("queue-dialog").size_full().bg(k.popover).child(body);
     // Nothing queued, an app with its own side panel in front, or the work area's panel open on that edge (its activity
     // bar is there): the drawer steps aside, and the status bar's count opens the queue.
-    const shownApp = shared("cockpit.app") ?? "home";
+    const shownApp = shared("khanh-personal.app") ?? "home";
     const panel = findNode(layout(), "panel");
     const panelOpen = Boolean(panel && !panel.hidden) && shownApp === "work";
     const aside = !["home", "work"].includes(shownApp) || (panelOpen && p?.edge !== "left");

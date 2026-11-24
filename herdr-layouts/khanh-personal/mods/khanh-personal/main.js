@@ -1,6 +1,6 @@
 // cockpit in the Herdr app: one mod, one view per place it shows (`props.app`), so the views share the hub client
 // (hub.js) and the design kit (ui.js). A view is a class with init(props, cx), render(cx), and optionally
-// command(name, cx) for keys.json's `personal.<command>` and close(cx); add it to VIEWS.
+// command(name, cx) for keys.json's `khanh-personal.<command>` and close(cx); add it to VIEWS.
 
 import { View } from "gpui-kit";
 import { props, nextCommand } from "herdr";
@@ -39,7 +39,7 @@ export default class Cockpit extends View {
     cx.spawn(async (cx) => {
       for (;;) {
         const command = await nextCommand();
-        // `personal.key:<keystroke>` presses a key in the shown views, for tests driving the window from a shell.
+        // `khanh-personal.key:<keystroke>` presses a key in the shown views, for tests driving the window from a shell.
         if (command.startsWith("key:") && this.view.key) {
           const keystroke = command.slice(4);
           this.view.key({ keystroke, key: keystroke.split("-").pop(), modifiers: {} }, cx);

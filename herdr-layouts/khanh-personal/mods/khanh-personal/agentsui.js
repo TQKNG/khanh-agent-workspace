@@ -72,11 +72,11 @@ export function Chips(row, { few = false, id = row.terminal } = {}) {
         icon: row.pr.state === "merged" ? "git-merge" : row.pr.draft ? "git-pull-request-draft" : "git-pull-request",
         color: row.pr.review === "CHANGES_REQUESTED" ? k.destructive : row.pr.review === "APPROVED" ? k.success : undefined,
         tooltip: row.pr.title,
-        onClick: () => run("personal.target:" + row.pr.url),
+        onClick: () => run("khanh-personal.target:" + row.pr.url),
       }),
     );
   }
-  if (!few && row.ticket) out.push(Chip(row.ticket.status ? `${row.ticket.key} ${row.ticket.status}` : row.ticket.key, { id: `${id}-ticket`, icon: "ticket", color: k.info, tooltip: row.ticket.title ?? row.ticket.key, onClick: row.ticket.url ? () => run("personal.target:" + row.ticket.url) : undefined }));
+  if (!few && row.ticket) out.push(Chip(row.ticket.status ? `${row.ticket.key} ${row.ticket.status}` : row.ticket.key, { id: `${id}-ticket`, icon: "ticket", color: k.info, tooltip: row.ticket.title ?? row.ticket.key, onClick: row.ticket.url ? () => run("khanh-personal.target:" + row.ticket.url) : undefined }));
   if (!few && row.branch) out.push(Chip(row.branch, { id: `${id}-branch`, mono: true, icon: "git-branch" }));
   if (c && (c.files || c.ahead)) {
     out.push(
@@ -280,7 +280,7 @@ export class AgentsModel {
     if (!row.herdr) this.act(cx, "seen", { terminal: row.terminal });
   }
 
-  /** The right-click menu of an agent; its items come back as `personal.agents|<what>|<terminal>|<arg>`. */
+  /** The right-click menu of an agent; its items come back as `khanh-personal.agents|<what>|<terminal>|<arg>`. */
   menu(row) {
     // Every item is a hub action.
     if (row.herdr) return;
@@ -307,7 +307,7 @@ export class AgentsModel {
     );
   }
 
-  /** `personal.agents|…` from a menu, run by the sidebar's copy alone (every shown copy hears it); true when it was one. */
+  /** `khanh-personal.agents|…` from a menu, run by the sidebar's copy alone (every shown copy hears it); true when it was one. */
   command(c, cx) {
     if (!c.startsWith("agents|")) return false;
     const [, what, terminal, arg] = c.split("|");
@@ -328,13 +328,13 @@ export class AgentsModel {
   togglePin(terminal) {
     this.pins = this.pins.includes(terminal) ? this.pins.filter((p) => p !== terminal) : [...this.pins, terminal];
     try {
-      localStorage.setItem("agents.pins", JSON.stringify(this.pins));
+      localStorage.setItem("khanh-personal.agents.pins", JSON.stringify(this.pins));
     } catch {}
   }
 
   loadPins() {
     try {
-      this.pins = JSON.parse(localStorage.getItem("agents.pins") ?? "[]");
+      this.pins = JSON.parse(localStorage.getItem("khanh-personal.agents.pins") ?? "[]");
     } catch {
       this.pins = [];
     }

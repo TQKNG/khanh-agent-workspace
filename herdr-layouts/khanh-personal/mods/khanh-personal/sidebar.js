@@ -1,6 +1,6 @@
 // The cockpit sidebar, in place of Herdr's Spaces and Agents lists: the work area and the pinned apps (the config's
 // `spaces`) with their counts, then the spaces with their tabs' agents. It is the one copy always shown, so it also
-// carries the window-wide plumbing: `personal.go:<app>`, `personal.palette`, `personal.target:<target>` (a notification's
+// carries the window-wide plumbing: `khanh-personal.go:<app>`, `khanh-personal.palette`, `khanh-personal.target:<target>` (a notification's
 // click) and the hub's notifications, posted as Herdr toasts while the window is in front, as system ones otherwise.
 
 import { div, image } from "gpui-kit";
@@ -23,7 +23,7 @@ const APPS = {
 };
 const DEFAULT_SPACES = ["inbox", "agents"];
 
-const CRITTER_ART = "mods/personal/critters/art";
+const CRITTER_ART = "mods/khanh-personal/critters/art";
 const CRITTER_NAMES = [
   "pixel", "byte", "nova", "rook", "ziggy", "mochi", "bolt", "echo", "juno", "kiwi",
   "luma", "miso", "nimbus", "onyx", "pepper", "quill", "rusty", "sprout", "tango", "umbra",
@@ -67,8 +67,8 @@ function appBadge(app, v) {
 /** Shows a block of the cockpit layout, `work` or an app's, and gives that app the keyboard. */
 export function show(child) {
   run("layout.select", { stack: "center", child });
-  setShared("cockpit.app", child);
-  if (child !== "work") run(`personal.show:${child}`);
+  setShared("khanh-personal.app", child);
+  if (child !== "work") run(`khanh-personal.show:${child}`);
 }
 
 /** The palette over the window, on Herdr's palette geometry; again: closes it. */
@@ -85,7 +85,7 @@ export default class Sidebar {
     this.hover = new Hover();
     this.flashes = new Flashes();
     this.folded = new Set();
-    this.critters = JSON.parse(localStorage.getItem("personal.critters") ?? "{}");
+    this.critters = JSON.parse(localStorage.getItem("khanh-personal.critters") ?? "{}");
     this.repos = new Map();
     this.drag = null;
     this.agents = new AgentsModel();
@@ -128,7 +128,7 @@ export default class Sidebar {
     else if (c === "palette") openPalette(cx);
     else if (c === "recap" || c.startsWith("recap:")) this.openRecap(c.split(":")[1]);
     else if (this.agents.command(c, cx)) return;
-    else if (c === "kit" || c.startsWith("kit:")) openOverlay({ mod: "personal", props: { app: "kit", tab: c.split(":")[1] }, kind: "window", key: "cockpit-kit", width: 0.85, height: 0.9 });
+    else if (c === "kit" || c.startsWith("kit:")) openOverlay({ mod: "khanh-personal", props: { app: "kit", tab: c.split(":")[1] }, kind: "window", key: "cockpit-kit", width: 0.85, height: 0.9 });
     else if (c.startsWith("target:")) this.target(c.slice(7), cx);
     else if (c.startsWith("code:open:")) openCode(c.slice(10));
     cx.notify();
@@ -158,7 +158,7 @@ export default class Sidebar {
 
   render(cx) {
     const k = tokens();
-    const active = shared("cockpit.app") ?? "work";
+    const active = shared("khanh-personal.app") ?? "work";
     // A space or tab picked anywhere brings the work area back (Home keeps its own focused agent).
     const f = focused();
     const place = f ? `${f.space}/${f.tab}` : null;
@@ -217,7 +217,7 @@ export default class Sidebar {
         .when(Boolean(count) && rail, (e) => e.child(div().absolute().top(4).right(6).size(7).rounded(4).bg(tone ?? k.ring)));
     };
     const apps = this.spaces.filter((s) => APPS[s]).map((s) => ({ ...APPS[s], child: APPS[s].child ?? s }));
-    const badge = (child) => this.counts[child] ?? shared(`badge.${child}`) ?? null;
+    const badge = (child) => this.counts[child] ?? shared(`khanh-personal.badge.${child}`) ?? null;
     const tone = (child) => { const t = badge(child)?.tone; return t ? k[t] ?? t : null; };
     const counts = model.value?.counts ?? {};
 
@@ -366,7 +366,7 @@ export default class Sidebar {
   }
 
   openRecap(tab) {
-    openOverlay({ mod: "personal", props: { app: "recap", ...(tab ? { tab } : {}) }, kind: "dialog", width: 0.8, height: 0.8 });
+    openOverlay({ mod: "khanh-personal", props: { app: "recap", ...(tab ? { tab } : {}) }, kind: "dialog", width: 0.8, height: 0.8 });
   }
 
   /** The Needs you band: each waiting agent's question, answered in place. */
@@ -412,7 +412,7 @@ export default class Sidebar {
       const pool = available.length ? available : CRITTER_NAMES;
       name = pool[webcrypto.getRandomValues(new Uint32Array(1))[0] % pool.length];
       this.critters[address] = name;
-      localStorage.setItem("personal.critters", JSON.stringify(this.critters));
+      localStorage.setItem("khanh-personal.critters", JSON.stringify(this.critters));
     }
     return name;
   }
@@ -571,7 +571,7 @@ export default class Sidebar {
     }
     const machines = [...new Set(sp.map((s) => s.machine).filter(Boolean))];
     const row = ({ s, i, tree }) => {
-      const on = s.active && (shared("cockpit.app") ?? "work") === "work";
+      const on = s.active && (shared("khanh-personal.app") ?? "work") === "work";
       const fill = colors[s.id] ?? k.ring;
       const dragging = this.drag && this.drag.from === i;
       const over = this.drag && this.drag.over === i && this.drag.from !== i;
@@ -627,7 +627,7 @@ export default class Sidebar {
     };
     // Each space's terminal lines fold away, one space with its chevron or all of them from the header.
     const byAddress = new Map(this.agents.rows.map((r) => [r.address, r]));
-    const folded = new Set(shared("cockpit.spaces.folded") ?? []);
+    const folded = new Set(shared("khanh-personal.spaces.folded") ?? []);
     const hasTerms = (s) => this.termRows(k, s, ps, byAddress, false).length > 0;
     const withLines = ordered.filter((r) => hasTerms(r.s));
     const allFolded = withLines.length > 0 && withLines.every((r) => folded.has(r.s.id));
@@ -643,7 +643,7 @@ export default class Sidebar {
               variant: "ghost",
               size: "icon-sm",
               tooltip: allFolded ? "Show what runs in each space" : "Hide what runs in each space",
-              onClick: () => setShared("cockpit.spaces.folded", allFolded ? [] : withLines.map((r) => r.s.id)),
+              onClick: () => setShared("khanh-personal.spaces.folded", allFolded ? [] : withLines.map((r) => r.s.id)),
             }),
           ),
         )
@@ -677,7 +677,7 @@ export default class Sidebar {
     const toggle = () => {
       const next = new Set(folded);
       isFolded ? next.delete(s.id) : next.add(s.id);
-      setShared("cockpit.spaces.folded", [...next]);
+      setShared("khanh-personal.spaces.folded", [...next]);
     };
     return h_flex()
       .id(`space-fold-${s.id}`)

@@ -4,7 +4,7 @@
 // yama-lei/herdr-editor-layout's editor pane (Apache-2.0).
 // Source: https://github.com/yama-lei/herdr-editor-layout (Apache-2.0), modified for cockpit; see THIRD_PARTY_NOTICES.md.
 //
-//   pane.split {direction: "right", pane, mod: "personal", props: {app: "code", file, line?, terminal?}}
+//   pane.split {direction: "right", pane, mod: "khanh-personal", props: {app: "code", file, line?, terminal?}}
 
 import { div } from "gpui-kit";
 import { v_flex, h_flex, Editor, EditorState, InputState, TextView, h_resizable, resizable_panel } from "gpui-base";
@@ -32,7 +32,7 @@ export async function openCode(file, { terminal, line } = {}) {
   // One editor per tab: the file replaces the one it showed.
   const open = tab ? (shared(SHOWN) ?? {})[tab] : null;
   if (open && all.some((p) => p.pane === open)) run("pane.close", { pane: open });
-  const args = { direction: "right", ...(beside ? { pane: beside.pane } : {}), mod: "personal", props: { app: "code", file, line, terminal: terminal ?? beside?.terminal, tab } };
+  const args = { direction: "right", ...(beside ? { pane: beside.pane } : {}), mod: "khanh-personal", props: { app: "code", file, line, terminal: terminal ?? beside?.terminal, tab } };
   // Through herdr-app, which answers with the new pane: run() gives nothing back.
   const r = await exec("env", [`HERDR_APP_HOME=${appHome()}`, `${home()}/.local/bin/herdr-app`, "do", "pane.split", JSON.stringify(args)]).catch(() => null);
   const made = r?.code === 0 ? JSON.parse(r.stdout || "{}").pane : null;
@@ -40,7 +40,7 @@ export async function openCode(file, { terminal, line } = {}) {
   else if (tab) setShared(SHOWN, { ...(shared(SHOWN) ?? {}), [tab]: made });
 }
 
-const SHOWN = "cockpit.code.panes";
+const SHOWN = "khanh-personal.code.panes";
 
 export default class Code {
   init(p) {

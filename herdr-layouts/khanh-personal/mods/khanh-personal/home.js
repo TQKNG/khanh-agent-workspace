@@ -282,7 +282,7 @@ export default class Home {
       const known = (await knownAgents().catch(() => [])).find((k) => k.installed);
       run("tab.new", known ? { argv: known.run } : {});
       run("layout.select", { stack: "center", child: "work" });
-      setShared("cockpit.app", "work");
+      setShared("khanh-personal.app", "work");
     });
   }
 
@@ -324,8 +324,8 @@ export default class Home {
     else if (action === "seen" && a) cx.spawn(async (cx) => this.act(cx, card.key, "…", () => agentAct("seen", { terminal: a.handle })));
     else if (action === "fork" && a) cx.spawn(async (cx) => this.act(cx, card.key, "Forking…", () => agentAct("fork", { terminal: a.handle, place: "tab" })));
     else if (action === "queue" && a) {
-      setShared("cockpit.queue.for", a.address);
-      run("personal.queue", {});
+      setShared("khanh-personal.queue.for", a.address);
+      run("khanh-personal.queue", {});
     }
     else if (action === "pr" && pr?.url) this.openUrl(cx, pr.url);
     else if (action === "merge" && pr?.url) this.merge(cx, pr);
@@ -561,7 +561,7 @@ export default class Home {
                 h_flex()
                   .gap(14)
                   .items_center()
-                  .child(image("mods/personal/cockpit.svg").w(44).h(44).flex_none())
+                  .child(image("mods/khanh-personal/cockpit.svg").w(44).h(44).flex_none())
                   .child(
                     v_flex()
                       .gap(2)

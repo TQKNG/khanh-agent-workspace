@@ -61,7 +61,7 @@ async function send(toasts, cx, a, armed) {
 
 /** Opens the release (or any row) as a window that stays, and comes back after a restart until closed. */
 export function popOut(key, title) {
-  openOverlay({ mod: "personal", kind: "window", frame: "none", key: `monitor:${key}`, keep: true, width: 460, height: 620, props: { app: "monitor-window", key, title } });
+  openOverlay({ mod: "khanh-personal", kind: "window", frame: "none", key: `monitor:${key}`, keep: true, width: 460, height: 620, props: { app: "monitor-window", key, title } });
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -1083,7 +1083,7 @@ export class MonitorWindow {
     this.sub?.stop();
   }
 
-  /** `personal.monitor:close-windows` closes every release window, `monitor:close:<key>` this one. */
+  /** `khanh-personal.monitor:close-windows` closes every release window, `monitor:close:<key>` this one. */
   command(c) {
     if (c === "monitor:close-windows" || c === `monitor:close:${this.key}`) closeOverlay(props().overlay);
   }

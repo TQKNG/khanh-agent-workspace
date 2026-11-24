@@ -42,7 +42,7 @@ function dots(k, height) {
 function shownInLayout(app) {
   const walk = (node, ok) => {
     if (!node || typeof node !== "object") return null;
-    if (node.content?.mod === "personal" && node.content?.props?.app === app) return ok && !node.hidden;
+    if (node.content?.mod === "khanh-personal" && node.content?.props?.app === app) return ok && !node.hidden;
     for (const child of node.children ?? []) {
       const visible = ok && !node.hidden && !child.hidden && (node.type !== "stack" || (node.active ?? node.children?.[0]?.id) === child.id);
       const found = walk(child, visible);
@@ -94,7 +94,7 @@ export default class Show {
       // A pane split from the agent's is focused for a moment: that is how this copy learns which pane it is.
       const learn = () => {
         const f = focused();
-        const mine = f?.pane && panes().find((x) => x.pane === f.pane && x.mod === "personal");
+        const mine = f?.pane && panes().find((x) => x.pane === f.pane && x.mod === "khanh-personal");
         if (mine && !this.pane) this.pane = f.pane;
       };
       learn();
@@ -109,7 +109,7 @@ export default class Show {
   /** The panel's picked view survives a reload of the mod. */
   remembered() {
     try {
-      return localStorage.getItem("show.pick") || null;
+      return localStorage.getItem("khanh-personal.show.pick") || null;
     } catch {
       return null;
     }
@@ -117,7 +117,7 @@ export default class Show {
 
   subscribe(cx) {
     try {
-      if (this.panel) localStorage.setItem("show.pick", this.pick ?? "");
+      if (this.panel) localStorage.setItem("khanh-personal.show.pick", this.pick ?? "");
     } catch {}
     this.sub?.stop();
     const args = this.name ? { name: this.name } : { terminal: this.terminal, pick: this.pick };
@@ -159,7 +159,7 @@ export default class Show {
     if (this.panel) {
       const asks = (value.views ?? []).reduce((n, v) => n + (v.asks ?? 0), 0);
       const badge = asks ? { count: asks, tone: "warning" } : null;
-      if (JSON.stringify(shared("badge.show") ?? null) !== JSON.stringify(badge)) setShared("badge.show", badge);
+      if (JSON.stringify(shared("khanh-personal.badge.show") ?? null) !== JSON.stringify(badge)) setShared("khanh-personal.badge.show", badge);
     }
   }
 

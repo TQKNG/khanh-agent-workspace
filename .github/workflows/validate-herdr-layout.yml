@@ -25,10 +25,46 @@ jobs:
       - run: python -m unittest discover -s herdr-layouts/khanh-personal/tests -v
       - run: node --test herdr-layouts/khanh-personal/tests/*.test.mjs
   python-3-9:
-    # macOS ships Python 3.9, so the hub must start and its tests pass there; setup-python no longer offers it.
+    # Keep the package's minimum supported Python version covered.
     runs-on: ubuntu-latest
     container: python:3.9-slim
     steps:
       - run: apt-get update && apt-get install -y --no-install-recommends git
       - uses: actions/checkout@v4
       - run: python -m unittest discover -s herdr-layouts/khanh-personal/tests -v
+  windows-macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            python: '3.9'
+          - os: windows-latest
+            python: '3.12'
+            smoke: true
+          - os: macos-latest
+            python: '3.9'
+          - os: macos-latest
+            python: '3.12'
+            smoke: true
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m unittest discover -s herdr-layouts/khanh-personal/tests -v
+      - run: node --test herdr-layouts/khanh-personal/tests/*.test.mjs
+      - name: Clean-home install and health smoke test (Windows)
+        if: matrix.smoke && matrix.os == 'windows-latest'
+        shell: pwsh
+        working-directory: herdr-layouts/khanh-personal
+        run: python tests/smoke_install.py (Join-Path $env:RUNNER_TEMP 'khanh-personal-herdr-home')
+      - name: Clean-home install and health smoke test (macOS)
+        if: matrix.smoke && matrix.os == 'macos-latest'
+        shell: bash
+        working-directory: herdr-layouts/khanh-personal
+        run: python tests/smoke_install.py "$RUNNER_TEMP/khanh-personal-herdr-home"

@@ -1,8 +1,8 @@
 # Personal layout for the Herdr app
 
-A complete, self-contained setup for the [Herdr app](https://herdr.dev).
-It contains the `personal` layout, the mods it needs, and a small local hub that connects its Inbox to GitHub.
-Nothing in it depends on the author's machine.
+A shareable setup for the [Herdr app](https://herdr.dev).
+It contains the `personal` layout, its package-owned mods and assets, and a local hub for the GitHub Inbox.
+It also uses Herdr's built-in components and optional tools installed on the user's machine, as described below.
 
 ## For an AI agent: set this up on a new machine
 
@@ -21,7 +21,7 @@ Stop and report if a step fails, instead of working around it.
    If they have none, skip this step. The header then shows "Workspace".
 5. Verify:
    - The installer's `herdr-app check` lines for both mods show no errors.
-   - `herdr-app status` shows `"layout": "personal"` and `"errors": []`.
+   - `herdr-app status` shows `"layout": "khanh-personal"` and `"errors": []`.
    - The installer printed `hub started on 127.0.0.1:<port>`.
    - Open the Inbox page from the page icons at the top of the sidebar and confirm it lists the user's GitHub PRs and issues without error text.
 6. Report what is not connected: the pages listed under "What is and is not connected".
@@ -39,22 +39,37 @@ Change this package in the repository and run the installer again instead.
 
 ## Requirements
 
-- The Herdr app, started at least once (it creates `~/.config/herdr-app`).
-- Python 3.9 or newer (the one macOS ships works).
-  Turning Codex's skills, plugins and MCP servers on and off also needs Python 3.11 or the `tomli` package; without either the Agents page still shows Codex, with its switches off and a note saying why.
-- The [GitHub CLI](https://cli.github.com), signed in with `gh auth login`.
-  The hub reads GitHub through it, so no token is stored anywhere in this setup.
-  Without it the Inbox says so and the rest of the layout works.
-- Optional: Claude Code, Codex and GitHub Copilot CLI, for the Agents page and for "Assign to agent".
-  One that is not installed shows as a grey card, and is left out of the agent picker.
+The machine-readable package and dependency inventory is [dependencies.json](dependencies.json).
+It separates files maintained by this package, Herdr-provided components, external tools, and local-only user state.
+
+| Dependency | Required for | Version or setup | Behavior when unavailable |
+|---|---|---|---|
+| Herdr app | Layout, mods, and built-in UI components | Start Herdr once before installing so its app home exists. Package compatibility was last documented as tested with `0.1.16`; other versions are not currently certified. | The installer warns when the version differs from `0.1.16`; built-in components may differ. |
+| Python | Local hub and installer | Python 3.9 or newer. Use `py -3` on Windows when `python` is not on `PATH`. | Installation or hub startup cannot complete. |
+| Git | Worktree and repository operations | Must be available on `PATH`. | Git-dependent issue assignment and worktree operations are unavailable. |
+| GitHub CLI (`gh`) | Inbox data and GitHub actions | Install the [GitHub CLI](https://cli.github.com) and sign in with `gh auth login`. | GitHub-backed Inbox data and actions are unavailable; other local layout UI remains available. |
+| Claude Code, Codex, GitHub Copilot CLI | Agent cards and issue assignment | Optional; install and authenticate each CLI separately. | Unavailable agents are omitted or shown without live usage data. |
+| Python `tomli` | Codex profile switches on Python 3.9 and 3.10 | Optional on those Python versions; Python 3.11+ provides `tomllib`. | Codex profile switches are off and the Agents page explains why. |
+| GitHub Copilot SDK | Copilot quota reading | Optional; install in `<herdr home>/khanh-personal-hub/.venv`. | Copilot usage quota is not shown. |
+| Claude Code status-line configuration | Claude usage reading | Optional; configure the documented status-line command in `~/.claude/settings.json`. | Claude usage quota is not shown. |
+
+### Compatibility status
+
+Follow [the clean-profile Windows and macOS verification checklist](PORTABILITY-VERIFICATION.md) before declaring a platform release-ready.
+
+The package's documented baseline is Herdr `0.1.16`, Python `3.9+`, and Node `22` for the JavaScript test suite.
+CI runs the Python and Node package suites on Ubuntu, Windows and macOS with Python `3.9` and `3.12` and Node `22`.
+Windows and macOS also run a clean-home install, repeat-install and hub-health smoke check using an isolated, unauthenticated GitHub CLI configuration.
+The hosted runners do not install Herdr itself, so they skip live `herdr-app check`; package wiring and assets are covered by automated package checks, and live mod loading still needs a Herdr installation.
+The documented Herdr baseline remains `0.1.16`; compatibility with other Herdr versions is not certified by this CI workflow.
 
 ### Agent card usage readings
 
 Codex usage is read from local session logs.
 Claude usage is captured from Claude Code's documented status-line JSON after a session receives its first API response.
-To enable it, add `"statusLine": {"type": "command", "command": "python3 <herdr home>/cockpit-hub/claude_status.py"}` to `~/.claude/settings.json`, replacing `<herdr home>` with the installed Herdr home.
+To enable it, add `"statusLine": {"type": "command", "command": "python3 <herdr home>/khanh-personal-hub/claude_status.py"}` to `~/.claude/settings.json`, replacing `<herdr home>` with the installed Herdr home.
 If a status line is already configured, incorporate the capture script into that command so the existing display is preserved.
-Copilot usage requires the optional official Python SDK: create `<herdr home>/cockpit-hub/.venv` and install `github-copilot-sdk` in it.
+Copilot usage requires the optional official Python SDK: create `<herdr home>/khanh-personal-hub/.venv` and install `github-copilot-sdk` in it.
 The reader uses the signed-in Copilot CLI account and shows a bar only when the SDK returns a current finite quota.
 When a provider has no current reading, the card shows an empty track with an explanation instead of treating missing data as zero remaining.
 
@@ -67,23 +82,42 @@ python install.py --activate
 ```
 
 On Windows, use `python install.py --activate` as well.
-Use `--home DIR` for a different Herdr home, `--dry-run` to preview, and `--force-hub` to replace an existing `cockpit.json`.
+Use `--home DIR` for a different Herdr home, `--dry-run` to preview, and `--force-hub` to replace this package's `khanh-personal.json`.
 
 The installer:
 
-- copies the layout and the mods `personal` and `workspace-chrome-swiss`,
-- installs the hub into `<herdr home>/cockpit-hub` and writes `cockpit.json` so the mods find it,
+- copies the layout and the mods `khanh-personal` and `khanh-workspace-chrome`,
+- installs the hub into `<herdr home>/khanh-personal-hub` and writes `khanh-personal.json` so the mods find it,
 - adds the layout's shortcuts to `keys.json` without replacing any key you already have,
 - keeps worktrees in `<herdr home>/worktrees` by setting Herdr's `worktrees.directory` in `settings.json`, unless you already chose a folder,
 - runs `herdr-app check` on each mod and starts the hub once to prove it works.
+- checks the running hub's health and reports dependency readiness without printing account or command output.
 
-Anything it replaces is moved to `<herdr home>/.install-backups/<time>/` first.
-If your `cockpit.json` already points at another cockpit, the installer leaves it alone and says so.
+Anything it replaces is backed up under `<herdr home>/.install-backups/khanh-personal/<time>/` first.
+The package uses its own `<herdr home>/khanh-personal.json` hub configuration so it can coexist with other cockpit integrations.
+The installer leaves this file alone if it already points at a different hub, unless `--force-hub` is provided.
+The Inbox reports when `gh` is missing or needs authentication, when Git is unavailable for worktree actions, and when every supported agent CLI is missing.
+The local `hub health` command returns structured readiness states; it never returns credentials or raw authentication diagnostics.
 
 The Herdr app starts the hub by itself when a page needs it.
 This is tested on Windows and macOS.
 On macOS and Linux the mods start it with `HOME` set to the hub's folder; the hub puts back the account's real home, so `gh` finds its login and `git` its config.
-If a page says it cannot reach the hub, run `<herdr home>/cockpit-hub/cockpit-hub hub start` once.
+If a page says it cannot reach the hub, run `<herdr home>/khanh-personal-hub/cockpit-hub hub start` once.
+
+### Update, rollback and uninstall
+
+The installer stages the package and checks its files and mods before changing the active installation.
+Re-run `python install.py` from the updated package checkout to update.
+Changed package files are backed up under `<herdr home>/.install-backups/khanh-personal/`.
+
+Preview a rollback with `python install.py --rollback --dry-run`, then run `python install.py --rollback` to restore the previous package transaction.
+Rollback keeps the current `keys.json`, `settings.json`, and `brand.json`, plus credentials, caches, hub runtime settings, repositories, and worktrees.
+
+Preview removal with `python install.py --uninstall --dry-run`, then run `python install.py --uninstall` to remove unchanged files owned by this package.
+The uninstaller leaves locally changed package files in place and reports them.
+It removes only shortcut bindings that still match the package values and removes the default worktree setting only when it still matches the value the installer added.
+It preserves user settings, brand assets, credentials, the hub virtual environment, hub settings and caches, repositories, and worktrees.
+Uninstall changes are backed up and can be restored with `python install.py --rollback`.
 
 ## Herdr version
 
@@ -97,7 +131,7 @@ The installer names any of them a Herdr version lacks, and that part of the wind
 The agents' logos on the Agents page are Herdr's too (`icons/claude.svg`, `codex.svg`, `copilot.svg`); a Herdr without one shows a robot icon in its place.
 If something looks wrong after an upgrade:
 
-- Run `herdr-app check <herdr home>/mods/<mod>` for `personal` and `workspace-chrome-swiss`, and read any error.
+- Run `herdr-app check <herdr home>/mods/<mod>` for `khanh-personal` and `khanh-workspace-chrome`, and read any error.
 - Compare `<herdr home>/AGENTS.md` with the mod code, since that file documents the mod API of your version.
 
 The theme (`paper` and `graphite`) and the fonts (Geist for the UI) ship with Herdr itself, so nothing about them is bundled here.
@@ -108,18 +142,24 @@ Earlier versions of this package shipped a calendar-only hub in `calendar-cockpi
 To move to this version:
 
 1. Run `python install.py --activate --force-hub`.
-   The installer would otherwise leave your existing `cockpit.json`, which points at the old hub, alone.
+   The installer would otherwise leave your existing package-specific hub configuration alone.
    It also fixes the layout's old shortcuts that pointed at pages it does not have, and keeps any shortcut you changed.
 2. Delete `calendar-cockpit/`, `mods/personal-swiss` and `mods/herdr-critters` from your Herdr home when you like, and `cockpit-hub/credentials.json` and `cockpit-hub/data/` if you had set up Google Calendar.
    The installer does not delete anything it did not replace, and nothing uses them any more.
 
 ## What is and is not connected
 
-Only the Inbox has a real backend in the bundled hub: GitHub, through `gh`.
+| Page or action | Status | Dependency or limitation |
+|---|---|---|
+| Spaces, tabs, terminals, sidebar, layout chrome | Connected to Herdr | Uses Herdr's app and built-in components. |
+| Inbox: PRs, issues, Actions, checks, diffs, review threads | Connected | Bundled hub reads GitHub through authenticated `gh`. |
+| Inbox: file issue, submit review, merge, rerun failed jobs | Connected write actions | Writes to GitHub after the UI confirmation and hub validation. Use only where you intend to make those changes. |
+| Inbox: assign issue to an agent | Connected with prerequisites | Requires Git, a usable repository/worktree setup, and an installed supported agent CLI. |
+| Agents: profiles and local usage information | Partially connected | Reads local agent configuration/logs; individual provider data and quota support varies. |
+| Home dashboard, queue, mail, monitor, routines | Not connected to bundled hub | The page shells are present, but the bundled hub does not provide their data. They may appear empty or remain on loading. |
+| Google Calendar | Not included in this package | Earlier calendar-only components are not part of the current bundled hub. |
 
-The layout also contains pages that belong to the full cockpit: the home dashboard, queue, mail, monitor and routines.
-The bundled hub does not implement their data, so they stay empty or on "Loading".
-The status counts and agent lists that come from the hub are stubs for the same reason.
+The status counts and agent lists supplied by the bundled hub are stubs where noted above; the layout shell alone does not make those services available.
 
 The Inbox writes to GitHub in five places: "File issue" (type the repository as `owner/name`), reviews, merges, re-runs of failed jobs, and assigning an issue to you when you give it to an agent.
 "File issue" drafts from a short idea with Claude or Codex, using the repository's matching issue template and the bundled repo-scaffold references when needed.
@@ -177,7 +217,7 @@ It also changes them:
 
 An MCP server shows its name, transport, state and the host of its URL, never its environment, headers, arguments or tokens.
 `claude mcp list` checks every server, so the hub keeps the result five minutes.
-The cards' logos are Herdr's own (`icons/`), redrawn by the hub at 256 px into `cockpit-hub/cache/marks/`, because Herdr's files are sized for 16 px and blur when scaled up.
+The cards' logos are Herdr's own (`icons/`), redrawn by the hub at 256 px into `khanh-personal-hub/cache/marks/`, because Herdr's files are sized for 16 px and blur when scaled up.
 
 ## Assigning an issue to an agent
 
@@ -197,7 +237,7 @@ The local clone is found by its `origin`, under `~/Documents/Development/Reposit
 The agent's task is `hub/worker-prompt.md`: the issue's address and the rules, never the issue's own text.
 It reads the issue itself and treats it as untrusted, follows the repository's own instructions, tests, commits, opens a pull request that closes the issue, and never merges.
 
-`<herdr home>/cockpit-hub/settings.json` (optional, never overwritten) changes the defaults:
+`<herdr home>/khanh-personal-hub/settings.json` (optional, never overwritten) changes the defaults:
 
 ```json
 { "repos": { "owner/name": "~/path/to/clone" }, "roots": ["~/work"], "agent": "codex", "agents": { "claude": ["claude", "--model", "opus"] } }
@@ -284,7 +324,7 @@ Reinstalling never overwrites your brand unless you pass brand flags.
 
 ## Critter pictures
 
-The sidebar draws small critter pictures from `mods/personal/critters/art`.
+The sidebar draws small critter pictures from `mods/khanh-personal/critters/art`.
 That folder is included, so the layout is complete on a fresh install.
 Replace the files there to change them, keeping the same file names.
 The pictures come from the herdr-critters mod, whose upstream repository does not identify a license, so the repository's MIT license does not cover them.
@@ -292,10 +332,10 @@ The pictures come from the herdr-critters mod, whose upstream repository does no
 ## Layout of this package
 
 ```
-layouts/personal.json, personal.svg   the layout and its settings preview
-mods/personal                         the pages (Inbox, Agents, Home and others), the PR review window and the sidebar
-mods/personal/critters/art            the sidebar's critter pictures
-mods/workspace-chrome-swiss           the header, shortcuts button and footer (reads your brand)
+layouts/personal.json, personal.svg         the layout and its settings preview
+mods/khanh-personal                   the pages (Inbox, Agents, Home and others), the PR review window and the sidebar
+mods/khanh-personal/critters/art            the sidebar's critter pictures
+mods/khanh-workspace-chrome           the header, shortcuts button and footer (reads your brand)
 hub/                                  the local hub (Python), its launchers, bundled repo-scaffold references, and the agent's task (worker-prompt.md)
 tests/                                unit tests: the hub's GitHub code, the issue start, the agent profiles and the installer, and the package itself
                                       (every asset it names is in it, every page it links to exists, a fresh install is complete) (Python);

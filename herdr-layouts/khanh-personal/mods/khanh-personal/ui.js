@@ -80,7 +80,7 @@ export function agentMark(name) {
 }
 
 export function Icon(name, { size = 16, color } = {}) {
-  const el = svg(`mods/personal/icons/${name}.svg`).size(size).flex_none();
+  const el = svg(`mods/khanh-personal/icons/${name}.svg`).size(size).flex_none();
   return color ? el.text_color(color) : el;
 }
 
@@ -832,12 +832,12 @@ export function HoverCard(id, trigger, content, { width = 320, openDelay = 500 }
 
 /**
  * A right-click menu at the pointer: items [{ label, icon, kbd, command, destructive } | "separator"]. Choosing one
- * runs `personal.<command>`, which reaches the view's `command()` (give commands a prefix of the view's own).
+ * runs `khanh-personal.<command>`, which reaches the view's `command()` (give commands a prefix of the view's own).
  */
 export function openMenu(items, { width = 220 } = {}) {
   const rows = items.filter(Boolean);
   const height = rows.reduce((h, i) => h + (i === "separator" ? 9 : 32), 10);
-  openOverlay({ mod: "personal", props: { app: "menu", items: rows }, kind: "popup", at: "pointer", width, height, frame: "none" });
+  openOverlay({ mod: "khanh-personal", props: { app: "menu", items: rows }, kind: "popup", at: "pointer", width, height, frame: "none" });
 }
 
 /** A section that folds (shadcn's <Collapsible>): a header with a chevron, count and action, then its children. */

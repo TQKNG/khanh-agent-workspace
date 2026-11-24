@@ -1,12 +1,12 @@
 {
   "layout:personal": {
-    "cmd-alt-0": "personal.go:home",
-    "cmd-alt-1": "personal.go:inbox",
-    "cmd-alt-2": "personal.go:agents",
-    "cmd-alt-3": "personal.go:work",
-    "cmd-alt-5": "personal.go:monitor",
-    "cmd-alt-6": "personal.go:routines",
-    "cmd-alt-7": "personal.go:mail",
-    "cmd-r": "personal.refresh"
+    "cmd-alt-0": "khanh-personal.go:home",
+    "cmd-alt-1": "khanh-personal.go:inbox",
+    "cmd-alt-2": "khanh-personal.go:agents",
+    "cmd-alt-3": "khanh-personal.go:work",
+    "cmd-alt-5": "khanh-personal.go:monitor",
+    "cmd-alt-6": "khanh-personal.go:routines",
+    "cmd-alt-7": "khanh-personal.go:mail",
+    "cmd-r": "khanh-personal.refresh"
   }
 }

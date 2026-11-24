@@ -19,7 +19,7 @@ import {
 // The inbox is read more than the kit's other pages: its text is a step larger, and its rows a little taller to match.
 const TEXT = { ...KIT_TEXT, xs: 12, sm: 13, base: 14 };
 const H = { heading: 52, pr: 38, ticket: 38, group: 30, line: 28, text: 34 };
-const TAB_KEY = "cockpit.inbox.tab";
+const TAB_KEY = "khanh-personal.inbox.tab";
 const KIND_NAME = { pr: ["PR", "PRs"], review: ["review request", "review requests"], ticket: ["issue", "issues"], alert: ["alert", "alerts"], brief: ["brief line", "brief lines"], muted: ["muted repo", "muted repos"], worktree: ["worktree", "worktrees"] };
 const FRESH_MS = 120_000;
 
@@ -1543,6 +1543,20 @@ export default class Inbox {
     return v_flex().mx(24).mt(12).px(12).py(8).gap(2).flex_none().rounded(RADIUS.md).bg(alpha(k.destructive, 0.1)).children(lines.map((x) => h_flex().gap(8).items_center().child(Icon("triangle-alert", { size: 13, color: k.destructive })).child(div().truncate().text_size(TEXT.sm).text_color(k.destructive).child(x))));
   }
 
+  capabilityNotices(k) {
+    const capabilities = this.model?.capabilities ?? {};
+    const notices = [];
+    const github = capabilities.github?.status;
+    if (github === "missing_cli") notices.push("GitHub Inbox is unavailable. Install GitHub CLI (gh), then restart or refresh.");
+    else if (github === "login_required") notices.push("GitHub Inbox is unavailable. Run `gh auth login`, then refresh.");
+    else if (github === "check_failed") notices.push("GitHub authentication could not be checked. Check that gh can run, then refresh.");
+    if (capabilities.git?.status === "missing_cli") notices.push("Git worktrees and agent assignment are unavailable. Install Git and add it to PATH.");
+    if (Array.isArray(capabilities.agents) && capabilities.agents.length && capabilities.agents.every((agent) => !agent.available)) notices.push("Issue assignment is unavailable until a supported agent CLI is installed.");
+    if (capabilities.codex_profile_switches?.status === "missing_toml_reader") notices.push("Codex profile switches need Python 3.11+ or `tomli` in the hub's Python environment.");
+    if (!notices.length) return null;
+    return v_flex().mx(24).mt(12).px(12).py(9).gap(5).flex_none().rounded(RADIUS.md).bg(alpha(k.warning, 0.1)).children(notices.map((notice) => h_flex().gap(8).items_center().child(Icon("triangle-alert", { size: 13, color: k.warning })).child(div().text_size(TEXT.sm).text_color(k.foreground).child(notice))));
+  }
+
   list(k, cx) {
     const m = this.model;
     if (!m) {
@@ -1604,6 +1618,7 @@ export default class Inbox {
           ],
         }),
       )
+      .when(Boolean(this.model?.capabilities), (e) => e.child(this.capabilityNotices(k)))
       .when(Boolean(m?.errors?.length), (e) => e.child(this.errorsEl(m.errors, k)))
       .child(
         h_flex()

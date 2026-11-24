@@ -10,6 +10,8 @@ from __future__ import annotations
 import json
 import os
 import secrets
+import shutil
+import subprocess
 import socket
 import subprocess
 import sys
@@ -67,10 +69,84 @@ class HubServer(ThreadingMixIn, TCPServer):
 
 
 AGENTS_VIEW = {"tickets": []}
+_HEALTH_LOCK = threading.Lock()
+_HEALTH_VALUE: dict | None = None
+_HEALTH_AT = 0.0
 
 
 def first_dict(args: list) -> dict:
     return args[0] if args and isinstance(args[0], dict) else {}
+
+
+def health_report() -> dict:
+    """Return redacted dependency readiness without exposing command output or credentials."""
+    global _HEALTH_VALUE, _HEALTH_AT
+    with _HEALTH_LOCK:
+        if _HEALTH_VALUE is not None and time.monotonic() - _HEALTH_AT < 15:
+            return json.loads(json.dumps(_HEALTH_VALUE))
+    gh = shutil.which("gh")
+    authenticated = False
+    auth_check = "not_checked"
+    if gh:
+        try:
+            result = subprocess.run(
+                [gh, "auth", "status"], capture_output=True, text=True,
+                timeout=8, env={**os.environ, "GH_PROMPT_DISABLED": "1"},
+                creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+            )
+            authenticated = result.returncode == 0
+            auth_check = "authenticated" if authenticated else "login_required"
+        except (OSError, subprocess.TimeoutExpired):
+            auth_check = "check_failed"
+    agents = github_start.agents(github_start.settings())
+    herdr_home = Path(os.environ.get("HERDR_APP_HOME") or ROOT.parent)
+    copilot_python = herdr_home / "khanh-personal-hub" / ".venv" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
+    copilot_sdk = "not_configured"
+    if copilot_python.is_file():
+        try:
+            probe = subprocess.run(
+                [str(copilot_python), "-c", "import importlib.util; raise SystemExit(0 if importlib.util.find_spec('copilot') else 1)"],
+                capture_output=True, timeout=5,
+                creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+            )
+            copilot_sdk = "ready" if probe.returncode == 0 else "sdk_missing"
+        except (OSError, subprocess.TimeoutExpired):
+            copilot_sdk = "check_failed"
+    claude_status = "not_configured"
+    try:
+        claude_settings = json.loads((Path.home() / ".claude" / "settings.json").read_text(encoding="utf-8"))
+        command = str((claude_settings.get("statusLine") or {}).get("command") or "")
+        if "claude_status.py" in command:
+            claude_status = "ready"
+    except (OSError, json.JSONDecodeError, AttributeError):
+        pass
+    report = {
+        "status": "ok",
+        "version": "0.3.0",
+        "capabilities": {
+            "github": {
+                "status": "ready" if gh and authenticated else "missing_cli" if not gh else auth_check,
+                "features": ["inbox", "issue filing", "reviews", "merge", "workflow reruns"],
+            },
+            "git": {
+                "status": "ready" if shutil.which("git") else "missing_cli",
+                "features": ["repository discovery", "worktrees", "agent assignment"],
+            },
+            "agents": [
+                {"id": item["id"], "available": bool(item["available"])}
+                for item in agents
+            ],
+            "codex_profile_switches": {
+                "status": "ready" if agent_profiles.tomllib is not None else "missing_toml_reader",
+            },
+            "copilot_usage": {"status": copilot_sdk},
+            "claude_usage": {"status": claude_status},
+        },
+    }
+    with _HEALTH_LOCK:
+        _HEALTH_VALUE = report
+        _HEALTH_AT = time.monotonic()
+    return json.loads(json.dumps(report))
 
 
 # What the inbox's actions write (each returns the note to show, or a dict with the note and more for the mod), and who
@@ -118,7 +194,9 @@ class Client(StreamRequestHandler):
 
     def view_value(self, name: str) -> dict | None:
         if name == "inbox":
-            return with_worktrees(self.server.inbox.get())
+            model = with_worktrees(self.server.inbox.get())
+            model["capabilities"] = health_report()["capabilities"]
+            return model
         if name == "agents":
             return AGENTS_VIEW
         return None
@@ -194,6 +272,8 @@ class Client(StreamRequestHandler):
                     self.send({"events": []})
                 elif op == "history":
                     self.send({"values": []})
+                elif op == "health":
+                    self.send(health_report())
                 elif op == "go":
                     self.send({})
                 else:
@@ -269,6 +349,26 @@ def start_hub() -> int:
     return 0
 
 
+def check_health() -> int:
+    """Ask the running hub for a health report; print only the redacted JSON response."""
+    info = live_hub_info()
+    if not info:
+        print("hub is not running", file=sys.stderr)
+        return 1
+    try:
+        with socket.create_connection(("127.0.0.1", int(info["port"])), timeout=5) as sock:
+            sock.sendall((json.dumps({"op": "health", "token": info["token"]}) + "\n").encode())
+            with sock.makefile("rb") as stream:
+                result = json.loads(stream.readline().decode("utf-8"))
+        if result.get("status") != "ok":
+            raise ValueError("hub returned an invalid health response")
+        print(json.dumps(result))
+        return 0
+    except (OSError, ValueError, KeyError, json.JSONDecodeError) as exc:
+        print(f"hub health check failed: {exc}", file=sys.stderr)
+        return 1
+
+
 def restore_home() -> None:
     """The mods start the hub with HOME set to the cockpit's own folder, so `gh` would miss its login and `git` its config.
     The hub keeps its files beside this script, so it puts back the account's real home for the programs it runs."""
@@ -289,7 +389,9 @@ def main() -> int:
     if command[:2] == ["hub", "serve"]:
         run_server()
         return 0
-    print("Usage: cockpit-hub hub start | hub serve", file=sys.stderr)
+    if command[:2] == ["hub", "health"]:
+        return check_health()
+    print("Usage: cockpit-hub hub start | hub serve | hub health", file=sys.stderr)
     return 2
 
 

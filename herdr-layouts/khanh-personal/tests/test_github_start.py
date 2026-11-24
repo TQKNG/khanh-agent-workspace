@@ -105,6 +105,15 @@ class TestHelpers(unittest.TestCase):
 
 
 class TestPlan(Repos):
+    def setUp(self):
+        super().setUp()
+        self.agent_path_patch = mock.patch.object(start.shutil, "which", side_effect=agent_on_path)
+        self.agent_path_patch.start()
+
+    def tearDown(self):
+        self.agent_path_patch.stop()
+        super().tearDown()
+
     def test_ready_plan(self):
         with mock.patch.object(start.shutil, "which", side_effect=agent_on_path):
             plan = self.plan(FakeGh())
@@ -183,6 +192,15 @@ def agent_on_path(name):
     return "/bin/sh" if name == "sh" else None
 
 class TestStart(Repos):
+    def setUp(self):
+        super().setUp()
+        self.agent_path_patch = mock.patch.object(start.shutil, "which", side_effect=agent_on_path)
+        self.agent_path_patch.start()
+
+    def tearDown(self):
+        self.agent_path_patch.stop()
+        super().tearDown()
+
     def test_creates_worktree_assigns_and_launches(self):
         fake = FakeGh()
         with mock.patch.object(start, "gh", fake):
@@ -301,7 +319,9 @@ class TestWorktreesRoot(unittest.TestCase):
 
     def test_setting(self):
         self.assertEqual(self.root_for(json.dumps({"worktrees": {"directory": "~/trees"}})), Path("~/trees").expanduser())
-        self.assertEqual(self.root_for(json.dumps({"worktrees": {"directory": "/srv/trees"}})), Path("/srv/trees"))
+        posix_path = Path("/srv/trees")
+        expected = Path(start.DEFAULT_WORKTREES).expanduser() if not posix_path.is_absolute() else posix_path
+        self.assertEqual(self.root_for(json.dumps({"worktrees": {"directory": "/srv/trees"}})), expected)
 
 
 if __name__ == "__main__":

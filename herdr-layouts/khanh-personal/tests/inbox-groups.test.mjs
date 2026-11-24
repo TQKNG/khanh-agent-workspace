@@ -1,8 +1,8 @@
-// Tests for mods/personal/inbox-groups.js: node --test tests/*.test.mjs
+// Tests for mods/khanh-personal/inbox-groups.js: node --test tests/*.test.mjs
 
 import assert from "node:assert/strict";
 import test from "node:test";
-import { byKind, byRepo, onlyTab, tabCounts, tabFor, TABS } from "../mods/personal/inbox-groups.js";
+import { byKind, byRepo, onlyTab, tabCounts, tabFor, TABS } from "../mods/khanh-personal/inbox-groups.js";
 
 const row = (kind, repo, extra = {}) => ({ key: `${kind}:${repo}:${extra.n ?? 0}`, path: `/${kind}/${repo}/${extra.n ?? 0}`, kind, repo, name: `${repo} ${kind}`, text: [], children: [], ...extra });
 const section = (key, children) => ({ key, path: `/${key}`, kind: "plain", name: key, title: key, children, expand: true });

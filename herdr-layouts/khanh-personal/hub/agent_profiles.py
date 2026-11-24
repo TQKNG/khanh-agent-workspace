@@ -56,8 +56,15 @@ def home() -> Path:
 
 
 def short(path: Path | str) -> str:
-    text, root = str(path), str(home())
-    return "~" + text[len(root):] if text == root or text.startswith(root + os.sep) else text
+    text = str(path)
+    if text == "~" or text.startswith("~/"):
+        return text
+    target, root = Path(text), home()
+    try:
+        relative = target.relative_to(root)
+    except ValueError:
+        return text
+    return "~/" + relative.as_posix() if relative.parts else "~"
 
 
 def run(argv: list[str], timeout: int = CLI_TIMEOUT) -> str:
@@ -181,7 +188,7 @@ def skills_in(folder: Path, source: str, disabled: set[str] = frozenset(), neste
 def claude() -> dict:
     root = home() / ".claude"
     plugins, skills, errors = [], [], []
-    skills += skills_in(root / "skills", "personal")
+    skills += skills_in(root / "skills", "khanh-personal")
     skills += skills_in(root / "skills" / "synced", "claude.ai", nested=True)
     try:
         for p in json.loads(run(["claude", "plugin", "list", "--json"])):
@@ -311,11 +318,11 @@ def claude_usage() -> dict:
 def copilot_usage() -> dict:
     """Ask the official Copilot SDK for the signed-in account's quota."""
     import subprocess
-    python = herdr_home() / "cockpit-hub" / ".venv" / "bin" / "python"
+    python = herdr_home() / "khanh-personal-hub" / ".venv" / "bin" / "python"
     if not python.exists():
-        python = herdr_home() / "cockpit-hub" / ".venv" / "Scripts" / "python.exe"
+        python = herdr_home() / "khanh-personal-hub" / ".venv" / "Scripts" / "python.exe"
     if not python.exists():
-        return {"state": "unreadable", "reason": "Install github-copilot-sdk in cockpit-hub/.venv"}
+        return {"state": "unreadable", "reason": "Install github-copilot-sdk in khanh-personal-hub/.venv"}
     try:
         result = subprocess.run([str(python), str(ROOT / "copilot_quota.py")], capture_output=True, text=True, timeout=35, check=True)
         return json.loads(result.stdout)
@@ -334,7 +341,7 @@ def codex() -> dict:
             pass
     switches = tomllib is not None
     disabled = {str(e.get("path")) for e in (config.get("skills") or {}).get("config") or [] if e.get("enabled") is False}
-    skills = skills_in(root / "skills", "personal", disabled, toggle=switches) + skills_in(root / "skills" / ".system", "built in", disabled, toggle=switches)
+    skills = skills_in(root / "skills", "khanh-personal", disabled, toggle=switches) + skills_in(root / "skills" / ".system", "built in", disabled, toggle=switches)
     skills += skills_in(home() / ".agents" / "skills", "~/.agents", disabled, toggle=switches)
     plugins = []
     try:
