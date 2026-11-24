@@ -110,12 +110,12 @@ class ProfileTests(unittest.TestCase):
         for number in range(1, 13):
             self.assertTrue(any(f'/{number:02d}-' in f for f in files), number)
 
-    def test_diagram_types_match_standard_and_runtime_is_mermaid(self):
+    def test_diagram_types_match_standard_and_runtime_uses_seq(self):
         used = {d['type'] for s in PROFILE['spaces'] for p in s['pages'] for d in p.get('diagrams', [])}
         self.assertEqual(used, set(PROFILE['diagram_types']))
         runtime = next(p for s in PROFILE['spaces'] for p in s['pages'] if p['key'] == 'runtime')
-        self.assertNotIn('diagrams', runtime)
-        self.assertIn('mermaid-sequence', runtime['blocks'])
+        self.assertEqual([d['type'] for d in runtime['diagrams']], ['seq'])
+        self.assertNotIn('mermaid-sequence', runtime['blocks'])
 
 
 class ValidatorTests(unittest.TestCase):
@@ -145,11 +145,17 @@ class ValidatorTests(unittest.TestCase):
         session['confirmation']['fingerprint'] = validate.source_fingerprint(session)
         self.assertEqual(validate.validate_session(session), [])
 
-    def test_runtime_diagram_cannot_use_a_drawio_type(self):
+    def test_unknown_diagram_type_is_rejected(self):
         session = valid_session()
         session['diagrams'].append({'type': 'sequence', 'doc_number': 'SD-Example-001', 'page': 'architecture.runtime'})
         session['confirmation']['fingerprint'] = validate.source_fingerprint(session)
         self.assertTrue(any('diagram-standards type' in e for e in validate.validate_session(session)))
+
+    def test_runtime_scenario_uses_seq_type(self):
+        session = valid_session()
+        session['diagrams'].append({'type': 'seq', 'doc_number': 'SEQ-Example-001', 'page': 'architecture.runtime'})
+        session['confirmation']['fingerprint'] = validate.source_fingerprint(session)
+        self.assertEqual(validate.validate_session(session), [])
 
     def test_merge_needs_approval_and_checks(self):
         session = valid_session()
@@ -184,14 +190,14 @@ class DetectionTests(unittest.TestCase):
 class PageCheckTests(unittest.TestCase):
     GOOD = '---\ntitle: "1.2 Introduction and Goals"\ndescription: "Goals."\nkeywords:\n  - "Example"\n---\n\n## 1.2.1 Introduction\n\nText.\n'
 
-    def run_check(self, text, with_source=False):
+    def run_check(self, text, with_source=False, name='page.mdx'):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            (root / 'page.mdx').write_text(text, encoding='utf-8')
+            (root / name).write_text(text, encoding='utf-8')
             if with_source:
                 (root / 'diagrams/src').mkdir(parents=True)
                 (root / 'diagrams/src/SC-Example-001.drawio').write_text('<mxfile/>', encoding='utf-8')
-            errors, _, _ = check.check_page(root / 'page.mdx', root)
+            errors, _, _ = check.check_page(root / name, root)
             return errors
 
     def test_good_page_passes(self):
@@ -208,6 +214,11 @@ class PageCheckTests(unittest.TestCase):
         page = self.GOOD + '\n<img src="/images/diagrams/SC-Example-001.png" alt="Context" />\n'
         self.assertTrue(any('no source' in e for e in self.run_check(page)))
         self.assertEqual(self.run_check(page, with_source=True), [])
+
+    def test_mermaid_sequence_on_runtime_page_fails(self):
+        page = self.GOOD + '\n```mermaid\nsequenceDiagram\n    A->>B: x\n```\n'
+        self.assertTrue(any('Mermaid sequenceDiagram' in e for e in self.run_check(page, name='06-runtime-view.mdx')))
+        self.assertFalse(any('Mermaid sequenceDiagram' in e for e in self.run_check(page)))
 
     def test_secret_values_fail(self):
         page = self.GOOD + '\nAccountKey=abcdefghijklmnop1234\n'

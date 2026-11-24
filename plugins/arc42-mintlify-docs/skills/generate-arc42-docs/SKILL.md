@@ -36,7 +36,7 @@ If validation fails, ask for the missing values and do not write to Mintlify.
 Generate every page the profile requires and every conditional page the user keeps.
 Use the page contracts in format-profile.json for titles, file paths, numbered headings, tables and register IDs.
 Create the six groups, the Decision records group and the product entry in `docs.json`.
-Put each architecture diagram through diagram-standards and keep runtime, code and domain views in Mermaid.
+Put each architecture diagram and each runtime scenario through diagram-standards, and keep the code and domain views in Mermaid.
 Mark missing facts as `[OWNER INPUT REQUIRED: ...]` and report each one.
 
 ## Existing project

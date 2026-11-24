@@ -54,7 +54,8 @@ Add `Last documentation review: YYYY-MM-DD` to the release index page.
 
 Architecture diagrams use the approved draw.io templates through the diagram-standards plugin.
 See references/diagram-integration.md.
-Runtime scenarios, the Level 3 code view and the domain model stay in Mermaid.
+Runtime scenarios use the `seq` template and are delivered as draw.io images, with the Mermaid source kept in `diagrams/src`.
+The Level 3 code view and the domain model stay in Mermaid.
 Mintlify renders fenced `mermaid` blocks.
 
 ## API reference
