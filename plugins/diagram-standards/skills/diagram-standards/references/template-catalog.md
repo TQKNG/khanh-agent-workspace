@@ -1,6 +1,7 @@
 # Template catalog
 
 The `seq`, `class` and `state` templates use UML notation and have no C4 legend entries beyond the shape kinds they use.
+They are the converters' example output, kept for reference; create these diagrams with the Mermaid converters, not with `new_diagram.py`.
 
 All templates share: outer frame, bottom title block (Document Title, Document Number, Version Number, Prepared By, Date), a Legend box (Person, Software System, Container, Component, Database, and a "Uses [technology]" relationship), Roboto font, C4 colours, dashed labelled relationships.
 
@@ -12,8 +13,8 @@ All templates share: outer frame, bottom title block (Document Title, Document N
 | `l1-deployment` | l1-deployment.drawio | 3260 x 2273 | Where containers run: cloud provider, tenant, subscription, resource group, services | Nested Azure boundaries with Azure icons, monitoring services, storage, 7 relationships |
 | `l2-component` | l2-component.drawio | 3260 x 2832 | Opening one container: its components and how they call each other | Whitebox frames, component boxes, 24 px title-block text, 12+ relationships |
 | `seq` | sequence.drawio | 2454 x variable | One runtime scenario: who calls whom, in order | Participants in C4 colours, lifelines, call and return arrows, loop and alt frames, legend |
-| `class` | class.drawio | 2454 x 1313 | The domain model, or an interface with its implementations | Interface, two implementations, an aggregate with a composed part and an enumeration, UML relationships, legend |
-| `state` | state.drawio | 2454 x 1313 | The lifecycle of one entity: states and the transitions between them | Initial, final and choice pseudostates, states, a composite state, labelled transitions, legend |
+| `class` | class.drawio | 2454 x 1313 | The domain model, or an interface with its implementations | Interface, two implementations, an aggregate with a composed part and an enumeration, UML relationships, legend (`references/class-example.mmd`) |
+| `state` | state.drawio | 2454 x 1313 | The lifecycle of one entity: states and the transitions between them | Initial, final and choice pseudostates, states, a composite state, labelled transitions, legend (`references/state-example.mmd`) |
 
 ## Cell ids worth knowing
 

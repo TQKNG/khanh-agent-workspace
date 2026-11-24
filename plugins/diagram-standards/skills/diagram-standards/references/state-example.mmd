@@ -1,0 +1,15 @@
+stateDiagram-v2
+    [*] --> Draft
+    Draft --> Submitted: submit [valid]
+    Submitted --> Processing: start / run job
+    state Processing {
+        direction LR
+        [*] --> Scanning
+        Scanning --> Assessing: scan clean
+    }
+    state decision <<choice>>
+    Processing --> decision: completed
+    decision --> Approved: [approved]
+    decision --> Rejected: [rejected]
+    Approved --> [*]
+    Rejected --> [*]

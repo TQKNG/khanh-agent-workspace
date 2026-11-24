@@ -16,7 +16,7 @@ Arguments: `<type> <doc-number> [title]`.
 
 1. Load the `diagram-standards` skill and follow its rules.
 2. Validate `<type>` against `sc`, `bc`, `l1-whitebox`, `l1-deployment`, `l2-component`, `seq`, `class`, `state`.
-   For `seq`, do not run `new_diagram.py`: follow the skill's "Sequence diagrams" section (write the `.mmd`, then run the converter).
+   For `seq`, `class` and `state`, do not run `new_diagram.py`: follow the skill's "Sequence diagrams" or "Class diagrams (`class`) and state diagrams (`state`)" section (write the `.mmd`, then run the converter).
    When missing or invalid, show the options with one-line descriptions from the skill's template table and wait for a choice.
 3. When `<doc-number>` is missing, build it as `<prefix>-<ProductName>-001` from the skill's table, using the product name found in the repository (docs.json name or the existing diagrams), and state the number chosen.
 4. Take the author from the user's request or from existing diagrams in `diagrams/src`; ask when neither exists.

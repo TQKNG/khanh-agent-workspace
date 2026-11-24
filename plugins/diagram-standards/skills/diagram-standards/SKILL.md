@@ -55,19 +55,28 @@ Sequence diagrams are authored in Mermaid and delivered as draw.io, so they shar
 5. One scenario per diagram, at most six participants.
    Split larger flows into several diagrams.
 
-## Class and state diagrams (`class`, `state`)
+## Class diagrams (`class`) and state diagrams (`state`)
 
-These two templates use UML notation and share the frame, footer title block, legend box, Roboto and C4 colours of the other templates.
-Create them with `scripts/new_diagram.py` like the C4 types, then relabel the example shapes.
+Class and state diagrams follow the same flow as sequence diagrams: they are authored in Mermaid and delivered as draw.io, so they share the frame, title block, legend, Roboto and C4 colours of the other diagrams.
 
-1. `class`: one diagram per aggregate, interface family or concern, at most eight classes.
-   Show names, the key attributes and the key operations, not every field; point to the API reference for full field lists.
-   Header colours: class `#438dd5`, interface `#85bbf0`, enumeration `#1168bd`.
-   Relationships: composition, association, realization (dashed, hollow triangle) and dependency (dashed, open arrow), as in the legend.
-2. `state`: one diagram per entity lifecycle.
-   Label every transition `event [guard] / action`, and omit the parts that do not apply.
-   Draw only states and transitions that the code or the approved design shows; mark anything unconfirmed in the page text instead of inventing it.
-3. Take names from the code (models, enums, interfaces) so the diagram matches it, and re-check them whenever the code changes.
+1. Write or reuse a Mermaid `classDiagram` or `stateDiagram-v2` and save it as `diagrams/src/<doc-number>.mmd` (see `references/class-example.mmd` and `references/state-example.mmd`).
+   Take names, members, enum values and states from the code or the approved design, and draw only what they show.
+   Class diagram syntax: `class` blocks with members, `<<interface>>` and `<<enumeration>>`, and the relationships `<|--`, `<|..`, `*--`, `o--`, `-->`, `..>`, `--`, `--|>`, `..|>` with optional cardinalities and labels.
+   State diagram syntax: `A --> B: event [guard] / action`, `[*]`, `state "Name" as id`, `<<choice>>`, one level of composite state, and `direction TB|LR`.
+2. Convert (an `.mdx` page with the Mermaid block also works as input; pick the block with `--block N`):
+   ```bash
+   python3 scripts/mermaid_class_to_drawio.py diagrams/src/<doc-number>.mmd diagrams/src/<doc-number>.drawio \
+     --title "<Product> – Domain Model – <scope>" --number <doc-number> --author "<name>"
+   python3 scripts/mermaid_state_to_drawio.py diagrams/src/<doc-number>.mmd diagrams/src/<doc-number>.drawio \
+     --title "<Product> – State Machine – <entity>" --number <doc-number> --author "<name>"
+   ```
+3. Continue at step 4 below (PNG) and step 5 (embed).
+   Replace the page's Mermaid block with the image.
+4. Keep the `.mmd` next to the `.drawio`.
+   Regenerate from the `.mmd` before any hand edits in draw.io; hand edits are not written back to the `.mmd`.
+5. One aggregate, interface family or entity lifecycle per diagram, at most eight classes.
+   Show the key attributes and operations, not every field; point to the API reference for full field lists.
+   A diagram wider than the page stops with an error: split it.
 
 ## Workflow
 

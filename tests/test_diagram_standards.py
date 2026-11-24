@@ -55,8 +55,8 @@ class TemplateTests(unittest.TestCase):
             for needle in ('Document Title', 'Document Number', 'Version Number', 'Prepared By', 'Legend'):
                 self.assertIn(needle, text, (key, needle))
 
-    def test_new_diagram_fills_the_title_block_for_each_template(self):
-        for key in ('sc', 'bc', 'l1-whitebox', 'l1-deployment', 'l2-component', 'class', 'state'):
+    def test_new_diagram_fills_the_title_block_for_each_c4_template(self):
+        for key in ('sc', 'bc', 'l1-whitebox', 'l1-deployment', 'l2-component'):
             with tempfile.TemporaryDirectory() as directory:
                 result = run(SCRIPTS / 'new_diagram.py', key, 'X-Test-001', '--title', 'Test Title',
                              '--author', 'Jane Doe', '--date', '2027.01.05', '--out-dir', directory)
@@ -65,26 +65,6 @@ class TemplateTests(unittest.TestCase):
                 plain = ' '.join(re.sub(r'<[^>]+>', '', cell.get('value') or '') for cell in tree.iter('mxCell'))
                 for value in ('Test Title', 'X-Test-001', 'Prepared By: Jane Doe', 'Date: 2027.01.05'):
                     self.assertIn(value, plain, (key, value))
-
-    def test_uml_templates_share_the_sequence_frame_and_footer(self):
-        def footer(stem):
-            tree = ET.parse(SKILL / 'templates' / f'{stem}.drawio')
-            cells = {c.get('id'): c for c in tree.iter('mxCell')}
-            return {i: (cells[i].get('style'), cells[i].find('mxGeometry').attrib)
-                    for i in ('frame', 'hdr', 'legbox', 't1', 't2', 't3', 't4', 't5')}
-        reference = footer('sequence')
-        for stem in ('class', 'state'):
-            self.assertEqual(footer(stem), reference, stem)
-
-    def test_class_template_has_uml_classes_and_relationships(self):
-        text = (SKILL / 'templates/class.drawio').read_text(encoding='utf-8')
-        for needle in ('swimlane', 'interface', 'enumeration', 'diamondThin', 'endArrow=block;endFill=0'):
-            self.assertIn(needle, text, needle)
-
-    def test_state_template_has_pseudostates_and_transitions(self):
-        text = (SKILL / 'templates/state.drawio').read_text(encoding='utf-8')
-        for needle in ('shape=endState', 'rhombus', 'Composite state', 'event [guard] / action'):
-            self.assertIn(needle, text, needle)
 
     def test_new_diagram_refuses_to_overwrite(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -128,6 +108,112 @@ class SequenceConverterTests(unittest.TestCase):
             result, _ = self.convert(source, directory)
             self.assertNotEqual(result.returncode, 0)
             self.assertIn('self-message', result.stderr)
+
+
+def shell_of(path):
+    """Style, x, width and height of the frame, title block and legend box (y moves with the body height)."""
+    cells = {c.get('id'): c for c in ET.parse(path).iter('mxCell')}
+    result = {}
+    for i in ('frame', 'hdr', 'legbox', 't1', 't2', 't3', 't4', 't5'):
+        g = cells[i].find('mxGeometry')
+        result[i] = (cells[i].get('style'), g.get('x'), g.get('width'), g.get('height'))
+    return result
+
+
+class UmlConverterTests(unittest.TestCase):
+    CLASS = SKILL / 'references/class-example.mmd'
+    STATE = SKILL / 'references/state-example.mmd'
+
+    def convert(self, script, source, directory, number='X-001'):
+        out = Path(directory) / 'out.drawio'
+        result = run(SCRIPTS / script, source, out, '--title', 'T', '--number', number, '--author', 'A')
+        return result, out
+
+    def test_examples_convert_and_match_the_committed_templates(self):
+        for script, source, stem in (('mermaid_class_to_drawio.py', self.CLASS, 'class'),
+                                     ('mermaid_state_to_drawio.py', self.STATE, 'state')):
+            with tempfile.TemporaryDirectory() as directory:
+                result, out = self.convert(script, source, directory)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                ET.fromstring(out.read_text(encoding='utf-8'))
+                template = SKILL / 'templates' / f'{stem}.drawio'
+                self.assertEqual(len(list(ET.parse(out).iter('mxCell'))), len(list(ET.parse(template).iter('mxCell'))), stem)
+
+    def test_converted_shell_matches_the_sequence_converter(self):
+        with tempfile.TemporaryDirectory() as directory:
+            seq = Path(directory) / 'seq.drawio'
+            result = run(SCRIPTS / 'mermaid_seq_to_drawio.py', SKILL / 'references/sequence-example.mmd', seq,
+                         '--title', 'T', '--number', 'X-001', '--author', 'A')
+            self.assertEqual(result.returncode, 0, result.stderr)
+            reference = shell_of(seq)
+            for script, source in (('mermaid_class_to_drawio.py', self.CLASS), ('mermaid_state_to_drawio.py', self.STATE)):
+                result, out = self.convert(script, source, directory)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                converted = shell_of(out)
+                for key in reference:
+                    self.assertEqual(converted[key][:3], reference[key][:3], (script, key))
+
+    def test_class_output_has_uml_shapes_and_state_output_has_pseudostates(self):
+        with tempfile.TemporaryDirectory() as directory:
+            result, out = self.convert('mermaid_class_to_drawio.py', self.CLASS, directory)
+            text = out.read_text(encoding='utf-8')
+            for needle in ('swimlane', '\u00abinterface\u00bb', 'diamondThin', 'endArrow=block;endFill=0', 'X-001'):
+                self.assertIn(needle, text, needle)
+            result, out = self.convert('mermaid_state_to_drawio.py', self.STATE, directory)
+            text = out.read_text(encoding='utf-8')
+            for needle in ('shape=endState', 'rhombus', 'submit [valid]', 'Processing'):
+                self.assertIn(needle, text, needle)
+
+    def test_no_shapes_overlap_in_the_body(self):
+        for script, source in (('mermaid_class_to_drawio.py', self.CLASS), ('mermaid_state_to_drawio.py', self.STATE)):
+            with tempfile.TemporaryDirectory() as directory:
+                result, out = self.convert(script, source, directory)
+                boxes = []
+                for cell in ET.parse(out).iter('mxCell'):
+                    g = cell.find('mxGeometry')
+                    if cell.get('vertex') == '1' and cell.get('parent') == '1' and cell.get('id', '')[:2] in ('c_', 's_'):
+                        boxes.append((cell.get('id'), *(float(g.get(k)) for k in ('x', 'y', 'width', 'height'))))
+                nested = {'s_3', 's_4', 's_5', 's_6'}  # the composite state and its inner states
+                for i, a in enumerate(boxes):
+                    for b in boxes[i + 1:]:
+                        if script.startswith('mermaid_state') and a[0] in nested and b[0] in nested:
+                            continue
+                        apart = a[1] + a[3] <= b[1] or b[1] + b[3] <= a[1] or a[2] + a[4] <= b[2] or b[2] + b[4] <= a[2]
+                        self.assertTrue(apart, (script, a[0], b[0]))
+
+    def test_class_converter_rejects_what_it_cannot_draw(self):
+        cases = (('mermaid_class_to_drawio.py', 'classDiagram\n    A --> A\n', 'self-relationship'),
+                 ('mermaid_class_to_drawio.py', 'classDiagram\n    note for A "x"\n', 'unsupported'),
+                 ('mermaid_state_to_drawio.py', 'stateDiagram-v2\n    A --> A\n', 'self-transition'),
+                 ('mermaid_state_to_drawio.py', 'stateDiagram-v2\n    state X {\n        state Y {\n        }\n    }\n', 'nested'),
+                 ('mermaid_state_to_drawio.py', 'stateDiagram-v2\n    A --> B\n    state C {\n        A --> D\n    }\n', 'inside and outside'))
+        for script, source, message in cases:
+            with tempfile.TemporaryDirectory() as directory:
+                path = Path(directory) / 'bad.mmd'
+                path.write_text(source, encoding='utf-8')
+                result, _ = self.convert(script, path, directory)
+                self.assertNotEqual(result.returncode, 0, source)
+                self.assertIn(message, result.stderr, source)
+
+    def test_too_wide_diagram_asks_to_split(self):
+        source = 'classDiagram\n' + ''.join(f'    Root --> Leaf{i}\n' for i in range(8))
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'wide.mmd'
+            path.write_text(source, encoding='utf-8')
+            result, _ = self.convert('mermaid_class_to_drawio.py', path, directory)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn('split', result.stderr)
+
+    def test_mdx_input_selects_the_requested_block(self):
+        page = '```mermaid\nclassDiagram\n    class A\n```\n\n```mermaid\nclassDiagram\n    class B\n```\n'
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / 'page.mdx'
+            source.write_text(page, encoding='utf-8')
+            out = Path(directory) / 'out.drawio'
+            result = run(SCRIPTS / 'mermaid_class_to_drawio.py', source, out, '--title', 'T', '--number', 'X-001',
+                         '--author', 'A', '--block', '2')
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn('value="B"', out.read_text(encoding='utf-8'))
 
 
 class HookTests(unittest.TestCase):

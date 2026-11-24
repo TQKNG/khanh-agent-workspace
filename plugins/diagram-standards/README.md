@@ -8,6 +8,7 @@ Makes Claude start every architecture diagram in your Mintlify docs from the app
 - **Check hook** (after file writes): flags `.mdx` pages that embed a diagram without a `.drawio` source or PNG, and `.drawio` files that lost the title block or legend.
   Remove `hooks/` to turn it off.
 - **Templates**: system context, business context, level 1 whitebox, level 1 deployment, level 2 component, sequence (runtime view), class (domain model) and state (lifecycle).
+  Class and state diagrams are written in Mermaid and converted to draw.io by `scripts/mermaid_class_to_drawio.py` and `scripts/mermaid_state_to_drawio.py`.
   Sequence diagrams are written in Mermaid and converted to draw.io by `scripts/mermaid_seq_to_drawio.py`.
 
 ## Requirements

@@ -14,8 +14,6 @@ TYPES = {
     "l1-whitebox":   ("l1-whitebox.drawio",     dict(title="v4", number="v6",  version="v7", author="v9", date="v10")),
     "l1-deployment": ("l1-deployment.drawio",   dict(title="v224", number="v225", version="v226", author="v227", date="v228")),
     "l2-component":  ("l2-component.drawio",    dict(title="v4", number="v6",  version="v7", author="v9", date="v10")),
-    "class":         ("class.drawio",           dict(title="t1",  number="t2",  version="t3", author="t4", date="t5")),
-    "state":         ("state.drawio",           dict(title="t1",  number="t2",  version="t3", author="t4", date="t5")),
 }
 
 def set_text(xml, cell_id, new):
