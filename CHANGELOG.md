@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.9.0](https://github.com/TQKNG/khanh-agent-workspace/compare/v0.8.0...v0.9.0) (2026-11-24)
+
+
+### Features
+
+* **arc42-mintlify-docs:** deliver runtime scenarios as draw.io sequence diagrams ([46e6567](https://github.com/TQKNG/khanh-agent-workspace/commit/46e6567a48068075da83713a0984a74bb84985ed))
+* **arc42-mintlify-docs:** deliver runtime scenarios as draw.io sequence diagrams ([aebe2ca](https://github.com/TQKNG/khanh-agent-workspace/commit/aebe2caeff8426d6db2eee3d9a9334c017776323))
+* **diagram-standards:** add draw.io diagram templates plugin ([6f8f5d3](https://github.com/TQKNG/khanh-agent-workspace/commit/6f8f5d3e2ce7886b5a80e3368393bebb98c6f15b))
+* **diagram-standards:** add draw.io diagram templates plugin ([cfb65a9](https://github.com/TQKNG/khanh-agent-workspace/commit/cfb65a9b4abe39bed7d7a42f5cb0a06f67a9aae5))
+
 ## [0.8.0](https://github.com/TQKNG/khanh-agent-workspace/compare/v0.7.0...v0.8.0) (2026-11-23)
 
 
