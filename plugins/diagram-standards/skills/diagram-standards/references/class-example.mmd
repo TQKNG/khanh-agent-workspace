@@ -1,0 +1,41 @@
+classDiagram
+    class ItemRepository {
+        <<interface>>
+        +get(id: str) Item
+        +save(item: Item) Item
+        +list() list~Item~
+    }
+    class InMemoryItemRepository {
+        -items: dict~str, Item~
+        +get(id: str) Item
+        +save(item: Item) Item
+        +list() list~Item~
+    }
+    class StoreItemRepository {
+        -client: StoreClient
+        +get(id: str) Item
+        +save(item: Item) Item
+        +list() list~Item~
+    }
+    class Order {
+        +id: str
+        +customer_id: str
+        +total: Decimal
+        +created_at: datetime
+        +add_line(line: OrderLine)
+    }
+    class OrderLine {
+        +sku: str
+        +quantity: int
+        +status: OrderStatus
+    }
+    class OrderStatus {
+        <<enumeration>>
+        OPEN
+        PAID
+        CLOSED
+    }
+    ItemRepository <|.. InMemoryItemRepository : implements
+    ItemRepository <|.. StoreItemRepository : implements
+    Order "1" *-- "0..*" OrderLine : contains
+    OrderLine --> OrderStatus : has

@@ -4,7 +4,7 @@ description: >
   This skill should be used when writing or updating architecture documentation, especially
   Mintlify pages, that needs a diagram: "document the architecture", "add a system context
   diagram", "business context diagram", "whitebox view", "deployment view", "component view",
-  "C4 diagram", "draw.io diagram for the docs", or any request to draw, update or embed a
+  "C4 diagram", "class diagram", "domain model", "state diagram", "draw.io diagram for the docs", or any request to draw, update or embed a
   diagram in documentation. It makes Claude start from the approved draw.io templates instead
   of drawing from scratch, fill the title block, export a PNG and embed it correctly.
 metadata:
@@ -29,6 +29,8 @@ The templates already carry the frame, bottom title block, legend, C4 colours, R
 | Level 1 deployment: where it runs (cloud tenant, subscription, resource group) | `l1-deployment` | `l1-deployment.drawio` | `LVL1-DeploymentView` |
 | Level 2 component view: inside one container, its components | `l2-component` | `l2-component.drawio` | `LVL2_ComponentView` |
 | Runtime view: one scenario as a sequence diagram (arc42 section 6) | `seq` | `sequence.drawio` | `SEQ` |
+| Class diagram: the domain model or an interface with its implementations (arc42 sections 5 and 8) | `class` | `class.drawio` | `CLS` |
+| State diagram: the lifecycle of one entity (arc42 section 8) | `state` | `state.drawio` | `STM` |
 
 Document number format: `<prefix>-<ProductName>-<NNN>`, for example `SC-ReportingGeneratorTool-001`.
 When unsure which type fits, read `references/template-catalog.md` for what each template contains and when to pick it.
@@ -52,6 +54,29 @@ Sequence diagrams are authored in Mermaid and delivered as draw.io, so they shar
    Regenerate from the `.mmd` before any hand edits in draw.io; hand edits are not written back to the `.mmd`.
 5. One scenario per diagram, at most six participants.
    Split larger flows into several diagrams.
+
+## Class diagrams (`class`) and state diagrams (`state`)
+
+Class and state diagrams follow the same flow as sequence diagrams: they are authored in Mermaid and delivered as draw.io, so they share the frame, title block, legend, Roboto and C4 colours of the other diagrams.
+
+1. Write or reuse a Mermaid `classDiagram` or `stateDiagram-v2` and save it as `diagrams/src/<doc-number>.mmd` (see `references/class-example.mmd` and `references/state-example.mmd`).
+   Take names, members, enum values and states from the code or the approved design, and draw only what they show.
+   Class diagram syntax: `class` blocks with members, `<<interface>>` and `<<enumeration>>`, and the relationships `<|--`, `<|..`, `*--`, `o--`, `-->`, `..>`, `--`, `--|>`, `..|>` with optional cardinalities and labels.
+   State diagram syntax: `A --> B: event [guard] / action`, `[*]`, `state "Name" as id`, `<<choice>>`, one level of composite state, and `direction TB|LR`.
+2. Convert (an `.mdx` page with the Mermaid block also works as input; pick the block with `--block N`):
+   ```bash
+   python3 scripts/mermaid_class_to_drawio.py diagrams/src/<doc-number>.mmd diagrams/src/<doc-number>.drawio \
+     --title "<Product> – Domain Model – <scope>" --number <doc-number> --author "<name>"
+   python3 scripts/mermaid_state_to_drawio.py diagrams/src/<doc-number>.mmd diagrams/src/<doc-number>.drawio \
+     --title "<Product> – State Machine – <entity>" --number <doc-number> --author "<name>"
+   ```
+3. Continue at step 4 below (PNG) and step 5 (embed).
+   Replace the page's Mermaid block with the image.
+4. Keep the `.mmd` next to the `.drawio`.
+   Regenerate from the `.mmd` before any hand edits in draw.io; hand edits are not written back to the `.mmd`.
+5. One aggregate, interface family or entity lifecycle per diagram, at most eight classes.
+   Show the key attributes and operations, not every field; point to the API reference for full field lists.
+   A diagram wider than the page stops with an error: split it.
 
 ## Workflow
 
