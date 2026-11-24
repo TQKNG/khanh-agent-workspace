@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "diagram-standards",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Keeps architecture documentation consistent: every Mintlify page that needs a diagram starts from the approved draw.io templates (C4 context, whitebox, deployment and component, plus UML sequence, class and state), exported to PNG by a GitHub Action.",
   "author": {
     "name": "Khanh Nguyen",
