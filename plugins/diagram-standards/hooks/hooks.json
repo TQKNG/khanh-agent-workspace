@@ -1,14 +1,17 @@
 {
-  "PostToolUse": [
-    {
-      "matcher": "Write|Edit|MultiEdit",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check_diagram_sources.py",
-          "timeout": 15
-        }
-      ]
-    }
-  ]
+  "description": "Flags pages that embed a diagram without its draw.io source or PNG, and diagrams that lost the title block or legend.",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check_diagram_sources.py",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
 }
