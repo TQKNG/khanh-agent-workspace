@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.10.1](https://github.com/TQKNG/khanh-agent-workspace/compare/v0.10.0...v0.10.1) (2026-11-24)
+
+
+### Bug Fixes
+
+* **diagram-standards:** nest hook events under a hooks key ([fe5bc9f](https://github.com/TQKNG/khanh-agent-workspace/commit/fe5bc9f56b81e544ca33bca75ec3cfc86485f8e3))
+* **diagram-standards:** nest hook events under a hooks key ([1c6b77d](https://github.com/TQKNG/khanh-agent-workspace/commit/1c6b77d3029e8cd198df1ceda8132212dedffc28))
+
 ## [0.10.0](https://github.com/TQKNG/khanh-agent-workspace/compare/v0.9.0...v0.10.0) (2026-11-24)
 
 
