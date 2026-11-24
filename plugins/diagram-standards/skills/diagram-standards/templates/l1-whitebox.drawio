@@ -1,0 +1,105 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="p1" name="1">
+    <mxGraphModel dx="2175" dy="1214" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2454" pageHeight="1714" math="0" shadow="0" adaptiveColors="auto">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="v2" parent="1" style="whiteSpace=wrap;html=1;rounded=0;fillColor=#ffffff;strokeColor=#000000;align=center;verticalAlign=middle;metaEdit=1;fontFamily=Roboto;spacingLeft=0;spacingRight=0;" value="" vertex="1">
+          <mxGeometry height="986.1" width="2143" x="9.4" y="2.7" as="geometry" />
+        </mxCell>
+        <mxCell id="v3" parent="1" style="whiteSpace=wrap;html=1;rounded=0;fillColor=#ffffff;strokeColor=#000000;align=center;verticalAlign=middle;metaEdit=1;fontFamily=Roboto;spacingLeft=0;spacingRight=0;" value="" vertex="1">
+          <mxGeometry height="140" width="2143" x="9.4" y="1019.2" as="geometry" />
+        </mxCell>
+        <mxCell id="v4" parent="1" style="whiteSpace=wrap;html=1;rounded=0;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;metaEdit=1;fontFamily=Roboto;spacingLeft=0;spacingRight=0;" value="&lt;b&gt;&lt;span style=&quot;font-size:18px;color:#000000&quot;&gt;Document Title&lt;/span&gt;&lt;/b&gt;&lt;span style=&quot;font-size:18px;color:#000000&quot;&gt;: Report Generation Tool – Level 1- System Whitebox&lt;/span&gt;" vertex="1">
+          <mxGeometry height="30.4" width="808.4" x="49.3" y="1037.5" as="geometry" />
+        </mxCell>
+        <mxCell id="v6" parent="1" style="whiteSpace=wrap;html=1;rounded=0;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;metaEdit=1;fontFamily=Roboto;spacingLeft=0;spacingRight=0;" value="&lt;b&gt;&lt;span style=&quot;font-size:18px;color:#000000&quot;&gt;Document Number&lt;/span&gt;&lt;/b&gt;&lt;span style=&quot;font-size:18px;color:#000000&quot;&gt;: LVL1_Whitebox-ReportingGeneratorTool-001&lt;/span&gt;" vertex="1">
+          <mxGeometry height="30.4" width="767.9" x="49.3" y="1074" as="geometry" />
+        </mxCell>
+        <mxCell id="v7" parent="1" style="whiteSpace=wrap;html=1;rounded=0;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;metaEdit=1;fontFamily=Roboto;spacingLeft=0;spacingRight=0;" value="&lt;b&gt;&lt;span style=&quot;font-size:18px;color:#000000&quot;&gt;Version Number&lt;/span&gt;&lt;/b&gt;&lt;span style=&quot;font-size:18px;color:#000000&quot;&gt;: 0.0.1&lt;/span&gt;" vertex="1">
+          <mxGeometry height="30.4" width="500.6" x="49.3" y="1113.5" as="geometry" />
+        </mxCell>
+        <mxCell id="v9" parent="1" style="whiteSpace=wrap;html=1;rounded=0;fillColor=none;strokeColor=none;align=right;verticalAlign=middle;metaEdit=1;fontFamily=Roboto;spacingLeft=0;spacingRight=0;" value="&lt;span style=&quot;font-size:18px;color:#000000&quot;&gt;Prepared By: Khanh Nguyen&lt;/span&gt;" vertex="1">
+          <mxGeometry height="30.4" width="500.6" x="1638.4" y="1044.3" as="geometry" />
+        </mxCell>
+        <mxCell id="v10" parent="1" style="whiteSpace=wrap;html=1;rounded=0;fillColor=none;strokeColor=none;align=right;verticalAlign=middle;metaEdit=1;fontFamily=Roboto;spacingLeft=0;spacingRight=0;" value="&lt;span style=&quot;font-size:18px;color:#000000&quot;&gt;Date: 2026.11.02&lt;/span&gt;" vertex="1">
+          <mxGeometry height="30.4" width="500.6" x="1638.4" y="1078.8" as="geometry" />
+        </mxCell>
+        <mxCell id="v34" parent="1" style="html=1;dashed=0;whiteSpace=wrap;shape=mxgraph.c4.person2;fillColor=#08427b;strokeColor=#073b6f;align=center;metaEdit=1;resizable=0;fontColor=#ffffff;fontFamily=Roboto;" value="&lt;b&gt;&lt;span style=&quot;font-size:18px;color:#ffffff&quot;&gt;Facility Manager&lt;br&gt;&lt;/span&gt;&lt;/b&gt;&lt;span style=&quot;font-size:18px;color:#ffffff&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size:14px;color:#ffffff&quot;&gt;Manage the facility IoT devices&lt;/span&gt;&lt;span style=&quot;font-size:18px;color:#000000&quot;&gt;&lt;/span&gt;" vertex="1">
+          <mxGeometry height="215" width="187.1" x="250.3" y="319.4" as="geometry" />
+        </mxCell>
+        <mxCell id="v35" parent="1" style="whiteSpace=wrap;html=1;rounded=1;absoluteArcSize=1;arcSize=11.3;fillColor=#1168bd;strokeColor=#1864ad;align=center;verticalAlign=middle;metaEdit=1;fontColor=#ffffff;fontFamily=Roboto;" value="&lt;b&gt;&lt;span style=&quot;font-size:18px;color:#ffffff&quot;&gt;Facility Management Platform&lt;br&gt;&lt;/span&gt;&lt;/b&gt;&lt;span style=&quot;font-size:14px;color:#ffffff&quot;&gt;Azure Web App&lt;/span&gt;&lt;span style=&quot;font-size:18px;color:#ffffff&quot;&gt;&lt;br&gt;&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size:14px;color:#ffffff&quot;&gt;Manage report requests&lt;/span&gt;&lt;span style=&quot;font-size:18px;color:#ffffff&quot;&gt;&lt;/span&gt;" vertex="1">
+          <mxGeometry height="131" width="187.1" x="630.1" y="403.4" as="geometry" />
+        </mxCell>
+        <mxCell id="v36" parent="1" style="whiteSpace=wrap;html=1;rounded=1;absoluteArcSize=1;arcSize=11.3;fillColor=#ffffff;strokeColor=#1864ad;dashed=1;align=center;verticalAlign=top;metaEdit=1;fontColor=#ffffff;fontFamily=Roboto;spacingLeft=0;spacingRight=0;" value="&lt;b&gt;&lt;span style=&quot;font-size:18px;color:#000000&quot;&gt;&lt;br&gt;Report Generation Service&lt;br&gt;&lt;/span&gt;&lt;/b&gt;&lt;span style=&quot;font-size:18px;color:#000000&quot;&gt;[Whitebox Container]&lt;/span&gt;" vertex="1">
+          <mxGeometry height="287.4" width="555.6" x="1004.3" y="401.7" as="geometry" />
+        </mxCell>
+        <mxCell id="v39" parent="1" style="html=1;dashed=0;whiteSpace=wrap;shape=mxgraph.c4.person2;fillColor=#08427b;strokeColor=#073b6f;align=center;metaEdit=1;resizable=0;fontColor=#ffffff;fontFamily=Roboto;" value="&lt;b&gt;&lt;span style=&quot;font-size:18px;color:#ffffff&quot;&gt;Report Recipient&lt;br&gt;&lt;/span&gt;&lt;/b&gt;&lt;span style=&quot;font-size:18px;color:#ffffff&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size:14px;color:#ffffff&quot;&gt;Reviews completed reports&lt;/span&gt;&lt;span style=&quot;font-size:18px;color:#000000&quot;&gt;&lt;/span&gt;" vertex="1">
+          <mxGeometry height="215" width="187.1" x="1752.7" y="312.3" as="geometry" />
+        </mxCell>
+        <mxCell id="v81" parent="1" style="shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=15;whiteSpace=wrap;html=1;fillColor=#438dd5;strokeColor=#3d81c3;align=center;metaEdit=1;fontColor=#ffffff;fontFamily=Roboto;" value="&lt;b&gt;&lt;span style=&quot;font-size:18px;color:#ffffff&quot;&gt;Report Archive&lt;br&gt;&lt;/span&gt;&lt;/b&gt;&lt;span style=&quot;font-size:12px;color:#ffffff&quot;&gt;Azure Blob Storage&lt;/span&gt;&lt;span style=&quot;font-size:10px;color:#ffffff&quot;&gt;&lt;br&gt;&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size:14px;color:#ffffff&quot;&gt;Store generated PDF reports&lt;/span&gt;&lt;span style=&quot;font-size:14px;color:#ffffff&quot;&gt;&lt;/span&gt;" vertex="1">
+          <mxGeometry height="118.4" width="169.1" x="1360.6" y="499.9" as="geometry" />
+        </mxCell>
+        <mxCell id="v83" parent="1" style="whiteSpace=wrap;html=1;rounded=1;absoluteArcSize=1;arcSize=11.3;fillColor=#1168bd;strokeColor=#1864ad;align=center;verticalAlign=middle;metaEdit=1;fontColor=#ffffff;fontFamily=Roboto;" value="&lt;b&gt;&lt;span style=&quot;font-size:18px;color:#ffffff&quot;&gt;IoT Management Platform&lt;br&gt;&lt;/span&gt;&lt;/b&gt;&lt;span style=&quot;font-size:14px;color:#ffffff&quot;&gt;3&lt;/span&gt;&lt;sup&gt;&lt;span style=&quot;font-size:14px;color:#ffffff&quot;&gt;rd&lt;/span&gt;&lt;/sup&gt;&lt;span style=&quot;font-size:14px;color:#ffffff&quot;&gt; party Web App&lt;/span&gt;&lt;span style=&quot;font-size:18px;color:#ffffff&quot;&gt;&lt;br&gt;&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size:14px;color:#ffffff&quot;&gt;Manage IoT device &lt;/span&gt;" vertex="1">
+          <mxGeometry height="131" width="187.1" x="1119.1" y="135.1" as="geometry" />
+        </mxCell>
+        <mxCell id="v18" parent="1" style="whiteSpace=wrap;html=1;rounded=1;absoluteArcSize=1;arcSize=14.2;fillColor=none;strokeColor=#7f7f7f;align=center;verticalAlign=middle;metaEdit=1;strokeWidth=1;fontFamily=Roboto;spacingLeft=0;spacingRight=0;" value="" vertex="1">
+          <mxGeometry height="189.9" width="1020.5" x="40.5" y="782.6" as="geometry" />
+        </mxCell>
+        <mxCell id="v19" parent="1" style="whiteSpace=wrap;html=1;rounded=0;fillColor=none;strokeColor=none;align=left;verticalAlign=middle;metaEdit=1;fontFamily=Roboto;spacingLeft=0;spacingRight=0;" value="&lt;b&gt;&lt;span style=&quot;font-size:16px;color:#000000&quot;&gt;Legend&lt;/span&gt;&lt;/b&gt;" vertex="1">
+          <mxGeometry height="30.7" width="505" x="64.2" y="797.9" as="geometry" />
+        </mxCell>
+        <mxCell id="v20" parent="1" style="html=1;dashed=0;whiteSpace=wrap;shape=mxgraph.c4.person2;fillColor=#08427b;strokeColor=#073b6f;align=center;metaEdit=1;resizable=0;fontColor=#ffffff;fontFamily=Roboto;" value="&lt;span style=&quot;font-size:12px;color:#ffffff&quot;&gt;name&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size:8px;color:#ffffff&quot;&gt;[Person]&lt;/span&gt;&lt;span style=&quot;font-size:12px;color:#ffffff&quot;&gt;&lt;br&gt;&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size:9px;color:#ffffff&quot;&gt;description of&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size:9px;color:#ffffff&quot;&gt;the person&lt;/span&gt;&lt;span style=&quot;font-size:12px;color:#000000&quot;&gt;&lt;/span&gt;" vertex="1">
+          <mxGeometry height="120.4" width="104.7" x="76.7" y="833" as="geometry" />
+        </mxCell>
+        <mxCell id="v21" parent="1" style="whiteSpace=wrap;html=1;rounded=1;absoluteArcSize=1;arcSize=11.3;fillColor=#1168bd;strokeColor=#1864ad;align=center;verticalAlign=middle;metaEdit=1;fontColor=#ffffff;fontFamily=Roboto;" value="&lt;span style=&quot;font-size:12px;color:#ffffff&quot;&gt;name&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size:12px;color:#ffffff&quot;&gt;[Software System]&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size:12px;color:#ffffff&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size:12px;color:#ffffff&quot;&gt;description of&lt;br&gt;system&lt;/span&gt;&lt;span style=&quot;font-size:12px;color:#ffffff&quot;&gt;&lt;/span&gt;" vertex="1">
+          <mxGeometry height="73.3" width="141" x="215" y="874.8" as="geometry" />
+        </mxCell>
+        <mxCell id="v22" parent="1" style="whiteSpace=wrap;html=1;rounded=1;absoluteArcSize=1;arcSize=11.3;fillColor=#438dd5;strokeColor=#3d81c3;align=center;verticalAlign=middle;metaEdit=1;fontColor=#ffffff;fontFamily=Roboto;" value="&lt;span style=&quot;font-size:12px;color:#ffffff&quot;&gt;name&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size:12px;color:#ffffff&quot;&gt;[Container: technology]&lt;br&gt;&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size:12px;color:#ffffff&quot;&gt;description of&lt;br&gt;container&lt;/span&gt;&lt;span style=&quot;font-size:12px;color:#ffffff&quot;&gt;&lt;/span&gt;" vertex="1">
+          <mxGeometry height="73.3" width="141" x="393" y="874.8" as="geometry" />
+        </mxCell>
+        <mxCell id="v28" parent="1" style="shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=15;whiteSpace=wrap;html=1;fillColor=#438dd5;strokeColor=#3d81c3;align=center;metaEdit=1;fontColor=#ffffff;fontFamily=Roboto;" value="&lt;span style=&quot;font-size:10px;color:#ffffff&quot;&gt;name&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size:10px;color:#ffffff&quot;&gt;[Container: technology]&lt;br&gt;&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size:10px;color:#ffffff&quot;&gt;description of&lt;br&gt;database&lt;/span&gt;&lt;span style=&quot;font-size:10px;color:#ffffff&quot;&gt;&lt;/span&gt;" vertex="1">
+          <mxGeometry height="98.1" width="119.7" x="750" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="v29" parent="1" style="whiteSpace=wrap;html=1;rounded=1;absoluteArcSize=1;arcSize=11.3;fillColor=#85bbf0;strokeColor=#78a8d8;align=center;verticalAlign=middle;metaEdit=1;fontColor=#000000;fontFamily=Roboto;" value="&lt;span style=&quot;font-size:12px;color:#ffffff&quot;&gt;name&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size:12px;color:#ffffff&quot;&gt;[Component: technology]&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size:12px;color:#ffffff&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size:12px;color:#ffffff&quot;&gt;description of&lt;br&gt;component&lt;/span&gt;&lt;span style=&quot;font-size:12px;color:#ffffff&quot;&gt;&lt;/span&gt;" vertex="1">
+          <mxGeometry height="73.3" width="141" x="570" y="874.8000000000001" as="geometry" />
+        </mxCell>
+        <mxCell id="v93" parent="1" style="whiteSpace=wrap;html=1;rounded=1;absoluteArcSize=1;arcSize=11.3;fillColor=#438dd5;strokeColor=#3d81c3;align=center;verticalAlign=middle;metaEdit=1;fontColor=#ffffff;fontFamily=Roboto;" value="&lt;b&gt;&lt;span style=&quot;font-size:18px;color:#ffffff&quot;&gt;Azure Function App&lt;br&gt;&lt;/span&gt;&lt;/b&gt;&lt;span style=&quot;font-size:12px;color:#ffffff&quot;&gt;Nodejs 22, Azure Durable Functions&lt;/span&gt;&lt;span style=&quot;font-size:12px;color:#ffffff&quot;&gt;&lt;br&gt;&lt;br&gt;Coordinate and execute report workflow&lt;/span&gt;&lt;span style=&quot;font-size:12px;color:#ffffff&quot;&gt;&lt;/span&gt;" vertex="1">
+          <mxGeometry height="118.4" width="169.1" x="1033.6" y="499.9" as="geometry" />
+        </mxCell>
+        <mxCell id="e40" edge="1" parent="1" source="v34" style="html=1;rounded=0;jettySize=auto;strokeColor=#000000;strokeWidth=2.25;dashed=1;startArrow=none;startFill=1;endArrow=blockThin;endFill=1;exitX=1.0;exitY=0.695;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;labelBackgroundColor=#ffffff;fontFamily=Roboto;fontSize=12;" target="v35" value="&lt;span style=&quot;font-size:12px&quot;&gt;Request Report from UI&lt;/span&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2.9" y="-16.3" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e41" edge="1" parent="1" source="v35" style="html=1;rounded=0;jettySize=auto;strokeColor=#000000;strokeWidth=2.25;dashed=1;startArrow=blockThin;startFill=1;endArrow=blockThin;endFill=1;exitX=1.0;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.234;entryDx=0;entryDy=0;entryPerimeter=0;labelBackgroundColor=#ffffff;fontFamily=Roboto;fontSize=12;" target="v36" value="&lt;span style=&quot;font-size:12px&quot;&gt;Send HTTP POST request&lt;/span&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1.6" y="-13.9" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e42" edge="1" parent="1" source="v36" style="html=1;rounded=0;jettySize=auto;strokeColor=#000000;strokeWidth=2.25;dashed=1;startArrow=none;startFill=1;endArrow=blockThin;endFill=1;exitX=1.0;exitY=0.219;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.708;entryDx=0;entryDy=0;entryPerimeter=0;labelBackgroundColor=#ffffff;fontFamily=Roboto;fontSize=12;" target="v39" value="&lt;span style=&quot;font-size:12px&quot;&gt;Send PDF report via SMTP&lt;/span&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-1.7" y="-13.5" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e87" edge="1" parent="1" source="v81" style="html=1;rounded=0;jettySize=auto;strokeColor=#000000;strokeWidth=2.25;dashed=1;startArrow=blockThin;startFill=1;endArrow=none;endFill=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1.0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;labelBackgroundColor=#ffffff;fontFamily=Roboto;fontSize=12;" target="v93" value="&lt;span style=&quot;font-size:12px&quot;&gt;Archive PDF Report with&lt;br&gt; Azure Blob API&lt;/span&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-9.1" y="27" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e89" edge="1" parent="1" source="v83" style="html=1;rounded=0;jettySize=auto;strokeColor=#000000;strokeWidth=2.25;dashed=1;startArrow=blockThin;startFill=1;endArrow=blockThin;endFill=1;exitX=0.223;exitY=1.0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.753;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;labelBackgroundColor=#ffffff;fontFamily=Roboto;fontSize=12;" target="v93" value="&lt;span style=&quot;font-size:12px&quot;&gt;Browserless automation&lt;/span&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="70.2" y="-19.9" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e25" edge="1" parent="1" style="html=1;rounded=0;jettySize=auto;strokeColor=#000000;strokeWidth=2.25;dashed=1;startArrow=none;startFill=1;endArrow=blockThin;endFill=1;labelBackgroundColor=#ffffff;fontFamily=Roboto;fontSize=12;" value="&lt;span style=&quot;font-size:12px;color:#000000&quot;&gt;Uses&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;font-size:12px;color:#000000&quot;&gt;[technology]&lt;/span&gt;&lt;span style=&quot;font-size:12px;color:#000000&quot;&gt;&lt;/span&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint y="-0.1" as="offset" />
+            <mxPoint x="891.8" y="913.7" as="sourcePoint" />
+            <mxPoint x="1038.4" y="913.7" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,16 @@
+{
+  "name": "diagram-standards",
+  "version": "0.2.0",
+  "description": "Keeps architecture documentation consistent: every Mintlify page that needs a diagram starts from the approved draw.io templates (C4 context, whitebox, deployment, component and sequence), exported to PNG by a GitHub Action.",
+  "author": {
+    "name": "Khanh Nguyen"
+  },
+  "keywords": [
+    "drawio",
+    "c4",
+    "architecture",
+    "mintlify",
+    "documentation",
+    "diagrams"
+  ]
+}
