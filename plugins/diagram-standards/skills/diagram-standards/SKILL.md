@@ -8,7 +8,7 @@ description: >
   diagram in documentation. It makes Claude start from the approved draw.io templates instead
   of drawing from scratch, fill the title block, export a PNG and embed it correctly.
 metadata:
-  version: "0.3.0"
+  version: "0.3.1"
 ---
 
 # Diagram standards

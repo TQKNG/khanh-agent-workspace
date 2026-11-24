@@ -7,7 +7,7 @@ description: >
   title block filled in.
 argument-hint: "<sc|bc|l1-whitebox|l1-deployment|l2-component|seq|class|state> <doc-number> [title]"
 metadata:
-  version: "0.3.0"
+  version: "0.3.1"
 ---
 
 # /new-diagram

@@ -35,6 +35,13 @@ class ManifestTests(unittest.TestCase):
         self.assertIn('diagram-standards', [p['name'] for p in codex['plugins']])
         self.assertLessEqual(len(manifests[2]['interface']['shortDescription']), 30)
 
+    def test_hooks_file_nests_events_under_a_hooks_key(self):
+        config = json.loads((PLUGIN / 'hooks/hooks.json').read_text(encoding='utf-8'))
+        self.assertIn('hooks', config)
+        command = config['hooks']['PostToolUse'][0]['hooks'][0]['command']
+        self.assertTrue((PLUGIN / 'hooks/scripts/check_diagram_sources.py').is_file())
+        self.assertIn('${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check_diagram_sources.py', command)
+
     def test_skills_have_frontmatter_matching_their_folder(self):
         for name in ('diagram-standards', 'new-diagram'):
             source = (PLUGIN / 'skills' / name / 'SKILL.md').read_text(encoding='utf-8')
