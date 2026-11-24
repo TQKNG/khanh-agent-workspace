@@ -71,6 +71,9 @@ def check_page(path, root):
             errors.append(f'Diagram {name}.png has no source diagrams/src/{name}.drawio.')
     if 'runtime-view' in path.name and re.search(r'```mermaid\s+sequenceDiagram', text):
         errors.append('Runtime view still has a Mermaid sequenceDiagram; deliver it as a diagram-standards seq diagram.')
+    for kind, template in (('classDiagram', 'class'), ('stateDiagram', 'state')):
+        if re.search(r'```mermaid\s+' + kind, text):
+            warnings.append(f'Mermaid {kind} on the page; deliver it as a diagram-standards {template} diagram.')
     for match in re.finditer(r'!\[[^\]]*\]\((https?://[^)]+)\)', text):
         warnings.append(f'External image {match.group(1)[:60]}; prefer /images/diagrams/ for architecture diagrams.')
     for match in re.finditer(r'<img\b[^>]*>', text):

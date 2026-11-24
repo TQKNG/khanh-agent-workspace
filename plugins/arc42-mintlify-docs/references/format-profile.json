@@ -41,7 +41,9 @@
     "l1-whitebox": "LVL1_Whitebox",
     "l1-deployment": "LVL1-DeploymentView",
     "l2-component": "LVL2_ComponentView",
-    "seq": "SEQ"
+    "seq": "SEQ",
+    "class": "CLS",
+    "state": "STM"
   },
   "spaces": [
     {
@@ -171,13 +173,12 @@
           "sections": [
             "2.1.1 Level 1 - System Whitebox: whitebox diagram, then 'Container responsibilities' table (Container | Responsibility | Technology | Owned data | Inbound | Outbound)",
             "2.1.2 Level 2 - Component view: only when justified in one sentence, one component diagram per container",
-            "2.1.3 Level 3 - Code view: optional Mermaid classDiagram"
+            "2.1.3 Level 3 - Code view: optional class diagram of one justified container, authored as Mermaid and delivered as a draw.io image"
           ],
           "blocks": [
             "paragraph",
             "diagram",
-            "table",
-            "mermaid-class"
+            "table"
           ],
           "match": [
             "building-block-view"
@@ -190,6 +191,11 @@
             {
               "type": "l2-component",
               "role": "level 2 component",
+              "optional": true
+            },
+            {
+              "type": "class",
+              "role": "level 3 code view, one per justified container",
               "optional": true
             }
           ]
@@ -248,15 +254,29 @@
           "title": "2.4 Crosscutting Concepts",
           "description": "Crosscutting Concepts for {product_name}.",
           "sections": [
-            "2.4.1 Domain Entity Model: Mermaid classDiagram followed by a Term | Definition table",
+            "2.4.1 Domain Entity Model: class diagram, authored as Mermaid and delivered as a draw.io image, followed by a Term | Definition table",
+            "2.4.2 Entity lifecycles: one state diagram per entity with a status field, authored as Mermaid and delivered as a draw.io image, only when the code or design shows the states",
             "2.4.n further concepts (validation, errors, configuration, observability, resilience) with links to canonical security and API pages"
           ],
           "blocks": [
-            "mermaid-class",
+            "paragraph",
+            "diagram",
             "table"
           ],
           "match": [
             "crosscutting-concepts"
+          ],
+          "notes": "The domain model uses the diagram-standards class template and entity lifecycles use the state template. Each Mermaid source stays in diagrams/src as a .mmd file next to the .drawio.",
+          "diagrams": [
+            {
+              "type": "class",
+              "role": "domain entity model"
+            },
+            {
+              "type": "state",
+              "role": "entity lifecycle, one per entity with a status field",
+              "optional": true
+            }
           ]
         },
         {

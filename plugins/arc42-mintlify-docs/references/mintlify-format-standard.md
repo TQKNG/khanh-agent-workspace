@@ -54,9 +54,9 @@ Add `Last documentation review: YYYY-MM-DD` to the release index page.
 
 Architecture diagrams use the approved draw.io templates through the diagram-standards plugin.
 See references/diagram-integration.md.
-Runtime scenarios use the `seq` template and are delivered as draw.io images, with the Mermaid source kept in `diagrams/src`.
-The Level 3 code view and the domain model stay in Mermaid.
-Mintlify renders fenced `mermaid` blocks.
+Runtime scenarios, the domain model and entity lifecycles use the `seq`, `class` and `state` types.
+They are authored in Mermaid, delivered as draw.io images, and keep the Mermaid source in `diagrams/src`.
+Mintlify renders fenced `mermaid` blocks for small sketches that have no diagram-standards type.
 
 ## API reference
 
