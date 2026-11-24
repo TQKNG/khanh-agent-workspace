@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.10.0](https://github.com/TQKNG/khanh-agent-workspace/compare/v0.9.0...v0.10.0) (2026-11-24)
+
+
+### Features
+
+* **arc42-mintlify-docs:** deliver domain models and entity lifecycles as draw.io diagrams ([bb5f10f](https://github.com/TQKNG/khanh-agent-workspace/commit/bb5f10fad4cdaf327daceaa43d92922bb779e699))
+* **arc42-mintlify-docs:** deliver domain models and entity lifecycles as draw.io diagrams ([4a71b32](https://github.com/TQKNG/khanh-agent-workspace/commit/4a71b32d2135278edc75a1249f361962d21d0562))
+* **diagram-standards:** add class and state diagram templates and converters ([#37](https://github.com/TQKNG/khanh-agent-workspace/issues/37)) ([e79d75c](https://github.com/TQKNG/khanh-agent-workspace/commit/e79d75c10c49beb11995e8d5e9d8bec562bd0198))
+
 ## [0.9.0](https://github.com/TQKNG/khanh-agent-workspace/compare/v0.8.0...v0.9.0) (2026-11-24)
 
 
