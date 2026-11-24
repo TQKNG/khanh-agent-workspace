@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "arc42-mintlify-docs",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Question-driven arc42 documentation for the tqkng/docs Mintlify site, in the Report Tool format, with approved draw.io diagrams.",
   "author": {
     "name": "Khanh Nguyen",

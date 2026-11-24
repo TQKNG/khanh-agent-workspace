@@ -21,7 +21,9 @@ Give the user a brief update summary, at most one screen, in this order:
 
 1. **Status:** product entry, page count found against the profile, pinned commit found on the landing page and the current source commit.
 2. **Missing:** profile pages that do not exist, with a one-line reason each.
-3. **Out of format:** pages that exist but break the format standard, such as a missing frontmatter field, unnumbered headings, an external image URL, or a Mermaid diagram where a template applies, including a Mermaid runtime scenario.
+3. **Out of format:** pages that exist but break the format standard, such as a missing frontmatter field, unnumbered headings, an external image URL, or a Mermaid diagram where a template applies.
+   A Mermaid runtime scenario is out of format.
+   A Mermaid class or state diagram is reported as a warning, not as out of format.
 4. **Possibly stale:** pages whose evidence predates the current commit.
 5. **Proposed changes:** the minimal list of pages to create or edit, plus anything intentionally left alone.
 

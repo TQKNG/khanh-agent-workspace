@@ -117,6 +117,16 @@ class ProfileTests(unittest.TestCase):
         self.assertEqual([d['type'] for d in runtime['diagrams']], ['seq'])
         self.assertNotIn('mermaid-sequence', runtime['blocks'])
 
+    def test_domain_model_and_lifecycles_use_class_and_state_types(self):
+        pages = {p['key']: p for s in PROFILE['spaces'] for p in s['pages']}
+        crosscutting = [(d['type'], d.get('optional', False)) for d in pages['crosscutting']['diagrams']]
+        self.assertEqual(crosscutting, [('class', False), ('state', True)])
+        self.assertIn(('class', True), [(d['type'], d.get('optional', False)) for d in pages['building-blocks']['diagrams']])
+        self.assertEqual(PROFILE['diagram_types']['class'], 'CLS')
+        self.assertEqual(PROFILE['diagram_types']['state'], 'STM')
+        for page in pages.values():
+            self.assertNotIn('mermaid-class', page.get('blocks', []))
+
 
 class ValidatorTests(unittest.TestCase):
     def test_blank_example_is_not_ready(self):
@@ -156,6 +166,16 @@ class ValidatorTests(unittest.TestCase):
         session['diagrams'].append({'type': 'seq', 'doc_number': 'SEQ-Example-001', 'page': 'architecture.runtime'})
         session['confirmation']['fingerprint'] = validate.source_fingerprint(session)
         self.assertEqual(validate.validate_session(session), [])
+
+    def test_domain_model_and_lifecycle_use_class_and_state_types(self):
+        session = valid_session()
+        session['diagrams'].append({'type': 'class', 'doc_number': 'CLS-Example-001', 'page': 'architecture.crosscutting'})
+        session['diagrams'].append({'type': 'state', 'doc_number': 'STM-Example-001', 'page': 'architecture.crosscutting'})
+        session['confirmation']['fingerprint'] = validate.source_fingerprint(session)
+        self.assertEqual(validate.validate_session(session), [])
+        session['diagrams'][-1]['doc_number'] = 'SEQ-Example-001'
+        session['confirmation']['fingerprint'] = validate.source_fingerprint(session)
+        self.assertTrue(any('document number' in e for e in validate.validate_session(session)))
 
     def test_merge_needs_approval_and_checks(self):
         session = valid_session()
@@ -219,6 +239,16 @@ class PageCheckTests(unittest.TestCase):
         page = self.GOOD + '\n```mermaid\nsequenceDiagram\n    A->>B: x\n```\n'
         self.assertTrue(any('Mermaid sequenceDiagram' in e for e in self.run_check(page, name='06-runtime-view.mdx')))
         self.assertFalse(any('Mermaid sequenceDiagram' in e for e in self.run_check(page)))
+
+    def test_mermaid_class_and_state_diagrams_warn_but_do_not_fail(self):
+        for kind, template in (('classDiagram\n    class A', 'class'), ('stateDiagram-v2\n    [*] --> A', 'state')):
+            page = self.GOOD + f'\n```mermaid\n{kind}\n```\n'
+            with tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                (root / '08-crosscutting-concepts.mdx').write_text(page, encoding='utf-8')
+                errors, warnings, _ = check.check_page(root / '08-crosscutting-concepts.mdx', root)
+            self.assertEqual(errors, [])
+            self.assertTrue(any(f'diagram-standards {template} diagram' in w for w in warnings), warnings)
 
     def test_secret_values_fail(self):
         page = self.GOOD + '\nAccountKey=abcdefghijklmnop1234\n'

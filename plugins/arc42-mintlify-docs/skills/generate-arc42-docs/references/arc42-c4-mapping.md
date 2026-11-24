@@ -215,9 +215,9 @@ Draw static C4 views (context, container, component, deployment) with the approv
 
 Express the C4 type in each element label.
 
-Use Mermaid `sequenceDiagram` syntax for runtime scenarios.
+Author runtime scenarios as Mermaid `sequenceDiagram`, the domain model as `classDiagram` and entity lifecycles as `stateDiagram-v2`, and deliver each through diagram-standards as described in references/diagram-integration.md.
 
-Mermaid is fine for runtime scenarios, but the semantic model must still follow C4.
+The semantic model must still follow C4.
 
 ## Placement in the Mintlify product
 
