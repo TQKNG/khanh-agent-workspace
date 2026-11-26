@@ -11,6 +11,11 @@ Write those commits, or the pull request titles used for squash merges, as [Conv
 Before version 1.0.0, a breaking change produces a minor release instead.
 Other types such as `docs:`, `test:`, and `chore:` do not trigger a release on their own.
 
+## First version
+
+If the project has no earlier release and the manifest is `0.0.0`, the first release uses `initial-version` from `.github/release-please-config.json`, which defaults to `0.1.0`.
+A releasable commit is still required before release-please opens the first release pull request.
+
 ## Review and publish a version
 
 1. Merge changes to `{{DEFAULT_BRANCH}}` as usual.
@@ -32,5 +37,7 @@ Do not edit `CHANGELOG.md` by hand; the next release pull request regenerates it
 
 Enable **Settings > Actions > General > Allow GitHub Actions to create and approve pull requests** so the workflow can open the release pull request.
 The workflow uses the default `GITHUB_TOKEN` with `contents: write` and `pull-requests: write` only.
-Pull requests, tags, and releases created with `GITHUB_TOKEN` do not trigger other workflows.
-If required checks must run on the release pull request, or a deployment must start from the release or tag event, pass a GitHub App token or fine-grained token to the action's `token` input instead.
+Tags and releases created with `GITHUB_TOKEN` do not trigger other workflows.
+Workflow runs for a release pull request opened or updated with `GITHUB_TOKEN` wait for approval, so required checks do not pass until they run.
+Someone with write access can start them by selecting **Approve workflows to run** on the pull request.
+To run checks without approval, or to start a deployment from the release or tag event, pass a GitHub App token or fine-grained token to the action's `token` input instead.
