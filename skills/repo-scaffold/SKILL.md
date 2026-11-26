@@ -1,17 +1,55 @@
 ---
 name: repo-scaffold
-description: Scaffold a new GitHub repository with core project documents, contribution templates, basic CI, and a release process with versioning, generated changelogs, tags, and GitHub Releases, or review and safely add missing repository hygiene and release artifacts to an existing repository.
+description: Scaffold a new GitHub repository or update missing hygiene in an existing one with project documents, contribution templates, CI, and a release process.
 ---
 
-# Repository scaffold
+# Scaffold a new GitHub Repository Workflow
 
-Use this skill when asked to create a consistent GitHub repository starter or add its baseline artifacts to an existing repository.
-DecisionLane is the reference for the artifact set: README, license, contribution guide, issue and pull request templates, and CI.
-Release setup is part of the same review and is described in [Release setup](#release-setup).
-Adapt the content to the target repository rather than copying DecisionLane's product details or stack checks.
-Use `~/.codex/AGENTS.md` as Khanh's single authoring source for shared agent rules.
-Read it fresh on every invocation; do not rely on the skill's installation-time contents.
-If it is unavailable on the current machine, ask for the current source before copying shared agent rules into a repository.
+Use this skill when asked to create a GitHub repository starter or add missing repository hygiene to an existing repository.
+
+
+## Step 1: Project name and General Configuration
+
+- Prompt the user for [project name] and [Owner/Repository].
+- Prompt the user for [local location path].
+- For a new repository, ask for the repository visibility [public/private].
+- Prompt the user for any bot configuration that affects repository access.
+- Prompt the user for these GitHub settings:
+  - Branch protection: [Yes/No].
+  - If enabled, ask which branch protection rules to configure.
+- Suggest relevant optional settings such as `CODEOWNERS`, Dependabot, required CI checks, and branch protection.
+- Show a summary in table format and require user confirmation before applying repository settings.
+- If the user declines, ask what to change and repeat the summary until they confirm.
+
+## Step 2: Local Repo Setup
+
+Dependencies: Step 1
+- Resolve the path in user response and create a new project folder locally
+- Scaffold below folders and files structure with empty content:
+
+```text
+.
+├── README.md
+├── LICENSE
+├── CONTRIBUTING.md
+├── AGENTS.md
+├── CLAUDE.md
+├── infra/
+│   ├── main.bicep
+│   ├── modules/
+│   └── main.bicepparam
+├── .github/
+│   ├── copilot-instructions.md
+│   ├── pull_request_template.md
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.yml
+│   │   └── feature_request.yml
+│   └── workflows/
+│       ├── ci.yml
+│       ├── deploy.yml
+│       └── release.yml
+└── .gitignore
+```
 
 ## Inspect first
 
@@ -84,7 +122,14 @@ Tell the user to enable "Allow GitHub Actions to create and approve pull request
 
 ## Content standard
 
-README: purpose, current status, setup, verification, repository layout, and links to contribution guidance, with claims grounded in the repo.
+README: follow `assets/starter/README.md` for the centered project title and badges, concise product summary, overview, core features, local quick start, actual repository tree, how-it-works flow, contribution link, and license link.
+Keep the centered product summary to ten words and feature names to two to four words.
+Replace every placeholder with verified project information or remove the optional section when it does not apply.
+Use the actual CI and release workflow filenames in badge URLs; include the release badge only when a release workflow exists.
+Use a GitHub releases version badge rather than an Actions status badge for the version.
+Use a real demo image and screenshots when available; remove image placeholders rather than shipping broken image links.
+Use a simple Mermaid flow with four or five real steps when it helps explain the project; do not retain generic sample nodes.
+The project tree must match the files actually created and must not list documentation or tooling that is not in the target repository.
 CONTRIBUTING: how to propose changes, set up, run checks, and submit a pull request.
 Issue templates: reproducible bug reports and outcome focused feature requests.
 Pull request template: summary, linked issue, verification, review notes, and sensitive data reminder.
