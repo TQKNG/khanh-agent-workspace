@@ -50,6 +50,13 @@ Dependencies: Step 1
 │       └── release.yml
 └── .gitignore
 ```
+
+## Inspect first
+
+Resolve the target directory and inspect Git status, tracked files, root documents, `.github/`, package manifests, test commands, default branch, and repository instructions.
+Classify the target as a new empty repository or an existing repository with meaningful content or history.
+Treat an existing repository as existing even when some baseline artifacts are absent.
+Check for case-insensitive filename collisions and generated files.
 Inspect the release state described in [Release setup](#release-setup) before proposing any change.
 
 ## New repository
