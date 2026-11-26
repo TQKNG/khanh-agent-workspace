@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.10.2](https://github.com/TQKNG/khanh-agent-workspace/compare/v0.10.1...v0.10.2) (2026-11-26)
+
+
+### Bug Fixes
+
+* **repo-scaffold:** restore inspect first section in skill ([fbf76eb](https://github.com/TQKNG/khanh-agent-workspace/commit/fbf76eb07a4c178c7046edab4b41535f9f48cf1c))
+* **repo-scaffold:** restore inspect first section in skill ([800d87a](https://github.com/TQKNG/khanh-agent-workspace/commit/800d87ad9f6ae43754df87324319f09b2a63a8dd))
+
 ## [0.10.1](https://github.com/TQKNG/khanh-agent-workspace/compare/v0.10.0...v0.10.1) (2026-11-24)
 
 
