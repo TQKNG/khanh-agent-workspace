@@ -77,7 +77,7 @@ Current status: {{CURRENT_STATUS}}.
 ```
 
 <!-- Update this tree to match the files actually present in the repository. -->
-<!-- If release setup is accepted, include its real files, such as RELEASING.md, release-please-config.json, .release-please-manifest.json, and the release workflow. -->
+<!-- If release setup is accepted, include .github/RELEASING.md, .github/release-please-config.json, .github/.release-please-manifest.json, and .github/workflows/release.yml. -->
 
 ## How It Works
 
