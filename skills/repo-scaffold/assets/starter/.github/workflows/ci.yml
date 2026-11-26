@@ -19,7 +19,7 @@ jobs:
           for file in README.md LICENSE CONTRIBUTING.md AGENTS.md CLAUDE.md .github/copilot-instructions.md .github/pull_request_template.md .github/ISSUE_TEMPLATE/bug_report.md .github/ISSUE_TEMPLATE/feature_request.md; do
             test -s "$file" || { echo "Missing or empty: $file"; exit 1; }
           done
-          if grep -R -n '{{[A-Z_]*}}' README.md LICENSE CONTRIBUTING.md .github/ISSUE_TEMPLATE .github/pull_request_template.md; then
+          if grep -n '{{[A-Z0-9_]*}}' README.md LICENSE CONTRIBUTING.md AGENTS.md CLAUDE.md .github/copilot-instructions.md .github/pull_request_template.md || grep -R -n '{{[A-Z0-9_]*}}' .github/ISSUE_TEMPLATE; then
             echo 'Unresolved scaffold placeholders found.'
             exit 1
           fi

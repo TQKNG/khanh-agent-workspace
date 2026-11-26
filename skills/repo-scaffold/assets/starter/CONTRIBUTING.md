@@ -24,3 +24,4 @@
   - [Bug report](.github/ISSUE_TEMPLATE/bug_report.md)
   - [Feature request](.github/ISSUE_TEMPLATE/feature_request.md)
 - [Pull request template](.github/pull_request_template.md)
+- [CI workflow](.github/workflows/ci.yml) - automated pull request checks.

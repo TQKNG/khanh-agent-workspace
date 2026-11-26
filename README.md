@@ -94,7 +94,7 @@ The `graphify` skill requires the Graphify CLI; semantic extraction can use an a
 The `ticket` skill lives in `.claude/skills/ticket/` because it uses Claude's issue argument and requires a Herdr-managed session.
 Copy that folder to a target repository's `.claude/skills/` or to `~/.claude/skills/` to use it elsewhere.
 
-The standalone skills and plugins are reviewable distribution snapshots of local sources: `~/.codex/skills/repo-scaffold`, `~/.codex/skills/graphify`, `~/.codex/skills/technical-blog-writing`, `~/.claude/skills/ticket`, and `~/plugins/session-token-audit`.
+The standalone skills and plugins are reviewable distribution snapshots of local sources: `~/.agents/skills/repo-scaffold`, `~/.codex/skills/graphify`, `~/.codex/skills/technical-blog-writing`, `~/.claude/skills/ticket`, and `~/plugins/session-token-audit`.
 Refresh the repository copies through a pull request when a local source changes.
 
 Standalone resources that are not part of a plugin should be documented with their intended installation path and scope before they are added to this repository.
