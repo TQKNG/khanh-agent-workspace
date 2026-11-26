@@ -6,7 +6,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILL = ROOT / 'skills/repo-scaffold'
-RELEASE = SKILL / 'assets/release'
+RELEASE = SKILL / 'assets/starter/.github'
 PLACEHOLDER = re.compile(r'{{([A-Z_]+)}}')
 
 
@@ -22,10 +22,11 @@ class RepoScaffoldReleaseTests(unittest.TestCase):
         self.skill = (SKILL / 'SKILL.md').read_text(encoding='utf-8')
 
     def test_release_starter_files_exist(self):
-        for path in ('.github/workflows/release.yml', 'release-please-config.json', '.release-please-manifest.json', 'RELEASING.md'):
+        for path in ('workflows/release.yml', 'release-please-config.json', '.release-please-manifest.json', 'RELEASING.md'):
             with self.subTest(path=path):
                 self.assertTrue((RELEASE / path).is_file())
         self.assertFalse((RELEASE / 'CHANGELOG.md').exists(), 'The changelog must be generated, not shipped as a starter file')
+        self.assertFalse((SKILL / 'assets/release').exists(), 'Release files must live in the starter .github directory')
 
     def test_release_config_is_valid_json_with_a_root_package(self):
         config = json.loads((RELEASE / 'release-please-config.json').read_text(encoding='utf-8'))
@@ -38,7 +39,7 @@ class RepoScaffoldReleaseTests(unittest.TestCase):
         self.assertFalse(package['include-component-in-tag'])
 
     def test_release_workflow_uses_minimal_permissions(self):
-        workflow = (RELEASE / '.github/workflows/release.yml').read_text(encoding='utf-8')
+        workflow = (RELEASE / 'workflows/release.yml').read_text(encoding='utf-8')
         self.assertRegex(workflow, r'(?m)^permissions: \{\}$')
         job_permissions = re.findall(r'(?m)^ {6}([a-z-]+): (read|write)$', workflow)
         self.assertEqual(sorted(job_permissions), [('contents', 'write'), ('pull-requests', 'write')])
@@ -46,11 +47,12 @@ class RepoScaffoldReleaseTests(unittest.TestCase):
         self.assertNotIn('pull_request_target', workflow)
 
     def test_release_workflow_runs_only_on_the_default_branch(self):
-        workflow = (RELEASE / '.github/workflows/release.yml').read_text(encoding='utf-8')
+        workflow = (RELEASE / 'workflows/release.yml').read_text(encoding='utf-8')
         triggers = workflow.split('\non:\n', 1)[1].split('\n\n', 1)[0]
         self.assertEqual([line.strip() for line in triggers.splitlines() if line.strip()], ['push:', 'branches:', "- '{{DEFAULT_BRANCH}}'"])
         self.assertIn('googleapis/release-please-action@v4', workflow)
-        self.assertIn('manifest-file: .release-please-manifest.json', workflow)
+        self.assertIn('config-file: .github/release-please-config.json', workflow)
+        self.assertIn('manifest-file: .github/.release-please-manifest.json', workflow)
 
     def test_releasing_guide_covers_review_publish_and_generated_changelog(self):
         guide = (RELEASE / 'RELEASING.md').read_text(encoding='utf-8')
@@ -65,9 +67,8 @@ class RepoScaffoldReleaseTests(unittest.TestCase):
 
     def test_release_placeholders_are_documented_by_the_skill(self):
         names = set()
-        for path in RELEASE.rglob('*'):
-            if path.is_file():
-                names.update(PLACEHOLDER.findall(path.read_text(encoding='utf-8')))
+        for path in ('workflows/release.yml', 'release-please-config.json', '.release-please-manifest.json', 'RELEASING.md'):
+            names.update(PLACEHOLDER.findall((RELEASE / path).read_text(encoding='utf-8')))
         self.assertEqual(names, {'PROJECT_NAME', 'DEFAULT_BRANCH', 'RELEASE_TYPE', 'CURRENT_VERSION', 'DEPLOYMENT_NOTES'})
         release = section(self.skill, 'Release setup')
         for referenced in ('release-type', '.release-please-manifest.json', 'RELEASING.md', 'default branch'):
@@ -83,7 +84,7 @@ class RepoScaffoldReleaseTests(unittest.TestCase):
         self.assertIn('Inspect the release state', section(self.skill, 'Inspect first'))
 
     def test_skill_routes_release_work_through_new_and_existing_flows(self):
-        self.assertIn('assets/release', section(self.skill, 'New repository'))
+        self.assertIn('assets/starter/.github', section(self.skill, 'New repository'))
         self.assertIn('release inventory', section(self.skill, 'Existing repository'))
         release = section(self.skill, 'Release setup')
         self.assertIn('Do not modify, replace, or remove an existing release or deployment workflow unless the user specifically approves', release)

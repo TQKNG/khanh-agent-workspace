@@ -73,7 +73,7 @@ If the project has no implementation yet, use a CI check that validates the base
 If code already exists, use the project's real install, lint, and test commands, and avoid claiming checks that do not run.
 Keep permissions minimal and use the repository's actual default branch, or branch agnostic push and pull request triggers when it is unknown.
 Include a practical `.gitignore` only when its entries match the selected stack.
-Recommend the release starter from [assets/release](assets/release) and add it when the user accepts it, as described in [Release setup](#release-setup).
+Recommend the release files in [assets/starter/.github](assets/starter/.github) and add them when the user accepts them, as described in [Release setup](#release-setup).
 Run the local equivalent of the CI check and inspect the final files for placeholders and broken relative links.
 
 ## Existing repository
@@ -101,11 +101,12 @@ Inspect the current release state before recommending anything:
 - Conventions: recent commit messages and pull request titles, merge strategy, and whether they follow Conventional Commits.
 
 Prefer the release tooling the repository already uses and only fill its gaps.
-When there is none, recommend the starter in [assets/release](assets/release), which uses release-please through a release pull request.
-Set `release-type` in `release-please-config.json` to match the stack, such as `node`, `python`, `rust`, `go`, or `simple` for repositories without a supported manifest.
-Set `.release-please-manifest.json` to the latest released version from tags or manifests, or to `0.0.0` when nothing has been released so the first release is `0.1.0`.
+When there is none, recommend the release files in [assets/starter/.github](assets/starter/.github), which use release-please through a release pull request.
+Copy `.github/workflows/release.yml`, `.github/release-please-config.json`, `.github/.release-please-manifest.json`, and `.github/RELEASING.md` from the starter into the same paths in the target repository.
+Set `release-type` in `.github/release-please-config.json` to match the stack, such as `node`, `python`, `rust`, `go`, or `simple` for repositories without a supported manifest.
+Set `.github/.release-please-manifest.json` to the latest released version from tags or manifests, or to `0.0.0` when nothing has been released so the first release is `0.1.0`.
 Keep the existing tag format; the starter produces `v1.2.3` tags and must be adjusted when the repository uses another format.
-Adapt `RELEASING.md`, describe real deployment steps or state that there is no deployment, and link it from `README.md` and `CONTRIBUTING.md`.
+Adapt `.github/RELEASING.md`, describe real deployment steps or state that there is no deployment, and link it from `README.md` and `CONTRIBUTING.md`.
 Add a Conventional Commits note to `CONTRIBUTING.md`, because the changelog and version bumps are generated from commit messages.
 Never hand write or edit `CHANGELOG.md`; the release tool generates it.
 release-please adds new entries above an existing changelog, so report how existing history will be kept and ask before moving or renaming it.
