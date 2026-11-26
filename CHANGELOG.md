@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.0](https://github.com/TQKNG/khanh-agent-workspace/compare/v0.10.2...v0.11.0) (2026-11-26)
+
+
+### Features
+
+* **repo-scaffold:** support multiple agents and restructure the workflow ([13e12c8](https://github.com/TQKNG/khanh-agent-workspace/commit/13e12c80d06ae9cb0b3c907bb740e0e0943c25eb))
+* **repo-scaffold:** support multiple agents and restructure the workflow ([2fa14ef](https://github.com/TQKNG/khanh-agent-workspace/commit/2fa14efcaf5ad137ff5abddaf341f8e1591eda92))
+
 ## [0.10.2](https://github.com/TQKNG/khanh-agent-workspace/compare/v0.10.1...v0.10.2) (2026-11-26)
 
 
